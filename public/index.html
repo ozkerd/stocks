@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TimesFM-3 Stock Forecaster | stocks.primerllm.com</title>
+  <link rel="stylesheet" href="/style.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="top-nav">
+    <div class="brand-domain">
+      <span>stocks.primerllm.com</span>
+      <span class="badge">TimesFM-3 Foundation Model</span>
+    </div>
+    <div class="nav-links">
+      <a href="https://github.com/ozkerd/stocks" target="_blank" rel="noopener">GitHub</a>
+      <a href="#about-model">Architecture</a>
+      <a href="#about-model">Markets</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero / Google-Style Center Search Section -->
+    <section class="hero-section" id="hero-section">
+      <div class="logo-container">
+        <div class="google-logo-text">
+          <span class="logo-t">T</span><span class="logo-i">i</span><span class="logo-m">m</span><span class="logo-e">e</span><span class="logo-s">s</span><span class="logo-fm">F</span><span class="logo-m">M</span><span class="logo-dash">-</span><span class="logo-three">3</span>
+        </div>
+        <p class="tagline">Foundation Model Stock Forecasting with Multivariate Uncertainty Intervals</p>
+      </div>
+
+      <!-- Search Box -->
+      <div class="search-wrapper">
+        <form id="search-form" onsubmit="handleSearch(event)">
+          <div class="search-box">
+            <svg class="search-icon" focusable="false" viewBox="0 0 24 24">
+              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+            </svg>
+            <input 
+              type="text" 
+              id="ticker-input" 
+              class="search-input" 
+              placeholder="Enter ticker symbol (e.g. NVDA, AAPL, MSFT, TSLA, GOOGL)..." 
+              autocomplete="off" 
+              spellcheck="false"
+              required
+              value="NVDA"
+            />
+          </div>
+        </form>
+      </div>
+
+      <!-- Horizon Selector -->
+      <div class="horizon-selector">
+        <span class="horizon-label">Forecast Horizon:</span>
+        <button type="button" class="pill-btn" data-horizon="1d" onclick="selectHorizon('1d')">1 Day</button>
+        <button type="button" class="pill-btn active" data-horizon="1m" onclick="selectHorizon('1m')">1 Month (21d)</button>
+        <button type="button" class="pill-btn" data-horizon="3m" onclick="selectHorizon('3m')">3 Months (63d)</button>
+        <button type="button" class="pill-btn" data-horizon="6m" onclick="selectHorizon('6m')">6 Months</button>
+        <button type="button" class="pill-btn" data-horizon="1y" onclick="selectHorizon('1y')">1 Year</button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button type="button" class="btn-google btn-primary" onclick="triggerForecast()">Forecast with TimesFM-3</button>
+        <button type="button" class="btn-google" onclick="luckyForecast()">I'm Feeling Lucky</button>
+      </div>
+
+      <!-- Trending Tickers -->
+      <div class="quick-tickers">
+        <span>Trending:</span>
+        <button class="ticker-chip" onclick="quickSelect('NVDA')">NVDA</button>
+        <button class="ticker-chip" onclick="quickSelect('AAPL')">AAPL</button>
+        <button class="ticker-chip" onclick="quickSelect('MSFT')">MSFT</button>
+        <button class="ticker-chip" onclick="quickSelect('GOOGL')">GOOGL</button>
+        <button class="ticker-chip" onclick="quickSelect('AMZN')">AMZN</button>
+        <button class="ticker-chip" onclick="quickSelect('TSLA')">TSLA</button>
+        <button class="ticker-chip" onclick="quickSelect('META')">META</button>
+      </div>
+    </section>
+
+    <!-- Loading State -->
+    <div class="loading-container" id="loading-container">
+      <div class="spinner"></div>
+      <div class="loading-text" id="loading-text">Ingesting market covariates and running TimesFM-3 inference...</div>
+    </div>
+
+    <!-- Error Banner -->
+    <div id="error-banner" style="display:none; max-width: 680px; margin: 0 auto 20px; background: #fce8e6; border: 1px solid #fad2cf; color: #c5221f; padding: 12px 16px; border-radius: 6px; font-size: 14px;">
+    </div>
+
+    <!-- Results Section (Google Knowledge Panel & Finance Style) -->
+    <section class="results-section" id="results-section">
+      
+      <!-- Ticker Header Card -->
+      <div class="stock-header-card">
+        <div class="stock-title-area">
+          <h1 id="res-company-title">
+            <span id="res-symbol">NVDA</span>
+            <span class="ticker-pill" id="res-exchange">NASDAQ</span>
+          </h1>
+          <div class="company-subline" id="res-company-name">NVIDIA Corporation • USD</div>
+        </div>
+        <div class="stock-price-area">
+          <div class="current-price" id="res-current-price">$0.00</div>
+          <div class="price-change" id="res-price-change">+0.00 (0.00%) Today</div>
+        </div>
+      </div>
+
+      <!-- Horizon Forecast Target Summary Bar -->
+      <div class="forecast-summary-bar">
+        <div class="summary-metric-item">
+          <span class="metric-label">TimesFM-3 Target (P50)</span>
+          <span class="metric-val target-blue" id="res-target-p50">$0.00</span>
+          <span class="metric-sub" id="res-target-return">+0.00% expected</span>
+        </div>
+        <div class="summary-metric-item">
+          <span class="metric-label">Pessimistic Bound (P10)</span>
+          <span class="metric-val" id="res-target-p10" style="color: var(--google-red);">$0.00</span>
+          <span class="metric-sub">10th percentile floor</span>
+        </div>
+        <div class="summary-metric-item">
+          <span class="metric-label">Optimistic Bound (P90)</span>
+          <span class="metric-val" id="res-target-p90" style="color: var(--google-green);">$0.00</span>
+          <span class="metric-sub">90th percentile ceiling</span>
+        </div>
+        <div class="summary-metric-item">
+          <span class="metric-label">Uncertainty Spread</span>
+          <span class="metric-val" id="res-uncertainty-spread">0.0%</span>
+          <span class="metric-sub" id="res-annual-vol">30D Vol: 0.0%</span>
+        </div>
+      </div>
+
+      <!-- Interactive Forecast Chart Card -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title" id="chart-main-title">Price History & TimesFM-3 Trajectory with Confidence Bands</div>
+          <div class="chart-legend-custom">
+            <div class="legend-item">
+              <div class="legend-color-box" style="background: #1a73e8;"></div>
+              <span>Historical Close</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color-box" style="background: #0d47a1; border-top: 2px dashed #0d47a1;"></div>
+              <span>Median Forecast (P50)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color-box" style="background: rgba(66, 133, 244, 0.25);"></div>
+              <span>50% CI (P25 - P75)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color-box" style="background: rgba(66, 133, 244, 0.12);"></div>
+              <span>90% CI (P10 - P90)</span>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="forecastChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Two-Column Grid: Covariates & Indicators -->
+      <div class="dashboard-grid">
+        
+        <!-- Covariate Weights Card -->
+        <div class="card">
+          <div class="card-title">
+            <span>TimesFM-3 Covariate Weight Matrix</span>
+            <span class="card-title-badge">Mathematical Attribution</span>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">
+            Relative predictive weight and directional impact of macroeconomic indicators and technical factors for the selected horizon.
+          </p>
+          <div class="covariate-list" id="covariate-list-container">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Technical & Stochastic Indicators Card -->
+        <div class="card">
+          <div class="card-title">
+            <span>Stochastic & Technical Signals</span>
+            <span class="card-title-badge">Multi-Period Engine</span>
+          </div>
+          <table class="stat-table">
+            <tbody>
+              <tr>
+                <td class="stat-name">Relative Strength Index (RSI 14)</td>
+                <td class="stat-val" id="stat-rsi">50.0 <span class="status-badge badge-neutral" id="badge-rsi">Neutral</span></td>
+              </tr>
+              <tr>
+                <td class="stat-name">MACD Histogram (12, 26, 9)</td>
+                <td class="stat-val" id="stat-macd">0.00 <span class="status-badge badge-bullish" id="badge-macd">Bullish</span></td>
+              </tr>
+              <tr>
+                <td class="stat-name">Stochastic Oscillator (%K / %D)</td>
+                <td class="stat-val" id="stat-stoch">50.0 / 50.0</td>
+              </tr>
+              <tr>
+                <td class="stat-name">Average True Range (ATR 14)</td>
+                <td class="stat-val" id="stat-atr">$0.00</td>
+              </tr>
+              <tr>
+                <td class="stat-name">Moving Averages (50d / 200d)</td>
+                <td class="stat-val" id="stat-ma">$0.00 / $0.00 <span class="status-badge badge-bullish" id="badge-ma">Bullish</span></td>
+              </tr>
+              <tr>
+                <td class="stat-name">Bollinger Upper / Lower</td>
+                <td class="stat-val" id="stat-bollinger">$0.00 / $0.00</td>
+              </tr>
+              <tr>
+                <td class="stat-name">Fibonacci Dynamic Support</td>
+                <td class="stat-val" id="stat-fib-support" style="color: var(--google-green);">$0.00</td>
+              </tr>
+              <tr>
+                <td class="stat-name">Fibonacci Dynamic Resistance</td>
+                <td class="stat-val" id="stat-fib-resistance" style="color: var(--google-red);">$0.00</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+            <div class="card-title" style="margin-bottom: 8px;">
+              <span>Macroeconomic & Geopolitics Radar</span>
+              <span class="card-title-badge">Free APIs</span>
+            </div>
+            <table class="stat-table">
+              <tbody>
+                <tr>
+                  <td class="stat-name">US 10-Year Treasury Yield (^TNX)</td>
+                  <td class="stat-val" id="stat-10y">0.00%</td>
+                </tr>
+                <tr>
+                  <td class="stat-name">Yield Curve Spread (10Y - 3M)</td>
+                  <td class="stat-val" id="stat-yield-spread">0.00% <span class="status-badge badge-neutral" id="badge-yield">Normal</span></td>
+                </tr>
+                <tr>
+                  <td class="stat-name">CBOE Volatility Index (^VIX)</td>
+                  <td class="stat-val" id="stat-vix">0.00 <span class="status-badge badge-neutral" id="badge-vix">Calm</span></td>
+                </tr>
+                <tr>
+                  <td class="stat-name">Crude Oil WTI (CL=F)</td>
+                  <td class="stat-val" id="stat-oil">$0.00</td>
+                </tr>
+                <tr>
+                  <td class="stat-name">COMEX Gold (GC=F)</td>
+                  <td class="stat-val" id="stat-gold">$0.00</td>
+                </tr>
+                <tr>
+                  <td class="stat-name">US Dollar Index (DXY)</td>
+                  <td class="stat-val" id="stat-usd">0.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- TimesFM-3 Architecture Card -->
+      <div class="architecture-banner" id="about-model">
+        <div class="arch-header">
+          <svg style="width:20px;height:20px;fill:var(--google-blue);" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+          </svg>
+          <span>TimesFM-3 Foundation Model Technology & Mathematical Accuracy</span>
+        </div>
+        <p class="arch-text">
+          <strong>TimesFM (Time Series Foundation Model)</strong> is Google Research's state-of-the-art pretrained decoder-only foundation model engineered specifically for time-series forecasting. Unlike traditional autoregressive models or simple recurrent networks, TimesFM-3 tokenizes continuous sequences into semantic patches and incorporates multi-horizon temporal self-attention.
+        </p>
+        <p class="arch-text" style="margin-top: 8px;">
+          This implementation injects <strong>multivariate exogenous covariates</strong>—including Treasury yield curves, the CBOE VIX risk barometer, commodities, and stochastic momentum indicators—directly into the predictive manifold. The expanding confidence cone mathematically captures quantile uncertainty (\(P_{10}\) to \(P_{90}\)), delivering calibrated probabilistic bounds with rigorous statistical fidelity.
+        </p>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <p>Powered by Google TimesFM-3 Architecture • Configured for <strong>stocks.primerllm.com</strong></p>
+    <p style="margin-top: 4px;">Open Source repository: <a href="https://github.com/ozkerd/stocks" target="_blank" rel="noopener">github.com/ozkerd/stocks</a></p>
+  </footer>
+
+  <!-- Frontend Logic -->
+  <script>
+    // Configurable API root (works with Cloudflare Pages Functions or direct API)
+    const API_BASE = window.API_BASE || '';
+
+    let currentHorizon = '1m';
+    let currentTicker = 'NVDA';
+    let forecastChart = null;
+
+    function selectHorizon(h) {
+      currentHorizon = h;
+      document.querySelectorAll('.pill-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.horizon === h);
+      });
+      if (document.getElementById('results-section').style.display !== 'none') {
+        fetchForecastData(currentTicker, currentHorizon);
+      }
+    }
+
+    function quickSelect(ticker) {
+      document.getElementById('ticker-input').value = ticker;
+      triggerForecast();
+    }
+
+    function luckyForecast() {
+      const luckyTickers = ['NVDA', 'AAPL', 'MSFT', 'AMZN', 'GOOGL', 'TSLA', 'META', 'AMD', 'PLTR'];
+      const randomTicker = luckyTickers[Math.floor(Math.random() * luckyTickers.length)];
+      document.getElementById('ticker-input').value = randomTicker;
+      triggerForecast();
+    }
+
+    function handleSearch(e) {
+      e.preventDefault();
+      triggerForecast();
+    }
+
+    function triggerForecast() {
+      const input = document.getElementById('ticker-input').value.trim().toUpperCase();
+      if (!input) return;
+      currentTicker = input;
+      fetchForecastData(currentTicker, currentHorizon);
+    }
+
+    async function fetchForecastData(ticker, horizon) {
+      const loading = document.getElementById('loading-container');
+      const results = document.getElementById('results-section');
+      const errorBanner = document.getElementById('error-banner');
+      const hero = document.getElementById('hero-section');
+
+      errorBanner.style.display = 'none';
+      loading.style.display = 'block';
+      results.style.display = 'none';
+
+      try {
+        const response = await fetch(`${API_BASE}/api/forecast?ticker=${encodeURIComponent(ticker)}&horizon=${encodeURIComponent(horizon)}`);
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.detail || `Error (${response.status}): Failed to generate forecast.`);
+        }
+
+        const data = await response.json();
+        renderResults(data);
+        hero.classList.add('compact');
+      } catch (err) {
+        errorBanner.textContent = err.message;
+        errorBanner.style.display = 'block';
+      } finally {
+        loading.style.display = 'none';
+      }
+    }
+
+    function renderResults(data) {
+      const results = document.getElementById('results-section');
+      results.style.display = 'block';
+
+      // Header
+      document.getElementById('res-symbol').textContent = data.symbol;
+      document.getElementById('res-exchange').textContent = data.info?.exchange || 'US';
+      document.getElementById('res-company-name').textContent = `${data.info?.shortName || data.symbol} • ${data.info?.currency || 'USD'}`;
+      
+      const currP = data.current_price;
+      const chg = data.indicators.price_change;
+      const chgPct = data.indicators.price_change_pct;
+      document.getElementById('res-current-price').textContent = `$${currP.toFixed(2)}`;
+      
+      const priceChgElem = document.getElementById('res-price-change');
+      const sign = chg >= 0 ? '+' : '';
+      priceChgElem.textContent = `${sign}$${chg.toFixed(2)} (${sign}${chgPct.toFixed(2)}%) Today`;
+      priceChgElem.className = `price-change ${chg >= 0 ? 'positive' : 'negative'}`;
+
+      // Forecast Bar
+      document.getElementById('res-target-p50').textContent = `$${data.target_price_p50.toFixed(2)}`;
+      const retSign = data.expected_return_pct >= 0 ? '+' : '';
+      document.getElementById('res-target-return').textContent = `${retSign}${data.expected_return_pct.toFixed(2)}% (${data.horizon_label})`;
+      document.getElementById('res-target-p10').textContent = `$${data.p10_bear_case.toFixed(2)}`;
+      document.getElementById('res-target-p90').textContent = `$${data.p90_bull_case.toFixed(2)}`;
+      document.getElementById('res-uncertainty-spread').textContent = `±${(data.confidence_band_spread_pct / 2).toFixed(1)}%`;
+      document.getElementById('res-annual-vol').textContent = `Annualized Vol: ${data.annualized_volatility_pct}%`;
+
+      // Covariate Weights
+      const covContainer = document.getElementById('covariate-list-container');
+      covContainer.innerHTML = '';
+      (data.covariate_weights || []).slice(0, 8).forEach(w => {
+        const item = document.createElement('div');
+        item.className = 'covariate-item';
+        const barClass = w.is_positive ? 'cov-bar-fill' : 'cov-bar-fill negative';
+        item.innerHTML = `
+          <div class="covariate-meta">
+            <span class="cov-name">${w.name} <span class="cov-dir-tag">(${w.group})</span></span>
+            <span class="cov-weight">${w.weight_pct}%</span>
+          </div>
+          <div class="cov-bar-bg">
+            <div class="${barClass}" style="width: ${Math.min(100, w.weight_pct * 3.5)}%;"></div>
+          </div>
+          <div class="cov-dir-tag">${w.direction}</div>
+        `;
+        covContainer.appendChild(item);
+      });
+
+      // Technical & Stochastic Table
+      const ind = data.indicators;
+      document.getElementById('stat-rsi').innerHTML = `${ind.rsi_14} <span class="status-badge ${ind.rsi_14 > 70 ? 'badge-bearish' : ind.rsi_14 < 30 ? 'badge-bullish' : 'badge-neutral'}">${ind.rsi_status}</span>`;
+      document.getElementById('stat-macd').innerHTML = `${ind.macd_hist} <span class="status-badge ${ind.macd_hist >= 0 ? 'badge-bullish' : 'badge-bearish'}">${ind.macd_status}</span>`;
+      document.getElementById('stat-stoch').textContent = `${ind.stoch_k} / ${ind.stoch_d}`;
+      document.getElementById('stat-atr').textContent = `$${ind.atr_14.toFixed(2)}`;
+      document.getElementById('stat-ma').innerHTML = `$${ind.sma_50.toFixed(2)} / $${ind.sma_200.toFixed(2)} <span class="status-badge ${ind.trend_ma.includes('Bullish') ? 'badge-bullish' : 'badge-neutral'}">${ind.trend_ma}</span>`;
+      document.getElementById('stat-bollinger').textContent = `$${ind.bollinger_upper.toFixed(2)} / $${ind.bollinger_lower.toFixed(2)}`;
+      document.getElementById('stat-fib-support').textContent = `$${ind.fibonacci.support.toFixed(2)}`;
+      document.getElementById('stat-fib-resistance').textContent = `$${ind.fibonacci.resistance.toFixed(2)}`;
+
+      // Macro
+      const m = ind.macro;
+      document.getElementById('stat-10y').textContent = `${m.us_10y_yield}%`;
+      document.getElementById('stat-yield-spread').innerHTML = `${m.yield_curve_spread}% <span class="status-badge ${m.yield_curve_spread < 0 ? 'badge-bearish' : 'badge-bullish'}">${m.yield_curve_signal}</span>`;
+      document.getElementById('stat-vix').innerHTML = `${m.vix} <span class="status-badge ${m.vix > 20 ? 'badge-bearish' : 'badge-bullish'}">${m.vix_status}</span>`;
+      document.getElementById('stat-oil').textContent = `$${m.crude_oil}`;
+      document.getElementById('stat-gold').textContent = `$${m.gold}`;
+      document.getElementById('stat-usd').textContent = `${m.usd_index}`;
+
+      // Update Chart
+      renderChart(data);
+    }
+
+    function renderChart(data) {
+      const ctx = document.getElementById('forecastChart').getContext('2d');
+      if (forecastChart) {
+        forecastChart.destroy();
+      }
+
+      const hist = data.historical_chart_data;
+      const fc = data.forecast_points;
+
+      const labels = hist.map(h => h.date).concat(fc.map(f => f.date));
+      const histLength = hist.length;
+
+      const historicalSeries = hist.map(h => h.close).concat(fc.map(() => null));
+
+      const p10Series = new Array(histLength - 1).fill(null);
+      p10Series.push(hist[histLength - 1].close);
+      fc.forEach(f => p10Series.push(f.p10));
+
+      const p25Series = new Array(histLength - 1).fill(null);
+      p25Series.push(hist[histLength - 1].close);
+      fc.forEach(f => p25Series.push(f.p25));
+
+      const p50Series = new Array(histLength - 1).fill(null);
+      p50Series.push(hist[histLength - 1].close);
+      fc.forEach(f => p50Series.push(f.p50));
+
+      const p75Series = new Array(histLength - 1).fill(null);
+      p75Series.push(hist[histLength - 1].close);
+      fc.forEach(f => p75Series.push(f.p75));
+
+      const p90Series = new Array(histLength - 1).fill(null);
+      p90Series.push(hist[histLength - 1].close);
+      fc.forEach(f => p90Series.push(f.p90));
+
+      forecastChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Historical Close',
+              data: historicalSeries,
+              borderColor: '#1a73e8',
+              backgroundColor: '#1a73e8',
+              borderWidth: 2,
+              pointRadius: 0,
+              pointHoverRadius: 4,
+              fill: false,
+              tension: 0.1
+            },
+            {
+              label: 'TimesFM-3 Target (P50)',
+              data: p50Series,
+              borderColor: '#0d47a1',
+              borderWidth: 2.5,
+              borderDash: [5, 5],
+              pointRadius: 0,
+              pointHoverRadius: 5,
+              fill: false,
+              tension: 0.2
+            },
+            {
+              label: 'P90 (Upper Bound)',
+              data: p90Series,
+              borderColor: 'transparent',
+              pointRadius: 0,
+              fill: '+4',
+              backgroundColor: 'rgba(66, 133, 244, 0.12)',
+              tension: 0.2
+            },
+            {
+              label: 'P75',
+              data: p75Series,
+              borderColor: 'transparent',
+              pointRadius: 0,
+              fill: '+2',
+              backgroundColor: 'rgba(66, 133, 244, 0.22)',
+              tension: 0.2
+            },
+            {
+              label: 'P25',
+              data: p25Series,
+              borderColor: 'transparent',
+              pointRadius: 0,
+              fill: false,
+              tension: 0.2
+            },
+            {
+              label: 'P10 (Lower Bound)',
+              data: p10Series,
+              borderColor: 'transparent',
+              pointRadius: 0,
+              fill: false,
+              tension: 0.2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(32, 33, 36, 0.95)',
+              titleColor: '#ffffff',
+              bodyColor: '#e8eaed',
+              padding: 10,
+              callbacks: {
+                label: function(context) {
+                  if (context.parsed.y !== null) {
+                    return `${context.dataset.label}: $${context.parsed.y.toFixed(2)}`;
+                  }
+                  return null;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { maxTicksLimit: 10, color: '#70757a', font: { size: 11 } }
+            },
+            y: {
+              grid: { color: '#f1f3f4' },
+              ticks: {
+                color: '#70757a',
+                font: { size: 11 },
+                callback: function(value) { return '$' + value; }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      triggerForecast();
+    });
+  </script>
+</body>
+</html>
