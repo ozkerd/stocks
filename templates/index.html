@@ -73,7 +73,12 @@
           </svg>
           Run 500M Deep Analysis
         </button>
-        <button type="button" class="btn-google" onclick="luckyForecast()">I'm Feeling Lucky</button>
+        <button type="button" class="btn-google btn-top-pick" onclick="aiTopPickForecast()">
+          <svg style="width:16px;height:16px;margin-right:6px;vertical-align:-2px;fill:#f9ab00;" viewBox="0 0 24 24">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+          AI Top Pick
+        </button>
       </div>
 
       <!-- Quick Tickers including Cryptos -->
@@ -446,12 +451,23 @@
         const div = document.createElement('div');
         div.className = 'autocomplete-item';
         const isCrypto = item.type === 'Crypto' || item.symbol.includes('-USD');
+        let iconText = item.symbol.slice(0, 2);
+        if (isCrypto) {
+          if (item.symbol.includes('BTC')) iconText = '₿';
+          else if (item.symbol.includes('ETH')) iconText = 'Ξ';
+          else if (item.symbol.includes('SOL')) iconText = '◎';
+          else if (item.symbol.includes('XRP')) iconText = '✕';
+          else iconText = '⚡';
+        }
         div.innerHTML = `
-          <div>
-            <span class="item-symbol">${item.symbol}</span>
-            <span class="item-name">${item.name}</span>
+          <div class="item-left-col">
+            <div class="asset-icon-box ${isCrypto ? 'crypto' : ''}">${iconText}</div>
+            <div class="item-text-info">
+              <span class="item-symbol">${item.symbol}</span>
+              <span class="item-name">${item.name}</span>
+            </div>
           </div>
-          <span class="item-badge ${isCrypto ? 'crypto' : ''}">${isCrypto ? 'Crypto' : item.exchange}</span>
+          <span class="item-badge ${isCrypto ? 'crypto' : ''}">${isCrypto ? 'Crypto 24/7' : item.exchange}</span>
         `;
         div.onclick = () => {
           document.getElementById('ticker-input').value = item.symbol;
@@ -464,38 +480,19 @@
       box.style.display = 'block';
     }
 
-    // Hide autocomplete when clicked outside
-    document.addEventListener('click', (e) => {
-      const box = document.getElementById('autocomplete-box');
-      if (!e.target.closest('.search-wrapper')) {
-        box.style.display = 'none';
-      }
-    });
-
-    function selectHorizon(h) {
-      currentHorizon = h;
-      document.querySelectorAll('.pill-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.horizon === h);
-      });
-      if (document.getElementById('results-section').style.display !== 'none') {
-        fetchForecastData(currentTicker, currentHorizon, isDeepMode);
-      }
-    }
-
-    function quickSelect(ticker) {
-      document.getElementById('ticker-input').value = ticker;
+    function aiTopPickForecast() {
+      const topPicks = [
+        { symbol: "NVDA", name: "NVIDIA Corp (AI Semiconductor Leader)" },
+        { symbol: "BTC-USD", name: "Bitcoin (Digital Gold Liquidity)" },
+        { symbol: "PLTR", name: "Palantir Technologies (Enterprise AI)" },
+        { symbol: "SOL-USD", name: "Solana (High Throughput L1)" }
+      ];
+      const pick = topPicks[Math.floor(Math.random() * topPicks.length)];
+      document.getElementById('ticker-input').value = pick.symbol;
       document.getElementById('autocomplete-box').style.display = 'none';
-      currentTicker = ticker;
-      fetchForecastData(currentTicker, currentHorizon, isDeepMode);
-    }
-
-    function luckyForecast() {
-      const luckyTickers = ['BTC-USD', 'ETH-USD', 'SOL-USD', 'NVDA', 'AAPL', 'MSFT', 'AMZN', 'GOOGL', 'TSLA', 'PLTR'];
-      const randomTicker = luckyTickers[Math.floor(Math.random() * luckyTickers.length)];
-      document.getElementById('ticker-input').value = randomTicker;
-      document.getElementById('autocomplete-box').style.display = 'none';
-      currentTicker = randomTicker;
-      fetchForecastData(currentTicker, currentHorizon, isDeepMode);
+      currentTicker = pick.symbol;
+      switchModelMode(true);
+      fetchForecastData(currentTicker, currentHorizon, true);
     }
 
     function handleSearch(e) {
