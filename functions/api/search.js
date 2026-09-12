@@ -28,7 +28,11 @@ const POPULAR_ASSETS = [
   { symbol: "DOGE-USD", name: "Dogecoin USD", type: "Crypto", exchange: "Crypto", aliases: ["DOGE", "DOGECOIN"] },
   { symbol: "ADA-USD", name: "Cardano USD", type: "Crypto", exchange: "Crypto", aliases: ["ADA", "CARDANO"] },
   { symbol: "AVAX-USD", name: "Avalanche USD", type: "Crypto", exchange: "Crypto", aliases: ["AVAX", "AVALANCHE"] },
-  { symbol: "BNB-USD", name: "BNB Binance USD", type: "Crypto", exchange: "Crypto", aliases: ["BNB", "BINANCE"] }
+  { symbol: "BNB-USD", name: "BNB Binance USD", type: "Crypto", exchange: "Crypto", aliases: ["BNB", "BINANCE"] },
+  { symbol: "HYPE32196-USD", name: "Hyperliquid USD (HYPE)", type: "Crypto", exchange: "Crypto", aliases: ["HYPE", "HYPERLIQUID"] },
+  { symbol: "LIT6833-USD", name: "Litentry USD (LIT)", type: "Crypto", exchange: "Crypto", aliases: ["LIT", "LITENTRY"] },
+  { symbol: "TAO-USD", name: "Bittensor USD (TAO)", type: "Crypto", exchange: "Crypto", aliases: ["TAO", "BITTENSOR"] },
+  { symbol: "AAVE-USD", name: "Aave USD", type: "Crypto", exchange: "Crypto", aliases: ["AAVE"] }
 ];
 
 export async function onRequest(context) {

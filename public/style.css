@@ -1224,6 +1224,208 @@ footer a {
   padding: 20px 24px;
 }
 
+/* Sub-Mode Switcher (Leaderboard vs Trade Setups) */
+.lb-mode-switcher {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: #f8f9fa;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  width: fit-content;
+}
+
+.lb-mode-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.lb-mode-btn:hover {
+  color: var(--text-primary);
+}
+
+.lb-mode-btn.active {
+  background: #ffffff;
+  color: var(--google-blue);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Category Filter Pills (Overall, Technicals, Price Action, High Cap, Mid Cap, Low Cap) */
+.category-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.category-filter-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.cat-pill {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  padding: 6px 14px;
+  border-radius: 18px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cat-pill:hover {
+  background: var(--google-blue-bg);
+  color: var(--google-blue);
+  border-color: #aecbfa;
+}
+
+.cat-pill.active {
+  background: var(--google-blue);
+  color: #ffffff;
+  border-color: var(--google-blue);
+  box-shadow: 0 1px 4px rgba(26,115,232,0.25);
+}
+
+/* Cap Badges */
+.cap-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  text-transform: uppercase;
+}
+
+.cap-high { background: #e8f0fe; color: #1a73e8; }
+.cap-mid { background: #f3e8ff; color: #7e22ce; }
+.cap-low { background: #fef3c7; color: #b45309; }
+
+/* Trade Setups View Styling */
+.setups-header-box {
+  background: #f8f9fa;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.timeframe-pill-group {
+  display: flex;
+  gap: 8px;
+}
+
+.timeframe-btn {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.timeframe-btn:hover {
+  border-color: var(--google-blue);
+  color: var(--google-blue);
+}
+
+.timeframe-btn.active {
+  background: #111827;
+  color: #ffffff;
+  border-color: #111827;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.setups-subtext {
+  font-size: 12px;
+  color: var(--text-muted);
+  max-width: 520px;
+}
+
+.setups-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.setups-table th {
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border-color);
+  background: #fafafa;
+}
+
+.setups-table td {
+  padding: 14px;
+  border-bottom: 1px solid #f1f3f4;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.entry-pill {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--google-blue);
+  background: #e8f0fe;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.tp-pill {
+  font-weight: 700;
+  font-size: 13px;
+  color: #137333;
+  background: #e6f4ea;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.stop-pill {
+  font-weight: 700;
+  font-size: 13px;
+  color: #c5221f;
+  background: #fce8e6;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.rr-pill {
+  font-weight: 800;
+  font-size: 13px;
+  color: #374151;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
 /* Leaderboard Table Styles */
 .leaderboard-toolbar {
   display: flex;

@@ -417,44 +417,112 @@
           <div class="view-title-wrap">
             <h2>
               <svg style="width:24px;height:24px;fill:var(--google-blue);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-              Best Now — Top 100 Ranked Assets by Return Potential
+              Best Now — Top Assets & Actionable Trade Setups
             </h2>
-            <p>Google TimesFM-3 500M neural conviction scores and calibrated drift targets across liquid global stocks & cryptos.</p>
+            <p>TimesFM-3 500M neural conviction rankings across Technicals, Price Action, Market Cap Tiers, and Daily/Weekly/Monthly Setups.</p>
           </div>
           <button type="button" class="btn-google" onclick="switchAppView('forecast')">
             ← Back to Forecaster
           </button>
         </div>
 
-        <div class="leaderboard-toolbar">
-          <input type="text" class="leaderboard-search" id="leaderboard-search" placeholder="Filter by symbol or company name (e.g. AppLovin, NVDA, Bitcoin, PLTR)..." oninput="filterLeaderboard(this.value)">
-          <div class="horizon-selector" style="margin-bottom:0;">
-            <span class="horizon-label">Horizon:</span>
-            <button type="button" class="pill-btn" data-lb-h="1d" onclick="changeLeaderboardHorizon('1d')">1 Day</button>
-            <button type="button" class="pill-btn" data-lb-h="1w" onclick="changeLeaderboardHorizon('1w')">1 Week</button>
-            <button type="button" class="pill-btn active" data-lb-h="1m" onclick="changeLeaderboardHorizon('1m')">1 Month</button>
-            <button type="button" class="pill-btn" data-lb-h="3m" onclick="changeLeaderboardHorizon('3m')">3 Months</button>
-            <button type="button" class="pill-btn" data-lb-h="6m" onclick="changeLeaderboardHorizon('6m')">6 Months</button>
-            <button type="button" class="pill-btn" data-lb-h="1y" onclick="changeLeaderboardHorizon('1y')">1 Year</button>
+        <!-- Sub-Mode Switcher -->
+        <div class="lb-mode-switcher">
+          <button type="button" class="lb-mode-btn active" id="btn-mode-leaderboard" onclick="switchLeaderboardSubMode('leaderboard')">
+            <svg style="width:15px;height:15px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+            Top 100 Ranked Leaderboard
+          </button>
+          <button type="button" class="lb-mode-btn" id="btn-mode-setups" onclick="switchLeaderboardSubMode('setups')">
+            <svg style="width:15px;height:15px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            🎯 Daily, Weekly & Monthly Trade Setups
+          </button>
+        </div>
+
+        <!-- SUBMODE 1: LEADERBOARD TABLE -->
+        <div id="submode-leaderboard">
+          <!-- Category Filter Bar -->
+          <div class="category-filter-bar">
+            <span class="category-filter-label">Ranking Mode:</span>
+            <button type="button" class="cat-pill active" data-cat="all" onclick="changeLeaderboardCategory('all')">🌟 Overall Conviction</button>
+            <button type="button" class="cat-pill" data-cat="technicals" onclick="changeLeaderboardCategory('technicals')">📈 Best Technicals</button>
+            <button type="button" class="cat-pill" data-cat="price_action" onclick="changeLeaderboardCategory('price_action')">⚡ Best Price Action</button>
+            <button type="button" class="cat-pill" data-cat="high_cap" onclick="changeLeaderboardCategory('high_cap')">🏛️ High Cap (&gt; $100B)</button>
+            <button type="button" class="cat-pill" data-cat="mid_cap" onclick="changeLeaderboardCategory('mid_cap')">🚀 Mid Cap ($10B - $100B)</button>
+            <button type="button" class="cat-pill" data-cat="low_cap" onclick="changeLeaderboardCategory('low_cap')">💎 Low Cap Gems (&lt; $10B)</button>
+          </div>
+
+          <div class="leaderboard-toolbar">
+            <input type="text" class="leaderboard-search" id="leaderboard-search" placeholder="Filter by symbol or company name (e.g. HYPE, APP, NVDA, LIT, PLTR)..." oninput="filterLeaderboard(this.value)">
+            <div class="horizon-selector" style="margin-bottom:0;">
+              <span class="horizon-label">Horizon:</span>
+              <button type="button" class="pill-btn" data-lb-h="1d" onclick="changeLeaderboardHorizon('1d')">1 Day</button>
+              <button type="button" class="pill-btn" data-lb-h="1w" onclick="changeLeaderboardHorizon('1w')">1 Week</button>
+              <button type="button" class="pill-btn active" data-lb-h="1m" onclick="changeLeaderboardHorizon('1m')">1 Month</button>
+              <button type="button" class="pill-btn" data-lb-h="3m" onclick="changeLeaderboardHorizon('3m')">3 Months</button>
+              <button type="button" class="pill-btn" data-lb-h="6m" onclick="changeLeaderboardHorizon('6m')">6 Months</button>
+              <button type="button" class="pill-btn" data-lb-h="1y" onclick="changeLeaderboardHorizon('1y')">1 Year</button>
+            </div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th style="width:50px;">Rank</th>
+                  <th>Asset</th>
+                  <th>Cap Tier</th>
+                  <th>Current Price</th>
+                  <th>Expected Target</th>
+                  <th>Hedef Alış / Zarar Durdur</th>
+                  <th id="th-score-col">Conviction</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-table-body">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <div style="overflow-x:auto;">
-          <table class="leaderboard-table">
-            <thead>
-              <tr>
-                <th style="width:60px;">Rank</th>
-                <th>Asset</th>
-                <th>Current Price</th>
-                <th>Expected Target & Return</th>
-                <th>AI Conviction</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="leaderboard-table-body">
-              <!-- Dynamically populated rows -->
-            </tbody>
-          </table>
+        <!-- SUBMODE 2: ACTIONABLE TRADE SETUPS -->
+        <div id="submode-setups" style="display:none;">
+          <div class="setups-header-box">
+            <div class="timeframe-pill-group">
+              <button type="button" class="timeframe-btn active" data-tf="daily" onclick="changeTradeSetupsTimeframe('daily')">
+                ⚡ Daily Setups (1D Intraday)
+              </button>
+              <button type="button" class="timeframe-btn" data-tf="weekly" onclick="changeTradeSetupsTimeframe('weekly')">
+                📅 Weekly Swings (1W Swing)
+              </button>
+              <button type="button" class="timeframe-btn" data-tf="monthly" onclick="changeTradeSetupsTimeframe('monthly')">
+                🗓️ Monthly Positions (1M Position)
+              </button>
+            </div>
+            <div class="setups-subtext">
+              TimesFM-3 neural quantile drift provides calibrated entry zones (Hedef Alış), multi-target profit taking (Hedef Satış), and stop floors (Zarar Durdur).
+            </div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="setups-table">
+              <thead>
+                <tr>
+                  <th>Asset</th>
+                  <th>Setup Pattern & Thesis</th>
+                  <th>Hedef Alış (Entry Zone)</th>
+                  <th>Hedef Satış (TP1 / TP2)</th>
+                  <th>Zarar Durdur (Stop)</th>
+                  <th>Risk / Reward</th>
+                  <th>AI Action</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="setups-table-body">
+                <!-- Dynamically populated trade setups -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div><!-- End of view-leaderboard -->
@@ -713,29 +781,155 @@
       switchAppView('portfolio');
     }
 
+    let currentLeaderboardCategory = 'all';
+    let currentTradeSetupsTimeframe = 'daily';
+    let currentLeaderboardSubMode = 'leaderboard';
+    let tradeSetupsCache = {};
+
+    // Submode Switcher (Leaderboard vs Trade Setups)
+    function switchLeaderboardSubMode(mode) {
+      currentLeaderboardSubMode = mode;
+      document.getElementById('btn-mode-leaderboard').classList.toggle('active', mode === 'leaderboard');
+      document.getElementById('btn-mode-setups').classList.toggle('active', mode === 'setups');
+
+      document.getElementById('submode-leaderboard').style.display = mode === 'leaderboard' ? 'block' : 'none';
+      document.getElementById('submode-setups').style.display = mode === 'setups' ? 'block' : 'none';
+
+      if (mode === 'setups') {
+        fetchTradeSetups(currentTradeSetupsTimeframe);
+      } else {
+        fetchLeaderboard(currentHorizon, currentLeaderboardCategory);
+      }
+    }
+
+    function changeLeaderboardCategory(cat) {
+      currentLeaderboardCategory = cat;
+      document.querySelectorAll('[data-cat]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.cat === cat);
+      });
+      fetchLeaderboard(currentHorizon, currentLeaderboardCategory);
+    }
+
+    function changeTradeSetupsTimeframe(tf) {
+      currentTradeSetupsTimeframe = tf;
+      document.querySelectorAll('[data-tf]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tf === tf);
+      });
+      fetchTradeSetups(tf);
+    }
+
+    // Trade Setups Controller
+    async function fetchTradeSetups(tf) {
+      const body = document.getElementById('setups-table-body');
+      body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:36px; color:var(--text-muted);">Loading ${tf.toUpperCase()} Trade Setups with Target Buy & Sell Levels...</td></tr>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/trade_setups?timeframe=${encodeURIComponent(tf)}`);
+        if (!res.ok) throw new Error("Failed to load trade setups");
+        const data = await res.json();
+        renderTradeSetupsTable(data.setups || []);
+      } catch (err) {
+        body.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--google-red); padding:24px;">Error loading trade setups: ${err.message}</td></tr>`;
+      }
+    }
+
+    function renderTradeSetupsTable(setups) {
+      const body = document.getElementById('setups-table-body');
+      body.innerHTML = '';
+      if (!setups || setups.length === 0) {
+        body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No setups available for this timeframe.</td></tr>`;
+        return;
+      }
+
+      setups.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'leaderboard-row';
+        const isCrypto = s.type === 'Crypto' || s.symbol.includes('-USD');
+
+        tr.innerHTML = `
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <strong style="color:var(--text-primary); font-size:15px; font-weight:700;">${s.display_symbol || s.symbol}</strong>
+              <span class="item-badge ${isCrypto ? 'crypto' : ''}" style="font-size:10px;">${isCrypto ? 'Crypto' : s.exchange}</span>
+            </div>
+            <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">${s.name} • $${s.current_price.toLocaleString()}</div>
+          </td>
+          <td style="max-width:240px;">
+            <div style="font-weight:700; color:var(--text-primary); font-size:13px;">${s.pattern}</div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:3px; line-height:1.4;">${s.thesis}</div>
+          </td>
+          <td>
+            <span class="entry-pill">${s.entry_zone}</span>
+          </td>
+          <td>
+            <div style="display:flex; flex-direction:column; gap:3px;">
+              <span class="tp-pill">TP1: ${s.target_tp1} (${s.target_tp1_pct})</span>
+              <span class="tp-pill" style="background:#d4edda; color:#155724;">TP2: ${s.target_tp2} (${s.target_tp2_pct})</span>
+            </div>
+          </td>
+          <td>
+            <span class="stop-pill">${s.stop_loss} (${s.stop_loss_pct})</span>
+          </td>
+          <td>
+            <span class="rr-pill">${s.rr_ratio}</span>
+          </td>
+          <td>
+            <span class="conviction-pill" style="font-size:11px;">${s.action}</span>
+          </td>
+          <td>
+            <button type="button" class="btn-google" style="padding:5px 12px; font-size:12px; font-weight:600; color:var(--google-blue); border-color:#d2e3fc;">⚡ Forecast</button>
+          </td>
+        `;
+
+        tr.onclick = () => {
+          const sym = s.display_symbol || s.symbol;
+          document.getElementById('ticker-input').value = sym;
+          currentTicker = sym;
+          switchAppView('forecast');
+          switchModelMode(true);
+          fetchForecastData(sym, currentHorizon, true);
+        };
+
+        body.appendChild(tr);
+      });
+    }
+
     // Leaderboard Controller
-    async function fetchLeaderboard(horizon) {
+    async function fetchLeaderboard(horizon, category = currentLeaderboardCategory) {
       currentLeaderboardHorizon = horizon;
+      currentLeaderboardCategory = category;
+
       document.querySelectorAll('[data-lb-h]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.lbH === horizon);
       });
+      document.querySelectorAll('[data-cat]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.cat === category);
+      });
+
+      // Update Score column header
+      const scoreTh = document.getElementById('th-score-col');
+      if (scoreTh) {
+        if (category === 'technicals') scoreTh.textContent = 'Tech Score';
+        else if (category === 'price_action') scoreTh.textContent = 'PA Score';
+        else scoreTh.textContent = 'Conviction';
+      }
 
       const body = document.getElementById('leaderboard-table-body');
-      body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:36px; color:var(--text-muted); font-size:14px;">Loading Top 100 Ranked Assets for ${horizon}...</td></tr>`;
+      body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:36px; color:var(--text-muted); font-size:14px;">Loading ${category.toUpperCase()} Assets for ${horizon}...</td></tr>`;
 
       try {
-        const res = await fetch(`${API_BASE}/api/leaderboard?horizon=${encodeURIComponent(horizon)}`);
+        const res = await fetch(`${API_BASE}/api/leaderboard?horizon=${encodeURIComponent(horizon)}&category=${encodeURIComponent(category)}`);
         if (!res.ok) throw new Error("Failed to load leaderboard");
         const data = await res.json();
         leaderboardData = data.assets || [];
         renderLeaderboardTable(leaderboardData);
       } catch (err) {
-        body.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--google-red); padding:24px; font-weight:600;">Error loading leaderboard: ${err.message}</td></tr>`;
+        body.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--google-red); padding:24px; font-weight:600;">Error loading leaderboard: ${err.message}</td></tr>`;
       }
     }
 
     function changeLeaderboardHorizon(h) {
-      fetchLeaderboard(h);
+      fetchLeaderboard(h, currentLeaderboardCategory);
     }
 
     function filterLeaderboard(query) {
@@ -745,7 +939,9 @@
         return;
       }
       const filtered = leaderboardData.filter(a => 
-        a.symbol.toLowerCase().includes(q) || a.name.toLowerCase().includes(q)
+        (a.symbol && a.symbol.toLowerCase().includes(q)) ||
+        (a.display_symbol && a.display_symbol.toLowerCase().includes(q)) ||
+        (a.name && a.name.toLowerCase().includes(q))
       );
       renderLeaderboardTable(filtered);
     }
@@ -754,35 +950,51 @@
       const body = document.getElementById('leaderboard-table-body');
       body.innerHTML = '';
       if (assets.length === 0) {
-        body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">No assets match your search.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No assets match your search.</td></tr>`;
         return;
       }
 
       assets.forEach(a => {
         const tr = document.createElement('tr');
         tr.className = 'leaderboard-row';
-        const isCrypto = a.type === 'Crypto' || a.symbol.includes('-USD');
+        const isCrypto = a.type === 'Crypto' || (a.symbol && a.symbol.includes('-USD'));
         const retSign = a.expected_return_pct >= 0 ? '+' : '';
         const retColor = a.expected_return_pct >= 0 ? 'var(--google-green)' : 'var(--google-red)';
-        
+        const sym = a.display_symbol || a.symbol;
+
+        // Cap badge text & style
+        let capBadge = `<span class="cap-badge cap-mid">Mid Cap</span>`;
+        if (a.cap === 'high_cap') capBadge = `<span class="cap-badge cap-high">High Cap</span>`;
+        else if (a.cap === 'low_cap') capBadge = `<span class="cap-badge cap-low">Low Cap / Gem</span>`;
+
+        // Score display based on active category
+        let scoreVal = `${a.conviction_score}/100`;
+        if (currentLeaderboardCategory === 'technicals') scoreVal = `${a.tech_score || a.conviction_score}/100`;
+        else if (currentLeaderboardCategory === 'price_action') scoreVal = `${a.pa_score || a.conviction_score}/100`;
+
         tr.innerHTML = `
           <td>
             <span class="rank-badge ${a.rank <= 3 ? 'rank-top3' : ''}">#${a.rank}</span>
           </td>
           <td>
             <div style="display:flex; align-items:center; gap:8px;">
-              <strong style="color:var(--text-primary); font-size:15px; font-weight:700;">${a.symbol}</strong>
-              <span style="font-size:13px; color:var(--text-secondary); max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${a.name}</span>
+              <strong style="color:var(--text-primary); font-size:15px; font-weight:700;">${sym}</strong>
+              <span style="font-size:13px; color:var(--text-secondary); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${a.name}</span>
               <span class="item-badge ${isCrypto ? 'crypto' : ''}" style="font-size:10px;">${isCrypto ? 'Crypto' : a.exchange}</span>
             </div>
           </td>
+          <td>${capBadge}</td>
           <td style="font-weight:700; font-size:14px;">$${a.current_price.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
           <td>
             <span style="font-weight:800; font-size:14px; color:${retColor};">${retSign}${a.expected_return_pct.toFixed(2)}%</span>
-            <span style="font-size:12px; color:var(--text-muted); margin-left:4px;">($${a.target_price.toLocaleString()})</span>
+            <span style="font-size:11px; color:var(--text-muted); margin-left:4px;">($${a.target_price.toLocaleString()})</span>
           </td>
           <td>
-            <span class="conviction-pill">${a.conviction_score}/100</span>
+            <div style="font-size:12px; font-weight:600; color:var(--google-blue);">${a.entry_zone || '$' + (a.current_price * 0.99).toFixed(2)}</div>
+            <div style="font-size:11px; color:var(--google-red);">Stop: ${a.stop_loss || '$' + (a.current_price * 0.95).toFixed(2)}</div>
+          </td>
+          <td>
+            <span class="conviction-pill">${scoreVal}</span>
           </td>
           <td>
             <button type="button" class="btn-google" style="padding:5px 12px; font-size:12px; font-weight:600; color:var(--google-blue); border-color:#d2e3fc;">⚡ Forecast</button>
@@ -791,8 +1003,8 @@
 
         tr.onclick = () => {
           selectHorizon(currentLeaderboardHorizon);
-          document.getElementById('ticker-input').value = a.symbol;
-          currentTicker = a.symbol;
+          document.getElementById('ticker-input').value = sym;
+          currentTicker = sym;
           switchAppView('forecast');
           switchModelMode(true);
           fetchForecastData(currentTicker, currentLeaderboardHorizon, true);
