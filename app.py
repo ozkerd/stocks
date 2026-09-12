@@ -36,8 +36,9 @@ forecaster = TimesFM3Forecaster()
 async def home(request: Request, ticker: Optional[str] = "NVDA"):
     """Render Google-style minimal homepage."""
     return templates.TemplateResponse(
-        "index.html",
-        {"request": request, "default_ticker": ticker.upper()}
+        request=request,
+        name="index.html",
+        context={"default_ticker": ticker.upper()}
     )
 
 
