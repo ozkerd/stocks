@@ -554,6 +554,31 @@
     let activeScenario = 'median';
     let searchDebounceTimer = null;
 
+    // Horizon Selection (1d, 1w, 1m, 3m, 6m, 1y)
+    function selectHorizon(h) {
+      currentHorizon = h;
+      document.querySelectorAll('[data-horizon]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.horizon === h);
+      });
+      document.querySelectorAll('[data-lb-h]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lbH === h);
+      });
+      const resultsSec = document.getElementById('results-section');
+      if (resultsSec && resultsSec.style.display !== 'none') {
+        fetchForecastData(currentTicker, currentHorizon, isDeepMode);
+      }
+    }
+
+    // Quick Trending Asset Selector
+    function quickSelect(ticker) {
+      document.getElementById('ticker-input').value = ticker;
+      currentTicker = ticker;
+      const box = document.getElementById('autocomplete-box');
+      if (box) box.style.display = 'none';
+      switchAppView('forecast');
+      fetchForecastData(currentTicker, currentHorizon, isDeepMode);
+    }
+
     // Switch between 200M Fast Edge and 500M Deep Neural
     function switchModelMode(deep) {
       isDeepMode = deep;
