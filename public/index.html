@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=20260912-11">
+  <link rel="stylesheet" href="/style.css?v=20260912-12">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
@@ -1563,9 +1563,41 @@
             card.href = item.link || '#';
             card.target = '_blank';
             card.rel = 'noopener noreferrer';
-            card.className = 'news-card-item';
+
+            // Sentiment resolution with client fallback
+            let sentiment = (item.sentiment || '').toLowerCase();
+            let label = item.sentiment_label || item.sentiment || '';
+            if (!sentiment) {
+              const t = (item.title || '').toLowerCase();
+              if (/\b(screaming buy|strong buy|all-time high|record high|blowout|outperform|upgrade|upgraded|surges?|soars?|massive growth|beat earnings|record revenue|bull run|top pick)\b/i.test(t)) {
+                sentiment = 'positive';
+                label = 'Bullish';
+              } else if (/\b(crash|fraud|investigation|lawsuit|bankruptcy|plunges?|slumps?|tumbles?|downgrade|downgraded|misses earnings|warning|warns|scam)\b/i.test(t)) {
+                sentiment = 'negative';
+                label = 'Bearish';
+              } else if (/\b(surge|soar|jump|rally|record|beat|buy|bull|bullish|boom|breakout|growth|accelerat|profit|climb|rise|expand|raise|win|gain|high|boost|opportunity|upside)\b/i.test(t)) {
+                sentiment = 'positive';
+                label = 'Bullish';
+              } else if (/\b(plunge|fall|drop|sink|slump|down|sell|bear|bearish|miss|plummet|tumble|loss|decline|tank|risk|cut|probe|headwind|struggle|inflation|recession|scare|fears|worries)\b/i.test(t)) {
+                sentiment = 'negative';
+                label = 'Bearish';
+              } else {
+                sentiment = 'neutral';
+                label = 'Neutral';
+              }
+            }
+            if (!label) {
+              label = sentiment === 'positive' ? 'Bullish' : (sentiment === 'negative' ? 'Bearish' : 'Neutral');
+            }
+
+            const icon = sentiment === 'positive' ? '▲' : (sentiment === 'negative' ? '▼' : '●');
+
+            card.className = `news-card-item sentiment-${sentiment}`;
             card.innerHTML = `
-              <div class="news-card-title">${escapeHtml(item.title)}</div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:6px;">
+                <div class="news-card-title">${escapeHtml(item.title)}</div>
+                <span class="news-sentiment-badge ${sentiment}">${icon} ${escapeHtml(label)}</span>
+              </div>
               <div class="news-card-meta">
                 <span class="news-publisher">${escapeHtml(item.publisher)}</span>
                 <span>${escapeHtml(item.time || '')}</span>

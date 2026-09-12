@@ -672,6 +672,51 @@ const FALLBACK_PROFILES = {
   }
 };
 
+function analyzeHeadlineSentiment(title) {
+  const text = (title || "").toLowerCase();
+  
+  const strongBullish = [
+    "screaming buy", "strong buy", "all-time high", "record high", "blowout", "outperform", "upgrade", "upgraded", "surges", "soars", "massive growth", "beat earnings", "record revenue", "bull run", "top pick"
+  ];
+  const strongBearish = [
+    "crash", "fraud", "investigation", "lawsuit", "bankruptcy", "plunges", "slumps", "tumbles", "downgrade", "downgraded", "misses earnings", "warning", "warns", "scam"
+  ];
+
+  for (const phrase of strongBullish) {
+    if (text.includes(phrase)) return { sentiment: "Positive", sentiment_score: 1, label: "Bullish" };
+  }
+  for (const phrase of strongBearish) {
+    if (text.includes(phrase)) return { sentiment: "Negative", sentiment_score: -1, label: "Bearish" };
+  }
+
+  const bullishTerms = [
+    "surge", "soar", "jump", "rally", "record", "beat", "buy", "bull", "bullish", "boom",
+    "breakout", "growth", "accelerat", "profit", "climb", "rise", "expand", "raise", "win", "gain", "high", "boost", "partnership", "opportunity", "upside"
+  ];
+
+  const bearishTerms = [
+    "plunge", "fall", "drop", "sink", "slump", "down", "sell", "bear", "bearish", "miss",
+    "plummet", "tumble", "loss", "decline", "tank", "risk", "cut", "probe", "headwind", "struggle", "inflation", "recession", "stalled", "scare", "fears", "worries"
+  ];
+
+  let bullScore = 0;
+  let bearScore = 0;
+
+  bullishTerms.forEach(w => {
+    const reg = new RegExp("\\b" + w, "i");
+    if (reg.test(text)) bullScore++;
+  });
+
+  bearishTerms.forEach(w => {
+    const reg = new RegExp("\\b" + w, "i");
+    if (reg.test(text)) bearScore++;
+  });
+
+  if (bullScore > bearScore) return { sentiment: "Positive", sentiment_score: 1, label: "Bullish" };
+  if (bearScore > bullScore) return { sentiment: "Negative", sentiment_score: -1, label: "Bearish" };
+  return { sentiment: "Neutral", sentiment_score: 0, label: "Neutral" };
+}
+
 async function fetchAssetNews(ticker) {
   try {
     const clean = ticker.includes("-USD") ? ticker : ticker.replace(/[^A-Z0-9]/g, "");
@@ -691,11 +736,15 @@ async function fetchAssetNews(ticker) {
             else if (diffMin < 1440) timeStr = `${Math.floor(diffMin / 60)}h ago`;
             else timeStr = `${Math.floor(diffMin / 1440)}d ago`;
           }
+          const sent = analyzeHeadlineSentiment(n.title);
           return {
             title: n.title,
             publisher: n.publisher || "Financial News",
             link: n.link,
-            time: timeStr
+            time: timeStr,
+            sentiment: sent.sentiment,
+            sentiment_label: sent.label,
+            sentiment_score: sent.sentiment_score
           };
         });
       }
@@ -1186,19 +1235,28 @@ export async function onRequest(context) {
               title: `${meta.shortName || symbol} Market Momentum & Multi-Horizon Trend Outlook`,
               publisher: "TimesFM Intelligence",
               link: `https://finance.yahoo.com/quote/${encodeURIComponent(symbol)}`,
-              time: "Recent"
+              time: "Recent",
+              sentiment: "Positive",
+              sentiment_label: "Bullish",
+              sentiment_score: 1
             },
             {
               title: `Macro Regime Impacts & Volatility Spread for ${symbol}`,
               publisher: "Quant Market Analysis",
               link: `https://finance.yahoo.com/quote/${encodeURIComponent(symbol)}/news`,
-              time: "1d ago"
+              time: "1d ago",
+              sentiment: "Neutral",
+              sentiment_label: "Neutral",
+              sentiment_score: 0
             },
             {
               title: `Technical Breakout Analysis & Support/Resistance Levels for ${symbol}`,
               publisher: "Global Financial Feed",
               link: `https://finance.yahoo.com/quote/${encodeURIComponent(symbol)}`,
-              time: "2d ago"
+              time: "2d ago",
+              sentiment: "Positive",
+              sentiment_label: "Bullish",
+              sentiment_score: 1
             }
           ],
 
