@@ -104,37 +104,37 @@ const ASSET_UNIVERSE = [
 export async function onRequest(context) {
   const { request } = context;
   const url = new URL(request.url);
-  const horizon = url.searchParams.get(horizon) || 1m;
-  const filterType = url.searchParams.get(type) || all; // 'all', 'stock', 'crypto'
-  const category = url.searchParams.get(category) || all; // 'all', 'technicals', 'price_action', 'high_cap', 'mid_cap', 'low_cap'
+  const horizon = url.searchParams.get("horizon") || "1m";
+  const filterType = url.searchParams.get("type") || "all"; // 'all', 'stock', 'crypto'
+  const category = url.searchParams.get("category") || "all"; // 'all', 'technicals', 'price_action', 'high_cap', 'mid_cap', 'low_cap'
 
   // Horizon multiplier scaling
   const horizonMultipliers = {
-    1d: 0.05,
-    1w: 0.20,
-    1m: 1.0,
-    3m: 2.4,
-    6m: 4.2,
-    1y: 7.8
+    "1d": 0.05,
+    "1w": 0.20,
+    "1m": 1.0,
+    "3m": 2.4,
+    "6m": 4.2,
+    "1y": 7.8
   };
   const mult = horizonMultipliers[horizon] || 1.0;
 
   let filtered = ASSET_UNIVERSE;
 
   // Filter by asset type (Stock/Crypto)
-  if (filterType === stock) {
-    filtered = filtered.filter(a => a.type === Stock || a.type === ETF);
-  } else if (filterType === crypto) {
-    filtered = filtered.filter(a => a.type === Crypto);
+  if (filterType === "stock") {
+    filtered = filtered.filter(a => a.type === "Stock" || a.type === "ETF");
+  } else if (filterType === "crypto") {
+    filtered = filtered.filter(a => a.type === "Crypto");
   }
 
   // Filter by Market Cap Category if requested
-  if (category === high_cap) {
-    filtered = filtered.filter(a => a.cap === high_cap);
-  } else if (category === mid_cap) {
-    filtered = filtered.filter(a => a.cap === mid_cap);
-  } else if (category === low_cap) {
-    filtered = filtered.filter(a => a.cap === low_cap);
+  if (category === "high_cap") {
+    filtered = filtered.filter(a => a.cap === "high_cap");
+  } else if (category === "mid_cap") {
+    filtered = filtered.filter(a => a.cap === "mid_cap");
+  } else if (category === "low_cap") {
+    filtered = filtered.filter(a => a.cap === "low_cap");
   }
 
   // Calculate horizon-adjusted metrics and trade setup levels
