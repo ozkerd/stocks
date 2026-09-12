@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=20260912-9">
+  <link rel="stylesheet" href="/style.css?v=20260912-10">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
@@ -36,49 +36,65 @@
     </div>
   </header>
 
-  <main class="main-container">
+  <main class="container">
 
     <!-- VIEW 1: INTERACTIVE FORECAST -->
     <div class="app-view active" id="view-forecast">
-      <!-- Search & Control Card -->
-      <section class="hero-section search-card" id="hero-section">
-      <div class="search-title">AI Stock & Crypto Price Forecaster</div>
-      <div class="search-subtitle">
-        Predict future price targets, multi-scenario probability ranges, and actionable trade setups for 100+ US stocks, ETFs, and major cryptocurrencies.
-      </div>
+      <!-- Hero / Google-Style Center Search Section -->
+      <section class="hero-section" id="hero-section">
+        <div class="logo-container">
+          <div class="google-logo-text">
+            <span class="logo-t">A</span><span class="logo-i">I</span>&nbsp;<span class="logo-m">S</span><span class="logo-e">t</span><span class="logo-s">o</span><span class="logo-fm">c</span><span class="logo-dash">k</span>&nbsp;<span class="logo-three">Forecast</span>
+          </div>
+          <p class="tagline">AI-Powered Price Targets, Probability Ranges &amp; Trade Setups for 100+ Stocks &amp; Cryptos</p>
+        </div>
 
-      <!-- Search Input Container with Autocomplete -->
-      <div class="search-input-wrapper">
-        <svg class="search-icon" viewBox="0 0 24 24">
-          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-        </svg>
-        <input
-          type="text"
-          id="ticker-input"
-          class="search-input"
-          placeholder="Search 100+ US Stocks, Cryptos &amp; ETFs (e.g., NVDA, BTC, ETH, SOL, HYPE, AAPL)..."
-          autocomplete="off"
-          spellcheck="false"
-          value="NVDA"
-        >
-        <!-- Autocomplete Suggestions Dropdown -->
-        <div id="autocomplete-box" class="autocomplete-box"></div>
-      </div>
+        <!-- Search Box with Live Company & Crypto Autocomplete -->
+        <div class="search-wrapper">
+          <form id="search-form" onsubmit="handleSearch(event)">
+            <div class="search-box">
+              <svg class="search-icon" focusable="false" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+              </svg>
+              <input 
+                type="text" 
+                id="ticker-input" 
+                class="search-input" 
+                placeholder="Search 100+ US Stocks, Cryptos &amp; ETFs (e.g. NVDA, Apple, BTC, ETH, SOL, HYPE, PLTR)..." 
+                autocomplete="off" 
+                spellcheck="false" 
+                required 
+                value="NVDA" 
+                oninput="handleInputSearch(this.value)" 
+              />
+              <button type="submit" class="search-submit-btn" title="Search &amp; Forecast" style="background:none;border:none;cursor:pointer;padding:4px 8px;display:flex;align-items:center;color:var(--google-blue);font-weight:600;font-size:14px;border-radius:12px;">
+                <svg style="width:20px;height:20px;fill:var(--google-blue);" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              </button>
+            </div>
+            <!-- Autocomplete Suggestions Dropdown -->
+            <div id="autocomplete-box" class="autocomplete-box"></div>
+          </form>
+        </div>
 
-      <!-- Horizon Selector -->
-      <div class="horizon-selector">
-        <span class="horizon-label">Forecast Horizon:</span>
-        <button type="button" class="pill-btn" data-horizon="1d" onclick="selectHorizon('1d')">1 Day (Intraday)</button>
-        <button type="button" class="pill-btn" data-horizon="1w" onclick="selectHorizon('1w')">1 Week (5d)</button>
-        <button type="button" class="pill-btn active" data-horizon="1m" onclick="selectHorizon('1m')">1 Month (21d)</button>
-        <button type="button" class="pill-btn" data-horizon="3m" onclick="selectHorizon('3m')">3 Months (63d)</button>
-        <button type="button" class="pill-btn" data-horizon="6m" onclick="selectHorizon('6m')">6 Months</button>
-        <button type="button" class="pill-btn" data-horizon="1y" onclick="selectHorizon('1y')">1 Year</button>
-      </div>
+        <!-- Horizon Selector -->
+        <div class="horizon-selector">
+          <span class="horizon-label">Forecast Horizon:</span>
+          <button type="button" class="pill-btn" data-horizon="1d" onclick="selectHorizon('1d')">1 Day (Intraday)</button>
+          <button type="button" class="pill-btn" data-horizon="1w" onclick="selectHorizon('1w')">1 Week (5d)</button>
+          <button type="button" class="pill-btn active" data-horizon="1m" onclick="selectHorizon('1m')">1 Month (21d)</button>
+          <button type="button" class="pill-btn" data-horizon="3m" onclick="selectHorizon('3m')">3 Months (63d)</button>
+          <button type="button" class="pill-btn" data-horizon="6m" onclick="selectHorizon('6m')">6 Months</button>
+          <button type="button" class="pill-btn" data-horizon="1y" onclick="selectHorizon('1y')">1 Year</button>
+        </div>
 
-      <!-- Action Buttons -->
-      <div class="action-buttons">
-        <button type="button" class="btn-google btn-primary" onclick="triggerForecast(false)">Forecast Price Targets</button>
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button type="button" class="btn-google btn-primary" onclick="triggerForecast(false)">
+            <svg style="width:16px;height:16px;margin-right:6px;vertical-align:-2px;fill:currentColor;" viewBox="0 0 24 24">
+              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            Forecast Price Targets
+          </button>
         <button type="button" class="btn-google btn-deep" id="btn-deep-analysis" onclick="triggerForecast(true)">
           <svg style="width:16px;height:16px;margin-right:6px;vertical-align:-2px;fill:currentColor;" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
