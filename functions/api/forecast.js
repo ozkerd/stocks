@@ -28,6 +28,8 @@ const CRYPTO_ALIASES = {
 
 const COMMON_COMPANY_NAMES = {
   "APPLE": "AAPL",
+  "APPLOVIN": "APP",
+  "APP": "APP",
   "MICROSOFT": "MSFT",
   "NVIDIA": "NVDA",
   "GOOGLE": "GOOGL",

@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TimesFM-3 Stock & Crypto Forecaster | stocks.primerllm.com</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=20260912-3">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
@@ -18,11 +21,15 @@
       <span class="badge" style="background:#e8f0fe; color:#1a73e8; border:1px solid #aecbfa;">Stocks & Crypto</span>
     </div>
     <div class="nav-links">
-      <button type="button" class="nav-btn" onclick="openLeaderboardModal()">
+      <button type="button" class="nav-btn active" id="nav-btn-forecast" onclick="switchAppView('forecast')">
+        <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
+        Forecast Engine
+      </button>
+      <button type="button" class="nav-btn" id="nav-btn-leaderboard" onclick="switchAppView('leaderboard')">
         <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
         Best Now (Top 100)
       </button>
-      <button type="button" class="nav-btn btn-portfolio" onclick="openPortfolioModal()">
+      <button type="button" class="nav-btn btn-portfolio" id="nav-btn-portfolio" onclick="switchAppView('portfolio')">
         <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
         Best Portfolio
       </button>
@@ -30,6 +37,8 @@
   </header>
 
   <main class="container">
+    <!-- VIEW 1: FORECAST ENGINE -->
+    <div id="view-forecast" class="app-view">
     <!-- Hero / Google-Style Center Search Section -->
     <section class="hero-section" id="hero-section">
       <div class="logo-container">
@@ -399,26 +408,33 @@
       </div>
 
     </section>
-  </main>
+    </div><!-- End of view-forecast -->
 
-  <!-- Best Now (Top 100 Leaderboard) Modal -->
-  <div class="modal-overlay" id="modal-leaderboard" onclick="handleOverlayClick(event, 'modal-leaderboard')">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-title">
-          <svg style="width:20px;height:20px;fill:var(--google-blue);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-          <span>Best Now — Top 100 Ranked Assets by Return Potential</span>
+    <!-- VIEW 2: BEST NOW (TOP 100 LEADERBOARD) -->
+    <div id="view-leaderboard" class="app-view" style="display:none;">
+      <div class="view-card">
+        <div class="view-header">
+          <div class="view-title-wrap">
+            <h2>
+              <svg style="width:24px;height:24px;fill:var(--google-blue);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+              Best Now — Top 100 Ranked Assets by Return Potential
+            </h2>
+            <p>Google TimesFM-3 500M neural conviction scores and calibrated drift targets across liquid global stocks & cryptos.</p>
+          </div>
+          <button type="button" class="btn-google" onclick="switchAppView('forecast')">
+            ← Back to Forecaster
+          </button>
         </div>
-        <button type="button" class="modal-close-btn" onclick="closeLeaderboardModal()">&times;</button>
-      </div>
-      <div class="modal-body">
+
         <div class="leaderboard-toolbar">
-          <input type="text" class="leaderboard-search" id="leaderboard-search" placeholder="Filter by asset name or ticker (e.g. NVDA, Bitcoin, PLTR)..." oninput="filterLeaderboard(this.value)">
+          <input type="text" class="leaderboard-search" id="leaderboard-search" placeholder="Filter by symbol or company name (e.g. AppLovin, NVDA, Bitcoin, PLTR)..." oninput="filterLeaderboard(this.value)">
           <div class="horizon-selector" style="margin-bottom:0;">
+            <span class="horizon-label">Horizon:</span>
             <button type="button" class="pill-btn" data-lb-h="1d" onclick="changeLeaderboardHorizon('1d')">1 Day</button>
             <button type="button" class="pill-btn" data-lb-h="1w" onclick="changeLeaderboardHorizon('1w')">1 Week</button>
             <button type="button" class="pill-btn active" data-lb-h="1m" onclick="changeLeaderboardHorizon('1m')">1 Month</button>
             <button type="button" class="pill-btn" data-lb-h="3m" onclick="changeLeaderboardHorizon('3m')">3 Months</button>
+            <button type="button" class="pill-btn" data-lb-h="6m" onclick="changeLeaderboardHorizon('6m')">6 Months</button>
             <button type="button" class="pill-btn" data-lb-h="1y" onclick="changeLeaderboardHorizon('1y')">1 Year</button>
           </div>
         </div>
@@ -427,7 +443,7 @@
           <table class="leaderboard-table">
             <thead>
               <tr>
-                <th style="width:50px;">Rank</th>
+                <th style="width:60px;">Rank</th>
                 <th>Asset</th>
                 <th>Current Price</th>
                 <th>Expected Target & Return</th>
@@ -441,20 +457,24 @@
           </table>
         </div>
       </div>
-    </div>
-  </div>
+    </div><!-- End of view-leaderboard -->
 
-  <!-- Best Portfolio Modal -->
-  <div class="modal-overlay" id="modal-portfolio" onclick="handleOverlayClick(event, 'modal-portfolio')">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-title">
-          <svg style="width:20px;height:20px;fill:#7b1fa2;" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
-          <span>Best Portfolio — Optimal Sharpe & Growth Models</span>
+    <!-- VIEW 3: BEST PORTFOLIO -->
+    <div id="view-portfolio" class="app-view" style="display:none;">
+      <div class="view-card">
+        <div class="view-header">
+          <div class="view-title-wrap">
+            <h2>
+              <svg style="width:24px;height:24px;fill:#7b1fa2;" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+              Best Portfolio — AI Risk-Optimized Multi-Asset Allocations
+            </h2>
+            <p>TimesFM-3 neural multi-asset allocations calibrated for High Risk (Alpha Growth), Balanced (Optimal Sharpe), and Low Risk (Capital Defense).</p>
+          </div>
+          <button type="button" class="btn-google" onclick="switchAppView('forecast')">
+            ← Back to Forecaster
+          </button>
         </div>
-        <button type="button" class="modal-close-btn" onclick="closePortfolioModal()">&times;</button>
-      </div>
-      <div class="modal-body">
+
         <div class="portfolio-risk-tabs">
           <div class="risk-tab-btn active" id="ptab-balanced" onclick="selectPortfolio('balanced')">
             <div class="risk-tab-title">⚖️ Balanced Risk</div>
@@ -498,7 +518,7 @@
           </div>
         </div>
 
-        <div style="font-weight:600; font-size:14px; margin-bottom:8px; color:var(--text-primary);">Target Asset Allocation</div>
+        <div style="font-weight:700; font-size:14px; margin-bottom:12px; color:var(--text-primary);">Target Asset Allocation</div>
         <div style="overflow-x:auto;">
           <table class="allocation-table">
             <thead>
@@ -516,8 +536,8 @@
           </table>
         </div>
       </div>
-    </div>
-  </div>
+    </div><!-- End of view-portfolio -->
+  </main>
 
   <footer>
     <p>Powered by Google TimesFM-3 Architecture • <strong>stocks.primerllm.com</strong></p>
@@ -641,30 +661,34 @@
       fetchForecastData(currentTicker, currentHorizon, true);
     }
 
-    // Modal Control Helpers
-    function handleOverlayClick(e, id) {
-      if (e.target.id === id) {
-        document.getElementById(id).style.display = 'none';
+    // View Navigation Controller (Forecast, Best Now, Best Portfolio)
+    function switchAppView(viewName) {
+      document.querySelectorAll('.app-view').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+      const targetView = document.getElementById(`view-${viewName}`);
+      const targetBtn = document.getElementById(`nav-btn-${viewName}`);
+
+      if (targetView) targetView.style.display = 'block';
+      if (targetBtn) targetBtn.classList.add('active');
+
+      if (viewName === 'leaderboard') {
+        fetchLeaderboard(currentHorizon);
+      } else if (viewName === 'portfolio') {
+        fetchPortfolios();
       }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeLeaderboardModal();
-        closePortfolioModal();
-      }
-    });
+    function openLeaderboardModal() {
+      switchAppView('leaderboard');
+    }
+
+    function openPortfolioModal() {
+      switchAppView('portfolio');
+    }
 
     // Leaderboard Controller
-    function openLeaderboardModal() {
-      document.getElementById('modal-leaderboard').style.display = 'flex';
-      fetchLeaderboard(currentHorizon);
-    }
-
-    function closeLeaderboardModal() {
-      document.getElementById('modal-leaderboard').style.display = 'none';
-    }
-
     async function fetchLeaderboard(horizon) {
       currentLeaderboardHorizon = horizon;
       document.querySelectorAll('[data-lb-h]').forEach(btn => {
@@ -672,7 +696,7 @@
       });
 
       const body = document.getElementById('leaderboard-table-body');
-      body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">Loading Top 100 Ranked Assets for ${horizon}...</td></tr>`;
+      body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:36px; color:var(--text-muted); font-size:14px;">Loading Top 100 Ranked Assets for ${horizon}...</td></tr>`;
 
       try {
         const res = await fetch(`${API_BASE}/api/leaderboard?horizon=${encodeURIComponent(horizon)}`);
@@ -681,7 +705,7 @@
         leaderboardData = data.assets || [];
         renderLeaderboardTable(leaderboardData);
       } catch (err) {
-        body.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--google-red); padding:20px;">Error loading leaderboard: ${err.message}</td></tr>`;
+        body.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--google-red); padding:24px; font-weight:600;">Error loading leaderboard: ${err.message}</td></tr>`;
       }
     }
 
@@ -705,7 +729,7 @@
       const body = document.getElementById('leaderboard-table-body');
       body.innerHTML = '';
       if (assets.length === 0) {
-        body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">No assets match your search.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">No assets match your search.</td></tr>`;
         return;
       }
 
@@ -722,30 +746,31 @@
           </td>
           <td>
             <div style="display:flex; align-items:center; gap:8px;">
-              <strong style="color:var(--text-primary); font-size:14px;">${a.symbol}</strong>
-              <span style="font-size:12px; color:var(--text-secondary); max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${a.name}</span>
+              <strong style="color:var(--text-primary); font-size:15px; font-weight:700;">${a.symbol}</strong>
+              <span style="font-size:13px; color:var(--text-secondary); max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${a.name}</span>
               <span class="item-badge ${isCrypto ? 'crypto' : ''}" style="font-size:10px;">${isCrypto ? 'Crypto' : a.exchange}</span>
             </div>
           </td>
-          <td style="font-weight:600;">$${a.current_price.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+          <td style="font-weight:700; font-size:14px;">$${a.current_price.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
           <td>
-            <span style="font-weight:700; color:${retColor};">${retSign}${a.expected_return_pct.toFixed(2)}%</span>
-            <span style="font-size:11px; color:var(--text-muted); margin-left:4px;">($${a.target_price.toLocaleString()})</span>
+            <span style="font-weight:800; font-size:14px; color:${retColor};">${retSign}${a.expected_return_pct.toFixed(2)}%</span>
+            <span style="font-size:12px; color:var(--text-muted); margin-left:4px;">($${a.target_price.toLocaleString()})</span>
           </td>
           <td>
             <span class="conviction-pill">${a.conviction_score}/100</span>
           </td>
           <td>
-            <button type="button" class="ticker-chip" style="padding:4px 10px; font-weight:600;">Analyze</button>
+            <button type="button" class="btn-google" style="padding:5px 12px; font-size:12px; font-weight:600; color:var(--google-blue); border-color:#d2e3fc;">⚡ Forecast</button>
           </td>
         `;
 
         tr.onclick = () => {
-          closeLeaderboardModal();
           selectHorizon(currentLeaderboardHorizon);
           document.getElementById('ticker-input').value = a.symbol;
           currentTicker = a.symbol;
-          fetchForecastData(currentTicker, currentLeaderboardHorizon, isDeepMode);
+          switchAppView('forecast');
+          switchModelMode(true);
+          fetchForecastData(currentTicker, currentLeaderboardHorizon, true);
         };
 
         body.appendChild(tr);
@@ -753,15 +778,6 @@
     }
 
     // Portfolio Controller
-    function openPortfolioModal() {
-      document.getElementById('modal-portfolio').style.display = 'flex';
-      fetchPortfolios();
-    }
-
-    function closePortfolioModal() {
-      document.getElementById('modal-portfolio').style.display = 'none';
-    }
-
     async function fetchPortfolios() {
       if (!portfoliosCache) {
         try {
@@ -804,8 +820,8 @@
         tr.className = 'leaderboard-row';
         tr.innerHTML = `
           <td>
-            <strong style="color:var(--text-primary);">${alloc.symbol}</strong>
-            <span style="font-size:12px; color:var(--text-secondary); margin-left:6px;">${alloc.name}</span>
+            <strong style="color:var(--text-primary); font-weight:700;">${alloc.symbol}</strong>
+            <span style="font-size:13px; color:var(--text-secondary); margin-left:6px;">${alloc.name}</span>
           </td>
           <td style="min-width:140px;">
             <div class="weight-bar-box">
@@ -816,17 +832,18 @@
             </div>
           </td>
           <td style="font-weight:700; color:var(--google-green);">${alloc.return_target}</td>
-          <td style="font-size:12px; color:var(--text-secondary);">${alloc.role}</td>
+          <td style="font-size:13px; color:var(--text-secondary);">${alloc.role}</td>
           <td>
-            <button type="button" class="ticker-chip" style="padding:4px 10px; font-weight:600;">Forecast</button>
+            <button type="button" class="btn-google" style="padding:5px 12px; font-size:12px; font-weight:600; color:var(--google-blue); border-color:#d2e3fc;">⚡ Forecast</button>
           </td>
         `;
 
         tr.onclick = () => {
-          closePortfolioModal();
           document.getElementById('ticker-input').value = alloc.symbol;
           currentTicker = alloc.symbol;
-          fetchForecastData(currentTicker, currentHorizon, isDeepMode);
+          switchAppView('forecast');
+          switchModelMode(true);
+          fetchForecastData(currentTicker, currentHorizon, true);
         };
 
         body.appendChild(tr);

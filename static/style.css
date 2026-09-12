@@ -1,6 +1,9 @@
 /* Google Clean Aesthetic Theme for stocks.primerllm.com */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --google-blue: #1a73e8;
   --google-blue-hover: #1557b0;
   --google-blue-bg: #e8f0fe;
@@ -8,17 +11,17 @@
   --google-yellow: #f9ab00;
   --google-green: #34a853;
   --google-green-bg: #e6f4ea;
-  --text-primary: #202124;
-  --text-secondary: #5f6368;
-  --text-muted: #70757a;
-  --border-color: #dadce0;
-  --border-light: #f1f3f4;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+  --border-light: #f3f4f6;
   --bg-page: #ffffff;
   --bg-card: #ffffff;
-  --bg-hover: #f8f9fa;
-  --shadow-sm: 0 1px 2px 0 rgba(60,64,67,0.1), 0 1px 3px 1px rgba(60,64,67,0.08);
-  --shadow-md: 0 2px 6px 2px rgba(60,64,67,0.15);
-  --shadow-search: 0 1px 6px rgba(32,33,36,0.28);
+  --bg-hover: #f9fafb;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-search: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -28,11 +31,16 @@
 }
 
 body {
-  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-family);
   color: var(--text-primary);
   background-color: var(--bg-page);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input, button, select, textarea, table, th, td {
+  font-family: var(--font-family);
 }
 
 /* Header & Top Bar */
@@ -1054,14 +1062,15 @@ footer a {
   background: #ffffff;
   border: 1px solid var(--border-color);
   border-radius: 20px;
-  padding: 6px 14px;
+  padding: 8px 16px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-secondary);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   transition: all 0.15s ease;
+  font-family: var(--font-family);
 }
 
 .nav-btn:hover {
@@ -1071,15 +1080,75 @@ footer a {
   box-shadow: 0 1px 4px rgba(26,115,232,0.15);
 }
 
+.nav-btn.active {
+  background: var(--google-blue) !important;
+  border-color: var(--google-blue) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(26,115,232,0.35) !important;
+}
+
 .nav-btn.btn-portfolio {
-  background: linear-gradient(135deg, #e8f0fe 0%, #f3e5f5 100%);
-  border-color: #ce93d8;
-  color: #7b1fa2;
+  background: linear-gradient(135deg, #fdf4ff 0%, #f3e8ff 100%);
+  border-color: #d8b4fe;
+  color: #7e22ce;
 }
 
 .nav-btn.btn-portfolio:hover {
-  background: linear-gradient(135deg, #d2e3fc 0%, #e1bee7 100%);
-  box-shadow: 0 2px 6px rgba(123,31,162,0.25);
+  background: linear-gradient(135deg, #fae8ff 0%, #e9d5ff 100%);
+  box-shadow: 0 2px 6px rgba(126,34,206,0.25);
+}
+
+.nav-btn.btn-portfolio.active {
+  background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%) !important;
+  border-color: #581c87 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(126,34,206,0.4) !important;
+}
+
+/* App View Containers */
+.app-view {
+  animation: appViewFadeIn 0.22s ease-out;
+}
+
+@keyframes appViewFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.view-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 16px;
+}
+
+.view-title-wrap h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+}
+
+.view-title-wrap p {
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 
 /* Modals (Google Clean Dialog Style) */

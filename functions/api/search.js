@@ -6,6 +6,7 @@
 const POPULAR_ASSETS = [
   // Mega Cap & Popular Tech
   { symbol: "NVDA", name: "NVIDIA Corporation", type: "Stock", exchange: "NASDAQ" },
+  { symbol: "APP", name: "AppLovin Corporation", type: "Stock", exchange: "NASDAQ", aliases: ["APP", "APPLOVIN"] },
   { symbol: "AAPL", name: "Apple Inc.", type: "Stock", exchange: "NASDAQ" },
   { symbol: "MSFT", name: "Microsoft Corporation", type: "Stock", exchange: "NASDAQ" },
   { symbol: "GOOGL", name: "Alphabet Inc. (Google)", type: "Stock", exchange: "NASDAQ" },
