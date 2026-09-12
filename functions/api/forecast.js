@@ -277,38 +277,69 @@ async function resolveTicker(input) {
   return clean;
 }
 
-async function fetchYahooChart(ticker, range = "5y") {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=${range}&interval=1d&includePrePost=false`;
-  const res = await fetch(url, {
-    headers: {
-      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      "Accept": "application/json"
-    }
-  });
+function parseBinanceKlines(klines, symbol) {
+  const cleaned = klines.map(k => ({
+    date: new Date(k[0]).toISOString().split("T")[0],
+    timestamp: Math.floor(k[0] / 1000),
+    close: parseFloat(k[4]),
+    high: parseFloat(k[2]),
+    low: parseFloat(k[3]),
+    volume: parseFloat(k[5])
+  }));
+  return {
+    meta: {
+      currency: "USD",
+      symbol: symbol,
+      exchangeName: "Binance/Crypto",
+      instrumentType: "CRYPTOCURRENCY",
+      regularMarketPrice: cleaned[cleaned.length - 1].close
+    },
+    records: cleaned,
+    symbol
+  };
+}
 
-  if (!res.ok) {
-    // If not found and doesn't have -USD, try crypto suffix if plausible
-    if (res.status === 404 && !ticker.includes("-") && ticker.length <= 5) {
-      const cryptoUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker + "-USD")}?range=${range}&interval=1d&includePrePost=false`;
-      const cRes = await fetch(cryptoUrl, {
-        headers: { "User-Agent": "Mozilla/5.0", "Accept": "application/json" }
-      });
-      if (cRes.ok) {
-        const cData = await cRes.json();
-        const cResult = cData?.chart?.result?.[0];
-        if (cResult && cResult.timestamp) return parseYahooResult(cResult, ticker + "-USD");
+async function fetchYahooChart(ticker, range = "5y") {
+  // 1. Try Yahoo Finance
+  try {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=${range}&interval=1d&includePrePost=false`;
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/json"
+      }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const result = data?.chart?.result?.[0];
+      if (result && result.timestamp && result.timestamp.length >= 20) {
+        return parseYahooResult(result, ticker);
       }
     }
-    throw new Error(`Market data for '${ticker}' not available (HTTP ${res.status}).`);
+  } catch (err) {
+    // Continue to Binance fallback
   }
 
-  const data = await res.json();
-  const result = data?.chart?.result?.[0];
-  if (!result || !result.timestamp || result.timestamp.length < 20) {
-    throw new Error(`Insufficient historical price data found for '${ticker}'.`);
+  // 2. If crypto or contains -USD, query Binance API for real-time OHLCV klines
+  if (ticker.includes("-") || ticker.length <= 6) {
+    const clean = ticker.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
+    try {
+      const bRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${clean}USDT&interval=1d&limit=1000`, {
+        headers: { "Accept": "application/json" }
+      });
+      if (bRes.ok) {
+        const klines = await bRes.json();
+        if (Array.isArray(klines) && klines.length >= 20) {
+          return parseBinanceKlines(klines, ticker.includes("-USD") ? ticker : ticker + "-USD");
+        }
+      }
+    } catch (bErr) {
+      // Ignore
+    }
   }
 
-  return parseYahooResult(result, ticker);
+  throw new Error(`Market data for '${ticker}' not available.`);
 }
 
 function parseYahooResult(result, symbol) {
@@ -342,39 +373,41 @@ const FALLBACK_PRICES = {
   "HYPE32196-USD": { price: 80.40, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
   "HYPE-USD": { price: 80.40, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
   "HYPE": { price: 80.40, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
-  "LIT6833-USD": { price: 0.118, name: "Litentry USD", type: "CRYPTOCURRENCY" },
-  "LIT-USD": { price: 0.118, name: "Litentry USD", type: "CRYPTOCURRENCY" },
-  "LIT": { price: 0.118, name: "Litentry USD", type: "CRYPTOCURRENCY" },
-  "SUI20947-USD": { price: 2.85, name: "Sui Network USD", type: "CRYPTOCURRENCY" },
-  "SEI-USD": { price: 0.42, name: "Sei Network USD", type: "CRYPTOCURRENCY" },
-  "APT21794-USD": { price: 8.60, name: "Aptos USD", type: "CRYPTOCURRENCY" },
-  "TIA-USD": { price: 5.10, name: "Celestia USD", type: "CRYPTOCURRENCY" },
-  "INJ-USD": { price: 19.40, name: "Injective USD", type: "CRYPTOCURRENCY" },
-  "JUP-USD": { price: 0.85, name: "Jupiter DEX USD", type: "CRYPTOCURRENCY" },
-  "ONDO-USD": { price: 0.98, name: "Ondo Finance USD", type: "CRYPTOCURRENCY" },
+  "LIT6833-USD": { price: 0.74, name: "Litentry USD", type: "CRYPTOCURRENCY" },
+  "LIT-USD": { price: 0.74, name: "Litentry USD", type: "CRYPTOCURRENCY" },
+  "LIT": { price: 0.74, name: "Litentry USD", type: "CRYPTOCURRENCY" },
+  "SUI20947-USD": { price: 0.72, name: "Sui Network USD", type: "CRYPTOCURRENCY" },
+  "SEI-USD": { price: 0.045, name: "Sei Network USD", type: "CRYPTOCURRENCY" },
+  "APT21794-USD": { price: 0.60, name: "Aptos USD", type: "CRYPTOCURRENCY" },
+  "TIA-USD": { price: 0.354, name: "Celestia USD", type: "CRYPTOCURRENCY" },
+  "INJ-USD": { price: 6.08, name: "Injective USD", type: "CRYPTOCURRENCY" },
+  "JUP-USD": { price: 0.24, name: "Jupiter DEX USD", type: "CRYPTOCURRENCY" },
+  "ONDO-USD": { price: 0.35, name: "Ondo Finance USD", type: "CRYPTOCURRENCY" },
   "KAS-USD": { price: 0.14, name: "Kaspa USD", type: "CRYPTOCURRENCY" },
-  "NEAR-USD": { price: 5.40, name: "NEAR Protocol USD", type: "CRYPTOCURRENCY" },
-  "FET-USD": { price: 1.35, name: "Artificial Superintelligence Alliance USD", type: "CRYPTOCURRENCY" },
+  "NEAR-USD": { price: 2.35, name: "NEAR Protocol USD", type: "CRYPTOCURRENCY" },
+  "FET-USD": { price: 0.1671, name: "Artificial Superintelligence Alliance USD", type: "CRYPTOCURRENCY" },
+  "FET": { price: 0.1671, name: "Artificial Superintelligence Alliance USD", type: "CRYPTOCURRENCY" },
+  "ASI": { price: 0.1671, name: "Artificial Superintelligence Alliance USD", type: "CRYPTOCURRENCY" },
   "PEPE24478-USD": { price: 0.0000095, name: "Pepe USD", type: "CRYPTOCURRENCY" },
-  "TAO-USD": { price: 485.00, name: "Bittensor USD", type: "CRYPTOCURRENCY" },
-  "RENDER-USD": { price: 5.80, name: "Render Network USD", type: "CRYPTOCURRENCY" },
-  "ENA-USD": { price: 0.48, name: "Ethena USD", type: "CRYPTOCURRENCY" },
-  "AAVE-USD": { price: 195.00, name: "Aave USD", type: "CRYPTOCURRENCY" },
-  "LINK-USD": { price: 15.20, name: "Chainlink USD", type: "CRYPTOCURRENCY" },
-  "AVAX-USD": { price: 28.50, name: "Avalanche USD", type: "CRYPTOCURRENCY" },
+  "TAO-USD": { price: 232.20, name: "Bittensor USD", type: "CRYPTOCURRENCY" },
+  "RENDER-USD": { price: 1.38, name: "Render Network USD", type: "CRYPTOCURRENCY" },
+  "ENA-USD": { price: 0.141, name: "Ethena USD", type: "CRYPTOCURRENCY" },
+  "AAVE-USD": { price: 126.47, name: "Aave USD", type: "CRYPTOCURRENCY" },
+  "LINK-USD": { price: 11.52, name: "Chainlink USD", type: "CRYPTOCURRENCY" },
+  "AVAX-USD": { price: 7.39, name: "Avalanche USD", type: "CRYPTOCURRENCY" },
   "APP": { price: 323.96, name: "AppLovin Corp", type: "EQUITY" },
   "NVDA": { price: 218.29, name: "NVIDIA Corp", type: "EQUITY" },
-  "BTC-USD": { price: 77453.11, name: "Bitcoin USD", type: "CRYPTOCURRENCY" },
-  "ETH-USD": { price: 2540.39, name: "Ethereum USD", type: "CRYPTOCURRENCY" },
-  "SOL-USD": { price: 101.97, name: "Solana USD", type: "CRYPTOCURRENCY" },
+  "BTC-USD": { price: 77164.13, name: "Bitcoin USD", type: "CRYPTOCURRENCY" },
+  "ETH-USD": { price: 2522.21, name: "Ethereum USD", type: "CRYPTOCURRENCY" },
+  "SOL-USD": { price: 101.41, name: "Solana USD", type: "CRYPTOCURRENCY" },
   "AAPL": { price: 332.27, name: "Apple Inc.", type: "EQUITY" },
   "MSFT": { price: 495.63, name: "Microsoft Corp", type: "EQUITY" },
   "TSLA": { price: 365.44, name: "Tesla Inc.", type: "EQUITY" },
   "PLTR": { price: 167.23, name: "Palantir Technologies", type: "EQUITY" },
-  "SMCI": { price: 42.50, name: "Super Micro Computer Inc.", type: "EQUITY" },
-  "ASTS": { price: 24.80, name: "AST SpaceMobile Inc.", type: "EQUITY" },
-  "RKLB": { price: 18.60, name: "Rocket Lab USA Inc.", type: "EQUITY" },
-  "IONQ": { price: 28.40, name: "IonQ Inc.", type: "EQUITY" },
+  "SMCI": { price: 40.10, name: "Super Micro Computer Inc.", type: "EQUITY" },
+  "ASTS": { price: 59.86, name: "AST SpaceMobile Inc.", type: "EQUITY" },
+  "RKLB": { price: 62.95, name: "Rocket Lab USA Inc.", type: "EQUITY" },
+  "IONQ": { price: 36.75, name: "IonQ Inc.", type: "EQUITY" },
   "MSTR": { price: 130.97, name: "MicroStrategy Inc.", type: "EQUITY" },
   "ARM": { price: 264.79, name: "Arm Holdings plc", type: "EQUITY" }
 };
