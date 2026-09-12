@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=20260912-8">
+  <link rel="stylesheet" href="/style.css?v=20260912-9">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
@@ -41,7 +41,7 @@
     <!-- VIEW 1: INTERACTIVE FORECAST -->
     <div class="app-view active" id="view-forecast">
       <!-- Search & Control Card -->
-      <section class="search-card">
+      <section class="hero-section search-card" id="hero-section">
       <div class="search-title">AI Stock & Crypto Price Forecaster</div>
       <div class="search-subtitle">
         Predict future price targets, multi-scenario probability ranges, and actionable trade setups for 100+ US stocks, ETFs, and major cryptocurrencies.
@@ -96,28 +96,28 @@
             </svg>
           </button>
           <div class="top-pick-menu" id="top-pick-menu">
-            <div class="top-pick-item" onclick="selectTopPickHorizon('1d')">
+            <div class="top-pick-item" onclick="selectTopPickOption('1d', 'NVDA')">
               <div class="top-pick-meta">
                 <span class="top-pick-title">⚡ AI Top Pick of the Day</span>
-                <span class="top-pick-sub" id="top-pick-sub-1d">NVDA · Intraday Drift</span>
+                <span class="top-pick-sub" id="top-pick-sub-1d">NVDA · Intraday Momentum</span>
               </div>
               <span class="top-pick-return" id="top-pick-ret-1d">+4.8%</span>
             </div>
-            <div class="top-pick-item" onclick="selectTopPickHorizon('1w')">
+            <div class="top-pick-item" onclick="selectTopPickOption('1w', 'APP')">
               <div class="top-pick-meta">
                 <span class="top-pick-title">📅 AI Top Pick of the Week</span>
                 <span class="top-pick-sub" id="top-pick-sub-1w">APP · 1-Week Swing</span>
               </div>
               <span class="top-pick-return" id="top-pick-ret-1w">+11.2%</span>
             </div>
-            <div class="top-pick-item" onclick="selectTopPickHorizon('1m')">
+            <div class="top-pick-item" onclick="selectTopPickOption('1m', 'BTC-USD')">
               <div class="top-pick-meta">
                 <span class="top-pick-title">🗓️ AI Top Pick of the Month</span>
-                <span class="top-pick-sub" id="top-pick-sub-1m">NVDA · 1-Month Trend</span>
+                <span class="top-pick-sub" id="top-pick-sub-1m">BTC · Trend Expansion</span>
               </div>
-              <span class="top-pick-return" id="top-pick-ret-1m">+24.5%</span>
+              <span class="top-pick-return" id="top-pick-ret-1m">+28.2%</span>
             </div>
-            <div class="top-pick-item" onclick="selectTopPickHorizon('1y')">
+            <div class="top-pick-item" onclick="selectTopPickOption('1y', 'PLTR')">
               <div class="top-pick-meta">
                 <span class="top-pick-title">🏛️ AI Top Pick of the Year</span>
                 <span class="top-pick-sub" id="top-pick-sub-1y">PLTR · Secular Expansion</span>
@@ -811,42 +811,12 @@
       }
     });
 
-    // AI Top Pick based on selected horizon and multi-factor conviction
-    async function selectTopPickHorizon(h) {
+    // AI Top Pick direct selection by option
+    function selectTopPickOption(h, symbol) {
       const menu = document.getElementById('top-pick-menu');
       if (menu) menu.classList.remove('show');
 
       selectHorizon(h);
-
-      // Default smart picks by horizon
-      let symbol = 'NVDA';
-      if (h === '1d') symbol = 'NVDA';
-      else if (h === '1w') symbol = 'APP';
-      else if (h === '1m') symbol = 'NVDA';
-      else if (h === '1y') symbol = 'PLTR';
-
-      try {
-        const res = await fetch(`${API_BASE}/api/leaderboard?horizon=${encodeURIComponent(h)}&category=all`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.assets && data.assets.length > 0) {
-            if (h === '1d') {
-              const p = data.assets.find(a => a.symbol === 'NVDA' || a.symbol === 'BTC-USD' || a.symbol === 'APP');
-              symbol = p ? p.symbol : data.assets[0].symbol;
-            } else if (h === '1w') {
-              const p = data.assets.find(a => a.symbol === 'APP' || a.symbol === 'PLTR' || a.symbol === 'SOL-USD');
-              symbol = p ? p.symbol : data.assets[0].symbol;
-            } else if (h === '1m') {
-              const p = data.assets.find(a => a.symbol === 'NVDA' || a.symbol === 'BTC-USD');
-              symbol = p ? p.symbol : data.assets[0].symbol;
-            } else {
-              symbol = data.top_pick ? data.top_pick.symbol : data.assets[0].symbol;
-            }
-          }
-        }
-      } catch (e) {
-        // Fallback to default symbol
-      }
 
       document.getElementById('ticker-input').value = symbol;
       const autocompleteBox = document.getElementById('autocomplete-box');
@@ -857,8 +827,14 @@
       fetchForecastData(currentTicker, h, true);
     }
 
+    function selectTopPickHorizon(h) {
+      const defaultMap = { '1d': 'NVDA', '1w': 'APP', '1m': 'BTC-USD', '1y': 'PLTR' };
+      selectTopPickOption(h, defaultMap[h] || 'NVDA');
+    }
+
     function aiTopPickForecast() {
-      selectTopPickHorizon(currentHorizon);
+      const defaultMap = { '1d': 'NVDA', '1w': 'APP', '1m': 'BTC-USD', '1y': 'PLTR' };
+      selectTopPickOption(currentHorizon, defaultMap[currentHorizon] || currentTicker || 'NVDA');
     }
 
     // View Navigation Controller (Forecast, Best Now, Best Portfolio)
@@ -1321,7 +1297,7 @@
         const data = await response.json();
         cachedForecastData = data;
         renderResults(data);
-        hero.classList.add('compact');
+        if (hero) hero.classList.add('compact');
       } catch (err) {
         errorBanner.textContent = err.message;
         errorBanner.style.display = 'block';
