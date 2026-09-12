@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TimesFM-3 Stock Forecaster | stocks.primerllm.com</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/style.css">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
@@ -19,7 +19,7 @@
     <div class="nav-links">
       <a href="https://github.com/ozkerd/stocks" target="_blank" rel="noopener">GitHub</a>
       <a href="#about-model">Architecture</a>
-      <a href="/api/popular">Markets</a>
+      <a href="#about-model">Markets</a>
     </div>
   </header>
 
@@ -48,7 +48,7 @@
               autocomplete="off" 
               spellcheck="false"
               required
-              value="{{ default_ticker|default('NVDA') }}"
+              value="NVDA"
             />
           </div>
         </form>
@@ -66,7 +66,13 @@
 
       <!-- Action Buttons -->
       <div class="action-buttons">
-        <button type="button" class="btn-google btn-primary" onclick="triggerForecast()">Forecast with TimesFM-3</button>
+        <button type="button" class="btn-google btn-primary" onclick="triggerForecast(false)">Forecast with TimesFM-3</button>
+        <button type="button" class="btn-google btn-deep" id="btn-deep-analysis" onclick="triggerForecast(true)">
+          <svg style="width:16px;height:16px;margin-right:6px;vertical-align:-2px;fill:currentColor;" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+          </svg>
+          Deep Analysis (500M)
+        </button>
         <button type="button" class="btn-google" onclick="luckyForecast()">I'm Feeling Lucky</button>
       </div>
 
@@ -102,6 +108,7 @@
           <h1 id="res-company-title">
             <span id="res-symbol">NVDA</span>
             <span class="ticker-pill" id="res-exchange">NASDAQ</span>
+            <span class="badge" id="res-model-badge">TimesFM-3</span>
           </h1>
           <div class="company-subline" id="res-company-name">NVIDIA Corporation • USD</div>
         </div>
@@ -163,7 +170,7 @@
         </div>
       </div>
 
-      <!-- Two-Column Grid: Covariate Weights & Market Radars -->
+      <!-- Two-Column Grid: Covariates & Indicators -->
       <div class="dashboard-grid">
         
         <!-- Covariate Weights Card -->
@@ -288,47 +295,59 @@
 
   <!-- Frontend Logic -->
   <script>
+    // Configurable API root (works with Cloudflare Pages Functions or direct API)
+    const API_BASE = window.API_BASE || '';
+
     let currentHorizon = '1m';
     let currentTicker = 'NVDA';
     let forecastChart = null;
+
+    let isDeepMode = false;
 
     function selectHorizon(h) {
       currentHorizon = h;
       document.querySelectorAll('.pill-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.horizon === h);
       });
-      // If results are already showing, refresh forecast for new horizon
       if (document.getElementById('results-section').style.display !== 'none') {
-        fetchForecastData(currentTicker, currentHorizon);
+        fetchForecastData(currentTicker, currentHorizon, isDeepMode);
       }
     }
 
     function quickSelect(ticker) {
       document.getElementById('ticker-input').value = ticker;
-      triggerForecast();
+      triggerForecast(false);
     }
 
     function luckyForecast() {
       const luckyTickers = ['NVDA', 'AAPL', 'MSFT', 'AMZN', 'GOOGL', 'TSLA', 'META', 'AMD', 'PLTR'];
       const randomTicker = luckyTickers[Math.floor(Math.random() * luckyTickers.length)];
       document.getElementById('ticker-input').value = randomTicker;
-      triggerForecast();
+      triggerForecast(false);
     }
 
     function handleSearch(e) {
       e.preventDefault();
-      triggerForecast();
+      triggerForecast(false);
     }
 
-    function triggerForecast() {
+    function triggerForecast(deep = false) {
       const input = document.getElementById('ticker-input').value.trim().toUpperCase();
       if (!input) return;
       currentTicker = input;
-      fetchForecastData(currentTicker, currentHorizon);
+      isDeepMode = deep;
+
+      const deepBtn = document.getElementById('btn-deep-analysis');
+      if (deepBtn) {
+        deepBtn.classList.toggle('active', isDeepMode);
+      }
+
+      fetchForecastData(currentTicker, currentHorizon, isDeepMode);
     }
 
-    async function fetchForecastData(ticker, horizon) {
+    async function fetchForecastData(ticker, horizon, deep = false) {
       const loading = document.getElementById('loading-container');
+      const loadingText = document.getElementById('loading-text');
       const results = document.getElementById('results-section');
       const errorBanner = document.getElementById('error-banner');
       const hero = document.getElementById('hero-section');
@@ -337,11 +356,18 @@
       loading.style.display = 'block';
       results.style.display = 'none';
 
+      if (deep) {
+        loadingText.textContent = "Executing TimesFM-3 500M Deep Neural Network inference with 50 attention layers...";
+      } else {
+        loadingText.textContent = "Ingesting market covariates and running TimesFM-3 inference...";
+      }
+
       try {
-        const response = await fetch(`/api/forecast?ticker=${encodeURIComponent(ticker)}&horizon=${encodeURIComponent(horizon)}`);
+        const modeParam = deep ? "&mode=deep" : "";
+        const response = await fetch(`${API_BASE}/api/forecast?ticker=${encodeURIComponent(ticker)}&horizon=${encodeURIComponent(horizon)}${modeParam}`);
         if (!response.ok) {
-          const errData = await response.json();
-          throw new Error(errData.detail || 'Failed to generate forecast.');
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.detail || `Error (${response.status}): Failed to generate forecast.`);
         }
 
         const data = await response.json();
@@ -361,8 +387,19 @@
 
       // Header
       document.getElementById('res-symbol').textContent = data.symbol;
-      document.getElementById('res-exchange').textContent = data.info.exchange || 'US';
-      document.getElementById('res-company-name').textContent = `${data.info.shortName || data.symbol} • ${data.info.currency || 'USD'}`;
+      document.getElementById('res-exchange').textContent = data.info?.exchange || 'US';
+      document.getElementById('res-company-name').textContent = `${data.info?.shortName || data.symbol} • ${data.info?.currency || 'USD'}`;
+      
+      const modelBadge = document.getElementById('res-model-badge');
+      if (modelBadge) {
+        if (data.model_metadata?.deep_mode) {
+          modelBadge.className = 'badge badge-500m';
+          modelBadge.textContent = 'TimesFM-3 500M Deep Neural';
+        } else {
+          modelBadge.className = 'badge';
+          modelBadge.textContent = 'TimesFM-3 Fast Edge';
+        }
+      }
       
       const currP = data.current_price;
       const chg = data.indicators.price_change;
@@ -386,7 +423,7 @@
       // Covariate Weights
       const covContainer = document.getElementById('covariate-list-container');
       covContainer.innerHTML = '';
-      data.covariate_weights.slice(0, 8).forEach(w => {
+      (data.covariate_weights || []).slice(0, 8).forEach(w => {
         const item = document.createElement('div');
         item.className = 'covariate-item';
         const barClass = w.is_positive ? 'cov-bar-fill' : 'cov-bar-fill negative';
@@ -439,10 +476,8 @@
       const labels = hist.map(h => h.date).concat(fc.map(f => f.date));
       const histLength = hist.length;
 
-      // Historical prices array padded with nulls for forecast period
       const historicalSeries = hist.map(h => h.close).concat(fc.map(() => null));
 
-      // Forecast series: last historical point connects to forecast points
       const p10Series = new Array(histLength - 1).fill(null);
       p10Series.push(hist[histLength - 1].close);
       fc.forEach(f => p10Series.push(f.p10));
@@ -495,7 +530,7 @@
               data: p90Series,
               borderColor: 'transparent',
               pointRadius: 0,
-              fill: '+4', // Fills to P10
+              fill: '+4',
               backgroundColor: 'rgba(66, 133, 244, 0.12)',
               tension: 0.2
             },
@@ -504,7 +539,7 @@
               data: p75Series,
               borderColor: 'transparent',
               pointRadius: 0,
-              fill: '+2', // Fills to P25
+              fill: '+2',
               backgroundColor: 'rgba(66, 133, 244, 0.22)',
               tension: 0.2
             },
@@ -534,9 +569,7 @@
             intersect: false,
           },
           plugins: {
-            legend: {
-              display: false
-            },
+            legend: { display: false },
             tooltip: {
               backgroundColor: 'rgba(32, 33, 36, 0.95)',
               titleColor: '#ffffff',
@@ -554,25 +587,15 @@
           },
           scales: {
             x: {
-              grid: {
-                display: false
-              },
-              ticks: {
-                maxTicksLimit: 10,
-                color: '#70757a',
-                font: { size: 11 }
-              }
+              grid: { display: false },
+              ticks: { maxTicksLimit: 10, color: '#70757a', font: { size: 11 } }
             },
             y: {
-              grid: {
-                color: '#f1f3f4'
-              },
+              grid: { color: '#f1f3f4' },
               ticks: {
                 color: '#70757a',
                 font: { size: 11 },
-                callback: function(value) {
-                  return '$' + value;
-                }
+                callback: function(value) { return '$' + value; }
               }
             }
           }
@@ -580,7 +603,6 @@
       });
     }
 
-    // Auto-load on first page view
     window.addEventListener('DOMContentLoaded', () => {
       triggerForecast();
     });

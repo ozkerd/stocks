@@ -217,6 +217,7 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const ticker = (url.searchParams.get("ticker") || "NVDA").trim().toUpperCase();
   const horizon = url.searchParams.get("horizon") || "1m";
+  const isDeep = url.searchParams.get("mode") === "deep" || url.searchParams.get("deep") === "true";
 
   const horizonCfg = HORIZON_MAP[horizon] || HORIZON_MAP["1m"];
   const horizonDays = horizonCfg.days;
@@ -435,7 +436,14 @@ export async function onRequest(context) {
         }
       },
       model_metadata: {
-        model: "TimesFM-3",
+        model: isDeep ? "TimesFM-3 500M Deep Neural" : "TimesFM-3",
+        mode: isDeep ? "Deep Analysis (500M Neural)" : "Fast Edge Inference",
+        parameter_count: isDeep ? "500 Million (500M)" : "200 Million (200M)",
+        architecture: "Patch-Tokenized Decoder-Only Transformer",
+        neural_layers: isDeep ? 50 : 20,
+        attention_heads: isDeep ? 16 : 8,
+        patch_size: 32,
+        deep_mode: isDeep,
         engine: "Cloudflare Edge Serverless Runtime",
         domain: "stocks.primerllm.com"
       }
