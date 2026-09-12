@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TimesFM-3 Stock & Crypto Forecaster | stocks.primerllm.com</title>
+  <title>AI Stock & Crypto Price Forecaster | stocks.primerllm.com</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=20260912-7">
+  <link rel="stylesheet" href="/style.css?v=20260912-8">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
@@ -17,7 +17,7 @@
   <header class="top-nav">
     <div class="brand-domain">
       <span>stocks.primerllm.com</span>
-      <span class="badge">TimesFM-3 Foundation Model</span>
+      <span class="badge">AI Market Forecasting Engine</span>
       <span class="badge" style="background:#e8f0fe; color:#1a73e8; border:1px solid #aecbfa;">Stocks & Crypto</span>
     </div>
     <div class="nav-links">
@@ -42,9 +42,9 @@
     <div class="app-view active" id="view-forecast">
       <!-- Search & Control Card -->
       <section class="search-card">
-      <div class="search-title">Google TimesFM-3 Zero-Shot Asset Forecaster</div>
+      <div class="search-title">AI Stock & Crypto Price Forecaster</div>
       <div class="search-subtitle">
-        Self-supervised Transformer predicting multi-quantile trajectories for US Stocks, ETFs, and Major Cryptocurrencies without fine-tuning.
+        Predict future price targets, multi-scenario probability ranges, and actionable trade setups for 100+ US stocks, ETFs, and major cryptocurrencies.
       </div>
 
       <!-- Search Input Container with Autocomplete -->
@@ -78,12 +78,12 @@
 
       <!-- Action Buttons -->
       <div class="action-buttons">
-        <button type="button" class="btn-google btn-primary" onclick="triggerForecast(false)">Forecast with TimesFM-3</button>
+        <button type="button" class="btn-google btn-primary" onclick="triggerForecast(false)">Forecast Price Targets</button>
         <button type="button" class="btn-google btn-deep" id="btn-deep-analysis" onclick="triggerForecast(true)">
           <svg style="width:16px;height:16px;margin-right:6px;vertical-align:-2px;fill:currentColor;" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
           </svg>
-          Run 500M Deep Analysis
+          Deep AI Analysis
         </button>
         <div class="dropdown-top-pick" id="dropdown-top-pick">
           <button type="button" class="btn-google btn-top-pick" onclick="toggleTopPickDropdown(event)">
@@ -144,7 +144,7 @@
     <!-- Loading State -->
     <div class="loading-container" id="loading-container">
       <div class="spinner"></div>
-      <div class="loading-text" id="loading-text">Ingesting market covariates and running TimesFM-3 inference...</div>
+      <div class="loading-text" id="loading-text">Analyzing market indicators and calculating AI price target projections...</div>
     </div>
 
     <!-- Error Banner -->
@@ -1305,9 +1305,9 @@
       results.style.display = 'none';
 
       if (deep) {
-        loadingText.textContent = "Executing TimesFM-3 500M Deep Neural Network with 50 attention layers & macro tensor covariates...";
+        loadingText.textContent = "Analyzing historical market patterns and calculating deep multi-scenario trajectories...";
       } else {
-        loadingText.textContent = "Ingesting market covariates and running TimesFM-3 zero-shot inference...";
+        loadingText.textContent = "Analyzing market indicators and calculating AI price target projections...";
       }
 
       try {
