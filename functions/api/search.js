@@ -20,19 +20,39 @@ const POPULAR_ASSETS = [
   { symbol: "BRK-B", name: "Berkshire Hathaway Inc.", type: "Stock", exchange: "NYSE" },
   { symbol: "JPM", name: "JPMorgan Chase & Co.", type: "Stock", exchange: "NYSE" },
 
-  // Crypto Assets
+  { symbol: "ARM", name: "Arm Holdings plc", type: "Stock", exchange: "NASDAQ" },
+  { symbol: "SMCI", name: "Super Micro Computer Inc.", type: "Stock", exchange: "NASDAQ" },
+  { symbol: "ASTS", name: "AST SpaceMobile Inc.", type: "Stock", exchange: "NASDAQ" },
+  { symbol: "RKLB", name: "Rocket Lab USA Inc.", type: "Stock", exchange: "NASDAQ" },
+  { symbol: "IONQ", name: "IonQ Inc. (Quantum)", type: "Stock", exchange: "NYSE" },
+  { symbol: "MSTR", name: "MicroStrategy Inc.", type: "Stock", exchange: "NASDAQ" },
+
+  // Crypto Assets & Trending Coins
   { symbol: "BTC-USD", name: "Bitcoin USD", type: "Crypto", exchange: "Crypto", aliases: ["BTC", "BITCOIN"] },
   { symbol: "ETH-USD", name: "Ethereum USD", type: "Crypto", exchange: "Crypto", aliases: ["ETH", "ETHEREUM"] },
   { symbol: "SOL-USD", name: "Solana USD", type: "Crypto", exchange: "Crypto", aliases: ["SOL", "SOLANA"] },
+  { symbol: "HYPE32196-USD", name: "Hyperliquid USD (HYPE)", type: "Crypto", exchange: "Crypto", aliases: ["HYPE", "HYPERLIQUID"] },
+  { symbol: "LIT6833-USD", name: "Litentry USD (LIT)", type: "Crypto", exchange: "Crypto", aliases: ["LIT", "LITENTRY"] },
+  { symbol: "SUI20947-USD", name: "Sui Network USD (SUI)", type: "Crypto", exchange: "Crypto", aliases: ["SUI"] },
+  { symbol: "SEI-USD", name: "Sei Network USD (SEI)", type: "Crypto", exchange: "Crypto", aliases: ["SEI"] },
+  { symbol: "APT21794-USD", name: "Aptos USD (APT)", type: "Crypto", exchange: "Crypto", aliases: ["APT", "APTOS"] },
+  { symbol: "TIA-USD", name: "Celestia USD (TIA)", type: "Crypto", exchange: "Crypto", aliases: ["TIA", "CELESTIA"] },
+  { symbol: "INJ-USD", name: "Injective USD (INJ)", type: "Crypto", exchange: "Crypto", aliases: ["INJ", "INJECTIVE"] },
+  { symbol: "JUP-USD", name: "Jupiter DEX USD (JUP)", type: "Crypto", exchange: "Crypto", aliases: ["JUP", "JUPITER"] },
+  { symbol: "ONDO-USD", name: "Ondo Finance RWA USD (ONDO)", type: "Crypto", exchange: "Crypto", aliases: ["ONDO"] },
+  { symbol: "KAS-USD", name: "Kaspa USD (KAS)", type: "Crypto", exchange: "Crypto", aliases: ["KAS", "KASPA"] },
+  { symbol: "NEAR-USD", name: "NEAR Protocol USD", type: "Crypto", exchange: "Crypto", aliases: ["NEAR"] },
+  { symbol: "FET-USD", name: "Artificial Superintelligence Alliance (FET)", type: "Crypto", exchange: "Crypto", aliases: ["FET", "ASI"] },
+  { symbol: "TAO-USD", name: "Bittensor USD (TAO)", type: "Crypto", exchange: "Crypto", aliases: ["TAO", "BITTENSOR"] },
+  { symbol: "RENDER-USD", name: "Render Network USD (RENDER)", type: "Crypto", exchange: "Crypto", aliases: ["RENDER", "RNDR"] },
+  { symbol: "ENA-USD", name: "Ethena USD (ENA)", type: "Crypto", exchange: "Crypto", aliases: ["ENA", "ETHENA"] },
+  { symbol: "AAVE-USD", name: "Aave USD", type: "Crypto", exchange: "Crypto", aliases: ["AAVE"] },
+  { symbol: "LINK-USD", name: "Chainlink USD", type: "Crypto", exchange: "Crypto", aliases: ["LINK", "CHAINLINK"] },
+  { symbol: "AVAX-USD", name: "Avalanche USD", type: "Crypto", exchange: "Crypto", aliases: ["AVAX", "AVALANCHE"] },
   { symbol: "XRP-USD", name: "XRP Ripple USD", type: "Crypto", exchange: "Crypto", aliases: ["XRP", "RIPPLE"] },
   { symbol: "DOGE-USD", name: "Dogecoin USD", type: "Crypto", exchange: "Crypto", aliases: ["DOGE", "DOGECOIN"] },
   { symbol: "ADA-USD", name: "Cardano USD", type: "Crypto", exchange: "Crypto", aliases: ["ADA", "CARDANO"] },
-  { symbol: "AVAX-USD", name: "Avalanche USD", type: "Crypto", exchange: "Crypto", aliases: ["AVAX", "AVALANCHE"] },
-  { symbol: "BNB-USD", name: "BNB Binance USD", type: "Crypto", exchange: "Crypto", aliases: ["BNB", "BINANCE"] },
-  { symbol: "HYPE32196-USD", name: "Hyperliquid USD (HYPE)", type: "Crypto", exchange: "Crypto", aliases: ["HYPE", "HYPERLIQUID"] },
-  { symbol: "LIT6833-USD", name: "Litentry USD (LIT)", type: "Crypto", exchange: "Crypto", aliases: ["LIT", "LITENTRY"] },
-  { symbol: "TAO-USD", name: "Bittensor USD (TAO)", type: "Crypto", exchange: "Crypto", aliases: ["TAO", "BITTENSOR"] },
-  { symbol: "AAVE-USD", name: "Aave USD", type: "Crypto", exchange: "Crypto", aliases: ["AAVE"] }
+  { symbol: "BNB-USD", name: "BNB Binance USD", type: "Crypto", exchange: "Crypto", aliases: ["BNB", "BINANCE"] }
 ];
 
 export async function onRequest(context) {

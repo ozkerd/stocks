@@ -30,10 +30,46 @@ const CRYPTO_ALIASES = {
   "LIT": "LIT6833-USD",
   "LIT-USD": "LIT6833-USD",
   "LITENTRY": "LIT6833-USD",
+  "SUI": "SUI20947-USD",
+  "SUI-USD": "SUI20947-USD",
+  "SEI": "SEI-USD",
+  "SEI-USD": "SEI-USD",
+  "APT": "APT21794-USD",
+  "APTOS": "APT21794-USD",
+  "APT-USD": "APT21794-USD",
+  "TIA": "TIA-USD",
+  "CELESTIA": "TIA-USD",
+  "TIA-USD": "TIA-USD",
+  "INJ": "INJ-USD",
+  "INJECTIVE": "INJ-USD",
+  "INJ-USD": "INJ-USD",
+  "JUP": "JUP-USD",
+  "JUPITER": "JUP-USD",
+  "JUP-USD": "JUP-USD",
+  "ONDO": "ONDO-USD",
+  "ONDO-USD": "ONDO-USD",
+  "KAS": "KAS-USD",
+  "KASPA": "KAS-USD",
+  "KAS-USD": "KAS-USD",
+  "NEAR": "NEAR-USD",
+  "NEAR-USD": "NEAR-USD",
+  "FET": "FET-USD",
+  "ASI": "FET-USD",
+  "FET-USD": "FET-USD",
+  "PEPE": "PEPE24478-USD",
+  "PEPE-USD": "PEPE24478-USD",
   "TAO": "TAO-USD",
+  "TAO-USD": "TAO-USD",
   "RENDER": "RENDER-USD",
+  "RNDR": "RENDER-USD",
+  "RENDER-USD": "RENDER-USD",
   "AAVE": "AAVE-USD",
-  "ENA": "ENA-USD"
+  "AAVE-USD": "AAVE-USD",
+  "ENA": "ENA-USD",
+  "ENA-USD": "ENA-USD",
+  "LINK": "LINK-USD",
+  "CHAINLINK": "LINK-USD",
+  "LINK-USD": "LINK-USD"
 };
 
 const COMMON_COMPANY_NAMES = {
@@ -52,7 +88,17 @@ const COMMON_COMPANY_NAMES = {
   "PALANTIR": "PLTR",
   "COINBASE": "COIN",
   "AMD": "AMD",
-  "BERKSHIRE": "BRK-B"
+  "BERKSHIRE": "BRK-B",
+  "SUPERMICRO": "SMCI",
+  "SMCI": "SMCI",
+  "ASTS": "ASTS",
+  "SPACEMOBILE": "ASTS",
+  "RKLB": "RKLB",
+  "ROCKETLAB": "RKLB",
+  "IONQ": "IONQ",
+  "MSTR": "MSTR",
+  "MICROSTRATEGY": "MSTR",
+  "ARM": "ARM"
 };
 
 const MACRO_TICKERS = {
@@ -100,7 +146,7 @@ async function resolveTicker(input) {
   return clean;
 }
 
-async function fetchYahooChart(ticker, range = "2y") {
+async function fetchYahooChart(ticker, range = "5y") {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=${range}&interval=1d&includePrePost=false`;
   const res = await fetch(url, {
     headers: {
@@ -168,6 +214,23 @@ const FALLBACK_PRICES = {
   "LIT6833-USD": { price: 0.118, name: "Litentry USD", type: "CRYPTOCURRENCY" },
   "LIT-USD": { price: 0.118, name: "Litentry USD", type: "CRYPTOCURRENCY" },
   "LIT": { price: 0.118, name: "Litentry USD", type: "CRYPTOCURRENCY" },
+  "SUI20947-USD": { price: 2.85, name: "Sui Network USD", type: "CRYPTOCURRENCY" },
+  "SEI-USD": { price: 0.42, name: "Sei Network USD", type: "CRYPTOCURRENCY" },
+  "APT21794-USD": { price: 8.60, name: "Aptos USD", type: "CRYPTOCURRENCY" },
+  "TIA-USD": { price: 5.10, name: "Celestia USD", type: "CRYPTOCURRENCY" },
+  "INJ-USD": { price: 19.40, name: "Injective USD", type: "CRYPTOCURRENCY" },
+  "JUP-USD": { price: 0.85, name: "Jupiter DEX USD", type: "CRYPTOCURRENCY" },
+  "ONDO-USD": { price: 0.98, name: "Ondo Finance USD", type: "CRYPTOCURRENCY" },
+  "KAS-USD": { price: 0.14, name: "Kaspa USD", type: "CRYPTOCURRENCY" },
+  "NEAR-USD": { price: 5.40, name: "NEAR Protocol USD", type: "CRYPTOCURRENCY" },
+  "FET-USD": { price: 1.35, name: "Artificial Superintelligence Alliance USD", type: "CRYPTOCURRENCY" },
+  "PEPE24478-USD": { price: 0.0000095, name: "Pepe USD", type: "CRYPTOCURRENCY" },
+  "TAO-USD": { price: 485.00, name: "Bittensor USD", type: "CRYPTOCURRENCY" },
+  "RENDER-USD": { price: 5.80, name: "Render Network USD", type: "CRYPTOCURRENCY" },
+  "ENA-USD": { price: 0.48, name: "Ethena USD", type: "CRYPTOCURRENCY" },
+  "AAVE-USD": { price: 195.00, name: "Aave USD", type: "CRYPTOCURRENCY" },
+  "LINK-USD": { price: 15.20, name: "Chainlink USD", type: "CRYPTOCURRENCY" },
+  "AVAX-USD": { price: 28.50, name: "Avalanche USD", type: "CRYPTOCURRENCY" },
   "APP": { price: 323.96, name: "AppLovin Corp", type: "EQUITY" },
   "NVDA": { price: 218.29, name: "NVIDIA Corp", type: "EQUITY" },
   "BTC-USD": { price: 77453.11, name: "Bitcoin USD", type: "CRYPTOCURRENCY" },
@@ -176,7 +239,13 @@ const FALLBACK_PRICES = {
   "AAPL": { price: 332.27, name: "Apple Inc.", type: "EQUITY" },
   "MSFT": { price: 495.63, name: "Microsoft Corp", type: "EQUITY" },
   "TSLA": { price: 365.44, name: "Tesla Inc.", type: "EQUITY" },
-  "PLTR": { price: 167.23, name: "Palantir Technologies", type: "EQUITY" }
+  "PLTR": { price: 167.23, name: "Palantir Technologies", type: "EQUITY" },
+  "SMCI": { price: 42.50, name: "Super Micro Computer Inc.", type: "EQUITY" },
+  "ASTS": { price: 24.80, name: "AST SpaceMobile Inc.", type: "EQUITY" },
+  "RKLB": { price: 18.60, name: "Rocket Lab USA Inc.", type: "EQUITY" },
+  "IONQ": { price: 28.40, name: "IonQ Inc.", type: "EQUITY" },
+  "MSTR": { price: 130.97, name: "MicroStrategy Inc.", type: "EQUITY" },
+  "ARM": { price: 264.79, name: "Arm Holdings plc", type: "EQUITY" }
 };
 
 function generateFallbackAsset(symbol) {
@@ -186,17 +255,20 @@ function generateFallbackAsset(symbol) {
   const now = Math.floor(Date.now() / 1000);
   const daySec = 86400;
 
-  for (let i = 90; i >= 0; i--) {
+  // Generate up to 1260 trading days (~5 years) of realistic historical context
+  for (let i = 1260; i >= 0; i--) {
     const ts = now - i * daySec;
     const dateStr = new Date(ts * 1000).toISOString().split("T")[0];
-    const drift = Math.sin(i / 10.0) * (base * 0.04) + (Math.random() - 0.48) * (base * 0.02);
-    const close = Math.max(0.01, Number((base + drift).toFixed(2)));
+    const trend = (1260 - i) / 1260.0 * 0.4;
+    const cycle = Math.sin(i / 25.0) * (base * 0.08) + Math.cos(i / 70.0) * (base * 0.12);
+    const noise = (Math.random() - 0.48) * (base * 0.02);
+    const close = Math.max(0.000001, Number((base * (0.7 + trend) + cycle + noise).toFixed(symbol.includes("PEPE") ? 7 : 2)));
     cleaned.push({
       date: dateStr,
       timestamp: ts,
       close,
-      high: Number((close * 1.015).toFixed(2)),
-      low: Number((close * 0.985).toFixed(2)),
+      high: Number((close * 1.018).toFixed(symbol.includes("PEPE") ? 7 : 2)),
+      low: Number((close * 0.982).toFixed(symbol.includes("PEPE") ? 7 : 2)),
       volume: Math.floor(1000000 + Math.random() * 500000)
     });
   }
@@ -636,13 +708,11 @@ export async function onRequest(context) {
       }
     };
 
-    // Historical Chart Data (Last 90 trading days)
-    const histSlice = records.slice(-90);
-    const historicalChartData = histSlice.map((r, idx) => {
-      const origIdx = n - histSlice.length + idx;
+    // Historical Chart Data (Full available history up to 5 years)
+    const historicalChartData = records.map((r, origIdx) => {
       return {
         date: r.date,
-        close: Number(r.close.toFixed(2)),
+        close: Number(r.close.toFixed(symbol.includes("PEPE") ? 7 : 2)),
         sma_50: Number(sma50[origIdx]?.toFixed(2) || r.close),
         sma_200: Number(sma200[origIdx]?.toFixed(2) || r.close),
         volume: r.volume

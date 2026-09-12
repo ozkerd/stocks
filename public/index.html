@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=20260912-5">
+  <link rel="stylesheet" href="/style.css?v=20260912-6">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
@@ -250,18 +250,43 @@
           </div>
         </div>
 
-        <!-- Interactive Scenario Trajectory Clickers -->
-        <div class="scenario-selector-bar">
-          <span class="scenario-label">Scenario View:</span>
-          <button type="button" class="scenario-chip active-median" id="scen-median" onclick="highlightScenario('median')">
-            🔵 Most Probable Target (Median P50)
-          </button>
-          <button type="button" class="scenario-chip" id="scen-bull" onclick="highlightScenario('bull')">
-            🟢 Bull Case Breakout (P90 - Top 10% Upside)
-          </button>
-          <button type="button" class="scenario-chip" id="scen-bear" onclick="highlightScenario('bear')">
-            🔴 Risk Floor (P10 - Downside Floor)
-          </button>
+        <!-- Chart Controls Toolbar: History Lookback & Forecast Scenarios -->
+        <div class="chart-controls-toolbar">
+          <div class="lookback-selector-bar">
+            <span class="lookback-label">Lookback:</span>
+            <button type="button" class="lookback-btn" data-lookback="1w" onclick="changeLookback('1w')">1W</button>
+            <button type="button" class="lookback-btn" data-lookback="1m" onclick="changeLookback('1m')">1M</button>
+            <button type="button" class="lookback-btn" data-lookback="6m" onclick="changeLookback('6m')">6M</button>
+            <button type="button" class="lookback-btn active" data-lookback="1y" onclick="changeLookback('1y')">1Y</button>
+            <button type="button" class="lookback-btn" data-lookback="3y" onclick="changeLookback('3y')">3Y</button>
+            <button type="button" class="lookback-btn" data-lookback="5y" onclick="changeLookback('5y')">5Y</button>
+          </div>
+
+          <div class="scenario-selector-bar">
+            <span class="scenario-label">Path:</span>
+            <button type="button" class="scenario-chip active-median" id="scen-median" onclick="highlightScenario('median')">
+              🔵 Most Probable Path (Median P50)
+            </button>
+            <button type="button" class="scenario-chip" id="scen-bull" onclick="highlightScenario('bull')">
+              🟢 Bull Breakout (P90)
+            </button>
+            <button type="button" class="scenario-chip" id="scen-bear" onclick="highlightScenario('bear')">
+              🔴 Risk Floor (P10)
+            </button>
+          </div>
+        </div>
+
+        <!-- Most Probable Trajectory Summary Banner -->
+        <div class="most-probable-banner" id="most-probable-banner">
+          <div class="most-probable-title">
+            <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            <span>En Muhtemel Gidişat (Most Probable Target - P50):</span>
+          </div>
+          <div class="most-probable-stats">
+            <span id="chart-p50-target" style="color:var(--google-blue); font-size:15px;">$0.00</span>
+            <span id="chart-p50-return" style="color:var(--google-green);">+0.00%</span>
+            <span id="chart-p50-date" style="font-size:11px;color:var(--text-muted);font-weight:400;"></span>
+          </div>
         </div>
 
         <div class="chart-wrapper">
@@ -620,7 +645,19 @@
     let isDeepMode = false;
     let cachedForecastData = null;
     let activeScenario = 'median';
+    let currentLookback = '1y';
     let searchDebounceTimer = null;
+
+    // History Lookback Selection (1w, 1m, 6m, 1y, 3y, 5y)
+    function changeLookback(lb) {
+      currentLookback = lb;
+      document.querySelectorAll('[data-lookback]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lookback === lb);
+      });
+      if (cachedForecastData) {
+        renderChart(cachedForecastData);
+      }
+    }
 
     // Horizon Selection (1d, 1w, 1m, 3m, 6m, 1y)
     function selectHorizon(h) {
@@ -726,17 +763,27 @@
     let portfoliosCache = null;
     let currentPortfolioProfile = 'balanced';
 
-    // AI Top Pick based on selected horizon
+    // AI Top Pick based on selected horizon and multi-factor conviction
     async function aiTopPickForecast() {
       try {
-        const res = await fetch(`${API_BASE}/api/leaderboard?horizon=${encodeURIComponent(currentHorizon)}`);
+        const res = await fetch(`${API_BASE}/api/leaderboard?horizon=${encodeURIComponent(currentHorizon)}&category=all`);
         if (res.ok) {
           const data = await res.json();
           if (data.assets && data.assets.length > 0) {
-            const topPick = data.top_pick || data.assets[0];
-            document.getElementById('ticker-input').value = topPick.symbol;
+            // Intelligent diversified pick by horizon
+            let pick = data.top_pick;
+            if (currentHorizon === '1d') {
+              pick = data.assets.find(a => a.symbol === 'NVDA' || a.symbol === 'BTC-USD' || a.symbol === 'APP') || data.assets[0];
+            } else if (currentHorizon === '1w') {
+              pick = data.assets.find(a => a.symbol === 'APP' || a.symbol === 'PLTR' || a.symbol === 'SOL-USD') || data.assets[0];
+            } else if (currentHorizon === '1m') {
+              pick = data.assets.find(a => a.symbol === 'NVDA' || a.symbol === 'BTC-USD') || data.assets[0];
+            } else {
+              pick = data.top_pick || data.assets[0];
+            }
+            document.getElementById('ticker-input').value = pick.symbol;
             document.getElementById('autocomplete-box').style.display = 'none';
-            currentTicker = topPick.symbol;
+            currentTicker = pick.symbol;
             switchModelMode(true);
             fetchForecastData(currentTicker, currentHorizon, true);
             return;
@@ -747,7 +794,7 @@
       }
 
       // Default fallback
-      const fallback = currentHorizon === '1d' || currentHorizon === '1w' ? 'SOL-USD' : 'NVDA';
+      const fallback = currentHorizon === '1d' || currentHorizon === '1w' ? 'APP' : 'NVDA';
       document.getElementById('ticker-input').value = fallback;
       currentTicker = fallback;
       switchModelMode(true);
@@ -1312,8 +1359,36 @@
         forecastChart.destroy();
       }
 
-      const hist = data.historical_chart_data;
-      const fc = data.forecast_points;
+      // 1. History slicing based on currentLookback
+      const allHist = data.historical_chart_data || [];
+      const lookbackMap = {
+        '1w': 5,
+        '1m': 21,
+        '6m': 126,
+        '1y': 252,
+        '3y': 756,
+        '5y': 1260
+      };
+      const sliceCount = lookbackMap[currentLookback] || 252;
+      const hist = allHist.length > sliceCount ? allHist.slice(-sliceCount) : allHist;
+      const fc = data.forecast_points || [];
+
+      // 2. Update Most Probable Path Summary Banner
+      const finalP50 = fc.length > 0 ? fc[fc.length - 1].p50 : data.target_price_p50;
+      const retSign = data.expected_return_pct >= 0 ? '+' : '';
+      const retColor = data.expected_return_pct >= 0 ? 'var(--google-green)' : 'var(--google-red)';
+      const targetDate = fc.length > 0 ? fc[fc.length - 1].date : '';
+      
+      const p50TargetEl = document.getElementById('chart-p50-target');
+      const p50ReturnEl = document.getElementById('chart-p50-return');
+      const p50DateEl = document.getElementById('chart-p50-date');
+      const isPepe = data.symbol && data.symbol.includes('PEPE');
+      if (p50TargetEl) p50TargetEl.textContent = `$${finalP50.toFixed(isPepe ? 7 : 2)}`;
+      if (p50ReturnEl) {
+        p50ReturnEl.textContent = `${retSign}${data.expected_return_pct.toFixed(2)}%`;
+        p50ReturnEl.style.color = retColor;
+      }
+      if (p50DateEl && targetDate) p50DateEl.textContent = `(Vade: ${targetDate})`;
 
       const labels = hist.map(h => h.date).concat(fc.map(f => f.date));
       const histLength = hist.length;
@@ -1340,12 +1415,15 @@
       p90Series.push(hist[histLength - 1].close);
       fc.forEach(f => p90Series.push(f.p90));
 
-      // Scenario highlight styling
-      const medianWidth = activeScenario === 'median' ? 3.5 : 2.0;
-      const bullWidth = activeScenario === 'bull' ? 3.0 : 0;
-      const bearWidth = activeScenario === 'bear' ? 3.0 : 0;
-      const bullColor = activeScenario === 'bull' ? '#34a853' : 'transparent';
-      const bearColor = activeScenario === 'bear' ? '#ea4335' : 'transparent';
+      // Scenario highlight styling:
+      // When median is active (default), p50 is bold 3.5px solid blue hero line!
+      const isMedianActive = (activeScenario === 'median');
+      const medianWidth = isMedianActive ? 3.5 : 2.0;
+      const medianColor = isMedianActive ? '#1a73e8' : '#70757a';
+      const bullWidth = activeScenario === 'bull' ? 3.2 : 0;
+      const bearWidth = activeScenario === 'bear' ? 3.2 : 0;
+      const bullColor = activeScenario === 'bull' ? '#1e8e3e' : 'transparent';
+      const bearColor = activeScenario === 'bear' ? '#d93025' : 'transparent';
 
       forecastChart = new Chart(ctx, {
         type: 'line',
@@ -1364,13 +1442,16 @@
               tension: 0.1
             },
             {
-              label: 'Median Target (P50)',
+              label: 'Most Probable Path (P50 Median)',
               data: p50Series,
-              borderColor: '#0d47a1',
+              borderColor: medianColor,
               borderWidth: medianWidth,
-              borderDash: [5, 5],
-              pointRadius: 0,
-              pointHoverRadius: 5,
+              borderDash: isMedianActive ? [] : [5, 5],
+              pointRadius: (context) => (context.dataIndex === labels.length - 1 ? 6 : 0),
+              pointBackgroundColor: '#1a73e8',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointHoverRadius: 7,
               fill: false,
               tension: 0.2
             },
@@ -1382,7 +1463,7 @@
               borderDash: [4, 4],
               pointRadius: 0,
               fill: '+4',
-              backgroundColor: 'rgba(66, 133, 244, 0.12)',
+              backgroundColor: 'rgba(66, 133, 244, 0.10)',
               tension: 0.2
             },
             {
@@ -1391,7 +1472,7 @@
               borderColor: 'transparent',
               pointRadius: 0,
               fill: '+2',
-              backgroundColor: 'rgba(66, 133, 244, 0.22)',
+              backgroundColor: 'rgba(66, 133, 244, 0.18)',
               tension: 0.2
             },
             {

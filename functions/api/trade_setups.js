@@ -383,6 +383,92 @@ const BASE_SETUPS = [
       action: "ACCUMULATE",
       thesis: "TimesFM long-horizon neural forecast projects multi-quarter breakout past $450."
     }
+  },
+
+  // 10. Sui Network (SUI)
+  {
+    symbol: "SUI20947-USD",
+    display_symbol: "SUI",
+    name: "Sui Network USD",
+    type: "Crypto",
+    exchange: "Crypto",
+    current_price: 3.47,
+    daily: {
+      pattern: "DeFi TVL Inflow & High-Throughput Momentum",
+      entry_low: 3.35, entry_high: 3.45,
+      tp1: 3.75, tp1_pct: "+8.1%",
+      tp2: 3.98, tp2_pct: "+14.7%",
+      stop_loss: 3.20, stop_pct: "-7.8%",
+      rr_ratio: "1.9 : 1",
+      conviction: 91,
+      action: "DAY BUY",
+      thesis: "Rapid daily active address growth and institutional DEX liquidity depth."
+    },
+    weekly: {
+      pattern: "Bullish Pennant Breakout",
+      entry_low: 3.25, entry_high: 3.40,
+      tp1: 4.20, tp1_pct: "+21.0%",
+      tp2: 4.80, tp2_pct: "+38.3%",
+      stop_loss: 2.95, stop_pct: "-15.0%",
+      rr_ratio: "2.6 : 1",
+      conviction: 92,
+      action: "SWING ACCUMULATE",
+      thesis: "TimesFM P90 projection models liquidity rotation into Move-based L1 ecosystems."
+    },
+    monthly: {
+      pattern: "Macro Layer-1 Valuation Re-Rating",
+      entry_low: 3.00, entry_high: 3.35,
+      tp1: 5.80, tp1_pct: "+67.1%",
+      tp2: 7.20, tp2_pct: "+107.5%",
+      stop_loss: 2.45, stop_pct: "-29.4%",
+      rr_ratio: "3.7 : 1",
+      conviction: 93,
+      action: "STRONG BUY",
+      thesis: "Ecosystem expansion compounding fee revenue with major institutional bridging."
+    }
+  },
+
+  // 11. AST SpaceMobile (ASTS)
+  {
+    symbol: "ASTS",
+    display_symbol: "ASTS",
+    name: "AST SpaceMobile Inc.",
+    type: "Stock",
+    exchange: "NASDAQ",
+    current_price: 24.80,
+    daily: {
+      pattern: "Satellite Launch Catalyst & Short Squeeze Pressure",
+      entry_low: 24.00, entry_high: 24.75,
+      tp1: 27.20, tp1_pct: "+9.7%",
+      tp2: 29.50, tp2_pct: "+19.0%",
+      stop_loss: 22.80, stop_pct: "-8.1%",
+      rr_ratio: "2.3 : 1",
+      conviction: 90,
+      action: "MOMENTUM BUY",
+      thesis: "BlueBird orbital launch operational milestones driving carrier partnership updates."
+    },
+    weekly: {
+      pattern: "Ascending Base Breakout",
+      entry_low: 23.20, entry_high: 24.50,
+      tp1: 31.00, tp1_pct: "+25.0%",
+      tp2: 36.00, tp2_pct: "+45.2%",
+      stop_loss: 21.00, stop_pct: "-15.3%",
+      rr_ratio: "3.0 : 1",
+      conviction: 91,
+      action: "SWING LONG",
+      thesis: "TimesFM quantile model identifies commercial revenue inflection from major telecom contracts."
+    },
+    monthly: {
+      pattern: "Commercial Direct-to-Device Constellation Ramp",
+      entry_low: 22.00, entry_high: 24.00,
+      tp1: 44.00, tp1_pct: "+77.4%",
+      tp2: 55.00, tp2_pct: "+121.8%",
+      stop_loss: 18.00, stop_pct: "-27.4%",
+      rr_ratio: "4.4 : 1",
+      conviction: 92,
+      action: "ACCUMULATE",
+      thesis: "Global space-based cellular broadband monopoly upside with global telco distribution."
+    }
   }
 ];
 

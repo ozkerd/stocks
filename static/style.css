@@ -589,23 +589,74 @@ input, button, select, textarea, table, th, td {
   font-weight: 600;
 }
 
+/* Chart Controls Toolbar */
+.chart-controls-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.lookback-selector-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f1f3f4;
+  padding: 3px;
+  border-radius: 8px;
+}
+
+.lookback-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-right: 4px;
+  margin-left: 4px;
+}
+
+.lookback-btn {
+  background: transparent;
+  border: none;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lookback-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.lookback-btn.active {
+  background: #ffffff;
+  color: var(--google-blue);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
 /* Interactive Scenario Clicker Bar */
 .scenario-selector-bar {
   display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: 8px;
   flex-wrap: wrap;
   align-items: center;
 }
 
 .scenario-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
 }
 
 .scenario-chip {
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 16px;
   font-size: 12px;
   font-weight: 600;
@@ -619,18 +670,49 @@ input, button, select, textarea, table, th, td {
   background: #e8f0fe;
   color: #1a73e8;
   border-color: #1a73e8;
+  box-shadow: 0 0 0 1px #1a73e8;
 }
 
 .scenario-chip.active-bull {
   background: #e6f4ea;
   color: #137333;
   border-color: #34a853;
+  box-shadow: 0 0 0 1px #34a853;
 }
 
 .scenario-chip.active-bear {
   background: #fce8e6;
   color: #c5221f;
   border-color: #ea4335;
+  box-shadow: 0 0 0 1px #ea4335;
+}
+
+.most-probable-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafd;
+  border: 1px solid #d2e3fc;
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.most-probable-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #1a73e8;
+}
+
+.most-probable-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
 }
 
 /* Catalyst Cards */
