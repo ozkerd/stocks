@@ -17,6 +17,16 @@
       <span class="badge">TimesFM-3 Foundation Model</span>
       <span class="badge" style="background:#e8f0fe; color:#1a73e8; border:1px solid #aecbfa;">Stocks & Crypto</span>
     </div>
+    <div class="nav-links">
+      <button type="button" class="nav-btn" onclick="openLeaderboardModal()">
+        <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+        Best Now (Top 100)
+      </button>
+      <button type="button" class="nav-btn btn-portfolio" onclick="openPortfolioModal()">
+        <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+        Best Portfolio
+      </button>
+    </div>
   </header>
 
   <main class="container">
@@ -391,6 +401,124 @@
     </section>
   </main>
 
+  <!-- Best Now (Top 100 Leaderboard) Modal -->
+  <div class="modal-overlay" id="modal-leaderboard" onclick="handleOverlayClick(event, 'modal-leaderboard')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg style="width:20px;height:20px;fill:var(--google-blue);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+          <span>Best Now — Top 100 Ranked Assets by Return Potential</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeLeaderboardModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="leaderboard-toolbar">
+          <input type="text" class="leaderboard-search" id="leaderboard-search" placeholder="Filter by asset name or ticker (e.g. NVDA, Bitcoin, PLTR)..." oninput="filterLeaderboard(this.value)">
+          <div class="horizon-selector" style="margin-bottom:0;">
+            <button type="button" class="pill-btn" data-lb-h="1d" onclick="changeLeaderboardHorizon('1d')">1 Day</button>
+            <button type="button" class="pill-btn" data-lb-h="1w" onclick="changeLeaderboardHorizon('1w')">1 Week</button>
+            <button type="button" class="pill-btn active" data-lb-h="1m" onclick="changeLeaderboardHorizon('1m')">1 Month</button>
+            <button type="button" class="pill-btn" data-lb-h="3m" onclick="changeLeaderboardHorizon('3m')">3 Months</button>
+            <button type="button" class="pill-btn" data-lb-h="1y" onclick="changeLeaderboardHorizon('1y')">1 Year</button>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th style="width:50px;">Rank</th>
+                <th>Asset</th>
+                <th>Current Price</th>
+                <th>Expected Target & Return</th>
+                <th>AI Conviction</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-table-body">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Best Portfolio Modal -->
+  <div class="modal-overlay" id="modal-portfolio" onclick="handleOverlayClick(event, 'modal-portfolio')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg style="width:20px;height:20px;fill:#7b1fa2;" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+          <span>Best Portfolio — Optimal Sharpe & Growth Models</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closePortfolioModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="portfolio-risk-tabs">
+          <div class="risk-tab-btn active" id="ptab-balanced" onclick="selectPortfolio('balanced')">
+            <div class="risk-tab-title">⚖️ Balanced Risk</div>
+            <div class="risk-tab-sub">Optimal Sharpe Ratio (2.42)</div>
+          </div>
+          <div class="risk-tab-btn" id="ptab-high_risk" onclick="selectPortfolio('high_risk')">
+            <div class="risk-tab-title">🚀 High Risk (Alpha)</div>
+            <div class="risk-tab-sub">Max Expected CAGR (+38.5%)</div>
+          </div>
+          <div class="risk-tab-btn" id="ptab-low_risk" onclick="selectPortfolio('low_risk')">
+            <div class="risk-tab-title">🛡️ Low Risk (Defensive)</div>
+            <div class="risk-tab-sub">Capital Defense (-6.5% Max DD)</div>
+          </div>
+        </div>
+
+        <div class="portfolio-metrics-grid">
+          <div class="portfolio-metric-box">
+            <div class="pm-val" id="pm-cagr">+22.8%</div>
+            <div class="pm-label">Expected Annual Return</div>
+          </div>
+          <div class="portfolio-metric-box">
+            <div class="pm-val" id="pm-sharpe">2.42</div>
+            <div class="pm-label">Sharpe Ratio</div>
+          </div>
+          <div class="portfolio-metric-box">
+            <div class="pm-val" id="pm-drawdown" style="color:var(--google-red);">-12.8%</div>
+            <div class="pm-label">Max Expected Drawdown</div>
+          </div>
+          <div class="portfolio-metric-box">
+            <div class="pm-val" id="pm-vol">16.8%</div>
+            <div class="pm-label">Annualized Volatility</div>
+          </div>
+        </div>
+
+        <div class="catalyst-box" style="margin-bottom:20px;">
+          <div class="catalyst-title" style="color:var(--text-primary);">
+            <span>Strategic Macro Thesis</span>
+          </div>
+          <div class="catalyst-desc" id="portfolio-thesis">
+            Modern portfolio frontier maximizing risk-adjusted return. Core megacap titans generate massive free cash flow, while gold and Treasuries dampen drawdowns during macro shocks.
+          </div>
+        </div>
+
+        <div style="font-weight:600; font-size:14px; margin-bottom:8px; color:var(--text-primary);">Target Asset Allocation</div>
+        <div style="overflow-x:auto;">
+          <table class="allocation-table">
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Target Weight</th>
+                <th>Expected Target</th>
+                <th>Strategic Role</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="portfolio-allocation-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <p>Powered by Google TimesFM-3 Architecture • <strong>stocks.primerllm.com</strong></p>
   </footer>
@@ -480,19 +608,229 @@
       box.style.display = 'block';
     }
 
-    function aiTopPickForecast() {
-      const topPicks = [
-        { symbol: "NVDA", name: "NVIDIA Corp (AI Semiconductor Leader)" },
-        { symbol: "BTC-USD", name: "Bitcoin (Digital Gold Liquidity)" },
-        { symbol: "PLTR", name: "Palantir Technologies (Enterprise AI)" },
-        { symbol: "SOL-USD", name: "Solana (High Throughput L1)" }
-      ];
-      const pick = topPicks[Math.floor(Math.random() * topPicks.length)];
-      document.getElementById('ticker-input').value = pick.symbol;
-      document.getElementById('autocomplete-box').style.display = 'none';
-      currentTicker = pick.symbol;
+    let leaderboardData = [];
+    let currentLeaderboardHorizon = '1m';
+    let portfoliosCache = null;
+    let currentPortfolioProfile = 'balanced';
+
+    // AI Top Pick based on selected horizon
+    async function aiTopPickForecast() {
+      try {
+        const res = await fetch(`${API_BASE}/api/leaderboard?horizon=${encodeURIComponent(currentHorizon)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.assets && data.assets.length > 0) {
+            const topPick = data.top_pick || data.assets[0];
+            document.getElementById('ticker-input').value = topPick.symbol;
+            document.getElementById('autocomplete-box').style.display = 'none';
+            currentTicker = topPick.symbol;
+            switchModelMode(true);
+            fetchForecastData(currentTicker, currentHorizon, true);
+            return;
+          }
+        }
+      } catch (e) {
+        // fallback
+      }
+
+      // Default fallback
+      const fallback = currentHorizon === '1d' || currentHorizon === '1w' ? 'SOL-USD' : 'NVDA';
+      document.getElementById('ticker-input').value = fallback;
+      currentTicker = fallback;
       switchModelMode(true);
       fetchForecastData(currentTicker, currentHorizon, true);
+    }
+
+    // Modal Control Helpers
+    function handleOverlayClick(e, id) {
+      if (e.target.id === id) {
+        document.getElementById(id).style.display = 'none';
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLeaderboardModal();
+        closePortfolioModal();
+      }
+    });
+
+    // Leaderboard Controller
+    function openLeaderboardModal() {
+      document.getElementById('modal-leaderboard').style.display = 'flex';
+      fetchLeaderboard(currentHorizon);
+    }
+
+    function closeLeaderboardModal() {
+      document.getElementById('modal-leaderboard').style.display = 'none';
+    }
+
+    async function fetchLeaderboard(horizon) {
+      currentLeaderboardHorizon = horizon;
+      document.querySelectorAll('[data-lb-h]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lbH === horizon);
+      });
+
+      const body = document.getElementById('leaderboard-table-body');
+      body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">Loading Top 100 Ranked Assets for ${horizon}...</td></tr>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/leaderboard?horizon=${encodeURIComponent(horizon)}`);
+        if (!res.ok) throw new Error("Failed to load leaderboard");
+        const data = await res.json();
+        leaderboardData = data.assets || [];
+        renderLeaderboardTable(leaderboardData);
+      } catch (err) {
+        body.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--google-red); padding:20px;">Error loading leaderboard: ${err.message}</td></tr>`;
+      }
+    }
+
+    function changeLeaderboardHorizon(h) {
+      fetchLeaderboard(h);
+    }
+
+    function filterLeaderboard(query) {
+      const q = query.trim().toLowerCase();
+      if (!q) {
+        renderLeaderboardTable(leaderboardData);
+        return;
+      }
+      const filtered = leaderboardData.filter(a => 
+        a.symbol.toLowerCase().includes(q) || a.name.toLowerCase().includes(q)
+      );
+      renderLeaderboardTable(filtered);
+    }
+
+    function renderLeaderboardTable(assets) {
+      const body = document.getElementById('leaderboard-table-body');
+      body.innerHTML = '';
+      if (assets.length === 0) {
+        body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">No assets match your search.</td></tr>`;
+        return;
+      }
+
+      assets.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.className = 'leaderboard-row';
+        const isCrypto = a.type === 'Crypto' || a.symbol.includes('-USD');
+        const retSign = a.expected_return_pct >= 0 ? '+' : '';
+        const retColor = a.expected_return_pct >= 0 ? 'var(--google-green)' : 'var(--google-red)';
+        
+        tr.innerHTML = `
+          <td>
+            <span class="rank-badge ${a.rank <= 3 ? 'rank-top3' : ''}">#${a.rank}</span>
+          </td>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <strong style="color:var(--text-primary); font-size:14px;">${a.symbol}</strong>
+              <span style="font-size:12px; color:var(--text-secondary); max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${a.name}</span>
+              <span class="item-badge ${isCrypto ? 'crypto' : ''}" style="font-size:10px;">${isCrypto ? 'Crypto' : a.exchange}</span>
+            </div>
+          </td>
+          <td style="font-weight:600;">$${a.current_price.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+          <td>
+            <span style="font-weight:700; color:${retColor};">${retSign}${a.expected_return_pct.toFixed(2)}%</span>
+            <span style="font-size:11px; color:var(--text-muted); margin-left:4px;">($${a.target_price.toLocaleString()})</span>
+          </td>
+          <td>
+            <span class="conviction-pill">${a.conviction_score}/100</span>
+          </td>
+          <td>
+            <button type="button" class="ticker-chip" style="padding:4px 10px; font-weight:600;">Analyze</button>
+          </td>
+        `;
+
+        tr.onclick = () => {
+          closeLeaderboardModal();
+          selectHorizon(currentLeaderboardHorizon);
+          document.getElementById('ticker-input').value = a.symbol;
+          currentTicker = a.symbol;
+          fetchForecastData(currentTicker, currentLeaderboardHorizon, isDeepMode);
+        };
+
+        body.appendChild(tr);
+      });
+    }
+
+    // Portfolio Controller
+    function openPortfolioModal() {
+      document.getElementById('modal-portfolio').style.display = 'flex';
+      fetchPortfolios();
+    }
+
+    function closePortfolioModal() {
+      document.getElementById('modal-portfolio').style.display = 'none';
+    }
+
+    async function fetchPortfolios() {
+      if (!portfoliosCache) {
+        try {
+          const res = await fetch(`${API_BASE}/api/portfolios`);
+          if (res.ok) {
+            const data = await res.json();
+            portfoliosCache = data.profiles || [];
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+      selectPortfolio(currentPortfolioProfile);
+    }
+
+    function selectPortfolio(profileKey) {
+      currentPortfolioProfile = profileKey;
+      
+      // Update Tab Styles
+      ['balanced', 'high_risk', 'low_risk'].forEach(p => {
+        const btn = document.getElementById(`ptab-${p}`);
+        if (btn) {
+          btn.classList.toggle('active', p === profileKey);
+        }
+      });
+
+      const pData = (portfoliosCache || []).find(p => p.id === profileKey);
+      if (!pData) return;
+
+      document.getElementById('pm-cagr').textContent = pData.expected_cagr;
+      document.getElementById('pm-sharpe').textContent = pData.sharpe_ratio;
+      document.getElementById('pm-drawdown').textContent = pData.max_drawdown;
+      document.getElementById('pm-vol').textContent = pData.volatility_annual;
+      document.getElementById('portfolio-thesis').textContent = pData.thesis;
+
+      const body = document.getElementById('portfolio-allocation-body');
+      body.innerHTML = '';
+      pData.allocations.forEach(alloc => {
+        const tr = document.createElement('tr');
+        tr.className = 'leaderboard-row';
+        tr.innerHTML = `
+          <td>
+            <strong style="color:var(--text-primary);">${alloc.symbol}</strong>
+            <span style="font-size:12px; color:var(--text-secondary); margin-left:6px;">${alloc.name}</span>
+          </td>
+          <td style="min-width:140px;">
+            <div class="weight-bar-box">
+              <span style="font-weight:700; width:36px;">${alloc.weight_pct}%</span>
+              <div class="weight-bar-outer">
+                <div class="weight-bar-inner" style="width:${alloc.weight_pct * 3.5}%;"></div>
+              </div>
+            </div>
+          </td>
+          <td style="font-weight:700; color:var(--google-green);">${alloc.return_target}</td>
+          <td style="font-size:12px; color:var(--text-secondary);">${alloc.role}</td>
+          <td>
+            <button type="button" class="ticker-chip" style="padding:4px 10px; font-weight:600;">Forecast</button>
+          </td>
+        `;
+
+        tr.onclick = () => {
+          closePortfolioModal();
+          document.getElementById('ticker-input').value = alloc.symbol;
+          currentTicker = alloc.symbol;
+          fetchForecastData(currentTicker, currentHorizon, isDeepMode);
+        };
+
+        body.appendChild(tr);
+      });
     }
 
     function handleSearch(e) {
