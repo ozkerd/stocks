@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=20260912-6">
+  <link rel="stylesheet" href="/style.css?v=20260912-7">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
@@ -23,59 +23,52 @@
     <div class="nav-links">
       <button type="button" class="nav-btn active" id="nav-btn-forecast" onclick="switchAppView('forecast')">
         <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
-        Forecast Engine
+        Forecast
       </button>
       <button type="button" class="nav-btn" id="nav-btn-leaderboard" onclick="switchAppView('leaderboard')">
         <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
         Best Now (Top 100)
       </button>
-      <button type="button" class="nav-btn btn-portfolio" id="nav-btn-portfolio" onclick="switchAppView('portfolio')">
-        <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+      <button type="button" class="nav-btn" id="nav-btn-portfolio" onclick="switchAppView('portfolio')">
+        <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
         Best Portfolio
       </button>
     </div>
   </header>
 
-  <main class="container">
-    <!-- VIEW 1: FORECAST ENGINE -->
-    <div id="view-forecast" class="app-view">
-    <!-- Hero / Google-Style Center Search Section -->
-    <section class="hero-section" id="hero-section">
-      <div class="logo-container">
-        <div class="google-logo-text">
-          <span class="logo-t">T</span><span class="logo-i">i</span><span class="logo-m">m</span><span class="logo-e">e</span><span class="logo-s">s</span><span class="logo-fm">F</span><span class="logo-m">M</span><span class="logo-dash">-</span><span class="logo-three">3</span>
-        </div>
-        <p class="tagline">Zero-Shot Multivariate Asset Forecasting with 500M Neural Covariates & Quantile Cones</p>
+  <main class="main-container">
+
+    <!-- VIEW 1: INTERACTIVE FORECAST -->
+    <div class="app-view active" id="view-forecast">
+      <!-- Search & Control Card -->
+      <section class="search-card">
+      <div class="search-title">Google TimesFM-3 Zero-Shot Asset Forecaster</div>
+      <div class="search-subtitle">
+        Self-supervised Transformer predicting multi-quantile trajectories for US Stocks, ETFs, and Major Cryptocurrencies without fine-tuning.
       </div>
 
-      <!-- Search Box with Live Company & Crypto Autocomplete -->
-      <div class="search-wrapper">
-        <form id="search-form" onsubmit="handleSearch(event)">
-          <div class="search-box">
-            <svg class="search-icon" focusable="false" viewBox="0 0 24 24">
-              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
-            </svg>
-            <input 
-              type="text" 
-              id="ticker-input" 
-              class="search-input" 
-              placeholder="Enter Company Name or Ticker (e.g. Apple, Bitcoin, Nvidia, TSLA, BTC, ETH)..." 
-              autocomplete="off" 
-              spellcheck="false"
-              required
-              value="NVDA"
-              oninput="handleInputSearch(this.value)"
-            />
-          </div>
-          <!-- Autocomplete Dropdown List -->
-          <div class="autocomplete-box" id="autocomplete-box"></div>
-        </form>
+      <!-- Search Input Container with Autocomplete -->
+      <div class="search-input-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24">
+          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+        <input
+          type="text"
+          id="ticker-input"
+          class="search-input"
+          placeholder="Search 100+ US Stocks, Cryptos &amp; ETFs (e.g., NVDA, BTC, ETH, SOL, HYPE, AAPL)..."
+          autocomplete="off"
+          spellcheck="false"
+          value="NVDA"
+        >
+        <!-- Autocomplete Suggestions Dropdown -->
+        <div id="autocomplete-box" class="autocomplete-box"></div>
       </div>
 
       <!-- Horizon Selector -->
       <div class="horizon-selector">
         <span class="horizon-label">Forecast Horizon:</span>
-        <button type="button" class="pill-btn" data-horizon="1d" onclick="selectHorizon('1d')">1 Day</button>
+        <button type="button" class="pill-btn" data-horizon="1d" onclick="selectHorizon('1d')">1 Day (Intraday)</button>
         <button type="button" class="pill-btn" data-horizon="1w" onclick="selectHorizon('1w')">1 Week (5d)</button>
         <button type="button" class="pill-btn active" data-horizon="1m" onclick="selectHorizon('1m')">1 Month (21d)</button>
         <button type="button" class="pill-btn" data-horizon="3m" onclick="selectHorizon('3m')">3 Months (63d)</button>
@@ -92,12 +85,47 @@
           </svg>
           Run 500M Deep Analysis
         </button>
-        <button type="button" class="btn-google btn-top-pick" onclick="aiTopPickForecast()">
-          <svg style="width:16px;height:16px;margin-right:6px;vertical-align:-2px;fill:#f9ab00;" viewBox="0 0 24 24">
-            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-          </svg>
-          AI Top Pick
-        </button>
+        <div class="dropdown-top-pick" id="dropdown-top-pick">
+          <button type="button" class="btn-google btn-top-pick" onclick="toggleTopPickDropdown(event)">
+            <svg style="width:16px;height:16px;margin-right:6px;vertical-align:-2px;fill:#f9ab00;" viewBox="0 0 24 24">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+            <span>AI Top Pick</span>
+            <svg style="width:12px;height:12px;margin-left:6px;fill:currentColor;" viewBox="0 0 24 24">
+              <path d="M7 10l5 5 5-5z"/>
+            </svg>
+          </button>
+          <div class="top-pick-menu" id="top-pick-menu">
+            <div class="top-pick-item" onclick="selectTopPickHorizon('1d')">
+              <div class="top-pick-meta">
+                <span class="top-pick-title">⚡ AI Top Pick of the Day</span>
+                <span class="top-pick-sub" id="top-pick-sub-1d">NVDA · Intraday Drift</span>
+              </div>
+              <span class="top-pick-return" id="top-pick-ret-1d">+4.8%</span>
+            </div>
+            <div class="top-pick-item" onclick="selectTopPickHorizon('1w')">
+              <div class="top-pick-meta">
+                <span class="top-pick-title">📅 AI Top Pick of the Week</span>
+                <span class="top-pick-sub" id="top-pick-sub-1w">APP · 1-Week Swing</span>
+              </div>
+              <span class="top-pick-return" id="top-pick-ret-1w">+11.2%</span>
+            </div>
+            <div class="top-pick-item" onclick="selectTopPickHorizon('1m')">
+              <div class="top-pick-meta">
+                <span class="top-pick-title">🗓️ AI Top Pick of the Month</span>
+                <span class="top-pick-sub" id="top-pick-sub-1m">NVDA · 1-Month Trend</span>
+              </div>
+              <span class="top-pick-return" id="top-pick-ret-1m">+24.5%</span>
+            </div>
+            <div class="top-pick-item" onclick="selectTopPickHorizon('1y')">
+              <div class="top-pick-meta">
+                <span class="top-pick-title">🏛️ AI Top Pick of the Year</span>
+                <span class="top-pick-sub" id="top-pick-sub-1y">PLTR · Secular Expansion</span>
+              </div>
+              <span class="top-pick-return" id="top-pick-ret-1y">+68.4%</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Quick Tickers including Cryptos -->
@@ -280,7 +308,7 @@
         <div class="most-probable-banner" id="most-probable-banner">
           <div class="most-probable-title">
             <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-            <span>En Muhtemel Gidişat (Most Probable Target - P50):</span>
+            <span>Most Probable Trajectory (Target - P50 Median):</span>
           </div>
           <div class="most-probable-stats">
             <span id="chart-p50-target" style="color:var(--google-blue); font-size:15px;">$0.00</span>
@@ -493,13 +521,13 @@
             <table class="leaderboard-table">
               <thead>
                 <tr>
-                  <th style="width:50px;">Rank</th>
-                  <th>Asset</th>
-                  <th>Cap Tier</th>
-                  <th>Current Price</th>
-                  <th>Expected Target</th>
-                  <th>Hedef Alış / Zarar Durdur</th>
-                  <th id="th-score-col">Conviction</th>
+                  <th style="width:65px;" class="sortable-th" onclick="sortLeaderboardTable('rank')">Rank <span class="sort-icon" id="sort-icon-rank">▲</span></th>
+                  <th class="sortable-th" onclick="sortLeaderboardTable('asset')">Asset <span class="sort-icon" id="sort-icon-asset">↕</span></th>
+                  <th class="sortable-th" onclick="sortLeaderboardTable('cap')">Cap Tier <span class="sort-icon" id="sort-icon-cap">↕</span></th>
+                  <th class="sortable-th" onclick="sortLeaderboardTable('price')">Current Price <span class="sort-icon" id="sort-icon-price">↕</span></th>
+                  <th class="sortable-th" onclick="sortLeaderboardTable('return')">Expected Target <span class="sort-icon" id="sort-icon-return">↕</span></th>
+                  <th class="sortable-th" onclick="sortLeaderboardTable('buy_stop')">Target Buy / Stop-Loss <span class="sort-icon" id="sort-icon-buy_stop">↕</span></th>
+                  <th id="th-score-col" class="sortable-th" onclick="sortLeaderboardTable('score')">Conviction <span class="sort-icon" id="sort-icon-score">↕</span></th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -525,7 +553,7 @@
               </button>
             </div>
             <div class="setups-subtext">
-              TimesFM-3 neural quantile drift provides calibrated entry zones (Hedef Alış), multi-target profit taking (Hedef Satış), and stop floors (Zarar Durdur).
+              TimesFM-3 neural quantile drift provides calibrated entry zones (Buy Zone), multi-target profit taking (TP1 / TP2), and stop-loss risk floors.
             </div>
           </div>
 
@@ -535,9 +563,9 @@
                 <tr>
                   <th>Asset</th>
                   <th>Setup Pattern & Thesis</th>
-                  <th>Hedef Alış (Entry Zone)</th>
-                  <th>Hedef Satış (TP1 / TP2)</th>
-                  <th>Zarar Durdur (Stop)</th>
+                  <th>Target Buy Zone (Entry)</th>
+                  <th>Target Profit (TP1 / TP2)</th>
+                  <th>Stop-Loss (Risk Floor)</th>
                   <th>Risk / Reward</th>
                   <th>AI Action</th>
                   <th>Action</th>
@@ -763,42 +791,74 @@
     let portfoliosCache = null;
     let currentPortfolioProfile = 'balanced';
 
+    function toggleTopPickDropdown(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      const menu = document.getElementById('top-pick-menu');
+      if (menu) {
+        menu.classList.toggle('show');
+      }
+    }
+
+    // Close top pick dropdown on outside click
+    document.addEventListener('click', function(e) {
+      const dd = document.getElementById('dropdown-top-pick');
+      if (dd && !dd.contains(e.target)) {
+        const menu = document.getElementById('top-pick-menu');
+        if (menu) menu.classList.remove('show');
+      }
+    });
+
     // AI Top Pick based on selected horizon and multi-factor conviction
-    async function aiTopPickForecast() {
+    async function selectTopPickHorizon(h) {
+      const menu = document.getElementById('top-pick-menu');
+      if (menu) menu.classList.remove('show');
+
+      selectHorizon(h);
+
+      // Default smart picks by horizon
+      let symbol = 'NVDA';
+      if (h === '1d') symbol = 'NVDA';
+      else if (h === '1w') symbol = 'APP';
+      else if (h === '1m') symbol = 'NVDA';
+      else if (h === '1y') symbol = 'PLTR';
+
       try {
-        const res = await fetch(`${API_BASE}/api/leaderboard?horizon=${encodeURIComponent(currentHorizon)}&category=all`);
+        const res = await fetch(`${API_BASE}/api/leaderboard?horizon=${encodeURIComponent(h)}&category=all`);
         if (res.ok) {
           const data = await res.json();
           if (data.assets && data.assets.length > 0) {
-            // Intelligent diversified pick by horizon
-            let pick = data.top_pick;
-            if (currentHorizon === '1d') {
-              pick = data.assets.find(a => a.symbol === 'NVDA' || a.symbol === 'BTC-USD' || a.symbol === 'APP') || data.assets[0];
-            } else if (currentHorizon === '1w') {
-              pick = data.assets.find(a => a.symbol === 'APP' || a.symbol === 'PLTR' || a.symbol === 'SOL-USD') || data.assets[0];
-            } else if (currentHorizon === '1m') {
-              pick = data.assets.find(a => a.symbol === 'NVDA' || a.symbol === 'BTC-USD') || data.assets[0];
+            if (h === '1d') {
+              const p = data.assets.find(a => a.symbol === 'NVDA' || a.symbol === 'BTC-USD' || a.symbol === 'APP');
+              symbol = p ? p.symbol : data.assets[0].symbol;
+            } else if (h === '1w') {
+              const p = data.assets.find(a => a.symbol === 'APP' || a.symbol === 'PLTR' || a.symbol === 'SOL-USD');
+              symbol = p ? p.symbol : data.assets[0].symbol;
+            } else if (h === '1m') {
+              const p = data.assets.find(a => a.symbol === 'NVDA' || a.symbol === 'BTC-USD');
+              symbol = p ? p.symbol : data.assets[0].symbol;
             } else {
-              pick = data.top_pick || data.assets[0];
+              symbol = data.top_pick ? data.top_pick.symbol : data.assets[0].symbol;
             }
-            document.getElementById('ticker-input').value = pick.symbol;
-            document.getElementById('autocomplete-box').style.display = 'none';
-            currentTicker = pick.symbol;
-            switchModelMode(true);
-            fetchForecastData(currentTicker, currentHorizon, true);
-            return;
           }
         }
       } catch (e) {
-        // fallback
+        // Fallback to default symbol
       }
 
-      // Default fallback
-      const fallback = currentHorizon === '1d' || currentHorizon === '1w' ? 'APP' : 'NVDA';
-      document.getElementById('ticker-input').value = fallback;
-      currentTicker = fallback;
+      document.getElementById('ticker-input').value = symbol;
+      const autocompleteBox = document.getElementById('autocomplete-box');
+      if (autocompleteBox) autocompleteBox.style.display = 'none';
+      currentTicker = symbol;
+      switchAppView('forecast');
       switchModelMode(true);
-      fetchForecastData(currentTicker, currentHorizon, true);
+      fetchForecastData(currentTicker, h, true);
+    }
+
+    function aiTopPickForecast() {
+      selectTopPickHorizon(currentHorizon);
     }
 
     // View Navigation Controller (Forecast, Best Now, Best Portfolio)
@@ -969,10 +1029,105 @@
         if (!res.ok) throw new Error("Failed to load leaderboard");
         const data = await res.json();
         leaderboardData = data.assets || [];
-        renderLeaderboardTable(leaderboardData);
+        updateSortIcons();
+        applyLeaderboardFilterAndSort();
       } catch (err) {
         body.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--google-red); padding:24px; font-weight:600;">Error loading leaderboard: ${err.message}</td></tr>`;
       }
+    }
+
+    let currentSortCol = 'rank';
+    let currentSortDir = 'asc';
+
+    function sortLeaderboardTable(col) {
+      if (currentSortCol === col) {
+        currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSortCol = col;
+        if (['price', 'return', 'score', 'cap'].includes(col)) {
+          currentSortDir = 'desc';
+        } else {
+          currentSortDir = 'asc';
+        }
+      }
+      updateSortIcons();
+      applyLeaderboardFilterAndSort();
+    }
+
+    function updateSortIcons() {
+      const cols = ['rank', 'asset', 'cap', 'price', 'return', 'buy_stop', 'score'];
+      cols.forEach(c => {
+        const icon = document.getElementById(`sort-icon-${c}`);
+        if (!icon) return;
+        if (c === currentSortCol) {
+          icon.textContent = currentSortDir === 'asc' ? '▲' : '▼';
+          icon.style.opacity = '1';
+          icon.style.color = 'var(--google-blue)';
+        } else {
+          icon.textContent = '↕';
+          icon.style.opacity = '0.35';
+          icon.style.color = 'inherit';
+        }
+      });
+    }
+
+    function applyLeaderboardFilterAndSort() {
+      const q = (document.getElementById('leaderboard-search')?.value || '').trim().toLowerCase();
+      let list = leaderboardData || [];
+      if (q) {
+        list = list.filter(a => 
+          (a.symbol && a.symbol.toLowerCase().includes(q)) ||
+          (a.display_symbol && a.display_symbol.toLowerCase().includes(q)) ||
+          (a.name && a.name.toLowerCase().includes(q))
+        );
+      }
+
+      // Sort
+      const sorted = [...list].sort((a, b) => {
+        let valA, valB;
+        if (currentSortCol === 'rank') {
+          valA = a.rank ?? 999;
+          valB = b.rank ?? 999;
+        } else if (currentSortCol === 'asset') {
+          valA = (a.display_symbol || a.symbol || '').toUpperCase();
+          valB = (b.display_symbol || b.symbol || '').toUpperCase();
+        } else if (currentSortCol === 'cap') {
+          const capTierVal = { 'high_cap': 3, 'mid_cap': 2, 'low_cap': 1 };
+          valA = capTierVal[a.cap] || 0;
+          valB = capTierVal[b.cap] || 0;
+        } else if (currentSortCol === 'price') {
+          valA = a.current_price || 0;
+          valB = b.current_price || 0;
+        } else if (currentSortCol === 'return') {
+          valA = a.expected_return_pct || 0;
+          valB = b.expected_return_pct || 0;
+        } else if (currentSortCol === 'buy_stop') {
+          valA = a.current_price * 0.99;
+          valB = b.current_price * 0.99;
+        } else if (currentSortCol === 'score') {
+          let scoreA = a.conviction_score;
+          let scoreB = b.conviction_score;
+          if (currentLeaderboardCategory === 'technicals') {
+            scoreA = a.tech_score ?? scoreA;
+            scoreB = b.tech_score ?? scoreB;
+          } else if (currentLeaderboardCategory === 'price_action') {
+            scoreA = a.pa_score ?? scoreA;
+            scoreB = b.pa_score ?? scoreB;
+          }
+          valA = scoreA || 0;
+          valB = scoreB || 0;
+        } else {
+          valA = a.rank || 0;
+          valB = b.rank || 0;
+        }
+
+        if (typeof valA === 'string') {
+          return currentSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
+        return currentSortDir === 'asc' ? (valA - valB) : (valB - valA);
+      });
+
+      renderLeaderboardTable(sorted);
     }
 
     function changeLeaderboardHorizon(h) {
@@ -980,17 +1135,7 @@
     }
 
     function filterLeaderboard(query) {
-      const q = query.trim().toLowerCase();
-      if (!q) {
-        renderLeaderboardTable(leaderboardData);
-        return;
-      }
-      const filtered = leaderboardData.filter(a => 
-        (a.symbol && a.symbol.toLowerCase().includes(q)) ||
-        (a.display_symbol && a.display_symbol.toLowerCase().includes(q)) ||
-        (a.name && a.name.toLowerCase().includes(q))
-      );
-      renderLeaderboardTable(filtered);
+      applyLeaderboardFilterAndSort();
     }
 
     function renderLeaderboardTable(assets) {
@@ -1388,7 +1533,7 @@
         p50ReturnEl.textContent = `${retSign}${data.expected_return_pct.toFixed(2)}%`;
         p50ReturnEl.style.color = retColor;
       }
-      if (p50DateEl && targetDate) p50DateEl.textContent = `(Vade: ${targetDate})`;
+      if (p50DateEl && targetDate) p50DateEl.textContent = `(Target Date: ${targetDate})`;
 
       const labels = hist.map(h => h.date).concat(fc.map(f => f.date));
       const histLength = hist.length;

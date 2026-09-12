@@ -1,7 +1,7 @@
 /**
  * Cloudflare Pages Function: Daily, Weekly, and Monthly Trade Setups API
- * Delivers actionable trade setups with Target Buy (Hedef Alış), Target Sell (Hedef Satış),
- * Stop-Loss (Zarar Durdur), and Risk/Reward (R:R) ratios based on TimesFM-3 quantile drift.
+ * Delivers actionable trade setups with Target Buy Zone, Target Sell (TP1/TP2),
+ * Stop-Loss Risk Floor, and Risk/Reward (R:R) ratios based on TimesFM-3 quantile drift.
  */
 
 const BASE_SETUPS = [

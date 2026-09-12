@@ -363,6 +363,101 @@ input, button, select, textarea, table, th, td {
   box-shadow: 0 1px 4px rgba(249, 171, 0, 0.25);
 }
 
+/* AI Top Pick Horizon Dropdown */
+.dropdown-top-pick {
+  position: relative;
+  display: inline-block;
+}
+
+.top-pick-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 310px;
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(32, 33, 36, 0.18);
+  padding: 8px 0;
+  z-index: 1050;
+  animation: fadeInDown 0.18s ease-out;
+}
+
+.top-pick-menu.show {
+  display: block;
+}
+
+.top-pick-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.top-pick-item:last-child {
+  border-bottom: none;
+}
+
+.top-pick-item:hover {
+  background: #f8fafd;
+}
+
+.top-pick-item:active {
+  background: #e8f0fe;
+}
+
+.top-pick-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.top-pick-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.top-pick-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.top-pick-return {
+  font-size: 13px;
+  font-weight: 800;
+  color: #137333;
+  background: #e6f4ea;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* Sortable Table Headers */
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sortable-th:hover {
+  background: #e8f0fe !important;
+  color: var(--google-blue) !important;
+}
+
+.sort-icon {
+  display: inline-block;
+  font-size: 10px;
+  margin-left: 4px;
+  opacity: 0.4;
+  vertical-align: 1px;
+}
+
 /* Autocomplete Dropdown (Google Finance & TradingView Style) */
 .autocomplete-box {
   position: absolute;
