@@ -1,0 +1,18 @@
+[Unit]
+Description=TimesFM-3 Stock Forecaster Web App (stocks.primerllm.com)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/stocks
+Environment="PATH=/opt/stocks/venv/bin:/usr/local/bin:/usr/bin"
+Environment="PORT=8000"
+Environment="HOST=127.0.0.1"
+ExecStart=/opt/stocks/venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000 --workers 2
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

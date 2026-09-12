@@ -1,0 +1,16 @@
+# Cloudflare Tunnel Configuration for stocks.primerllm.com
+# Usage: cloudflared tunnel run stocks-primerllm
+
+tunnel: <YOUR-CLOUDFLARE-TUNNEL-UUID>
+credentials-file: /root/.cloudflared/<YOUR-CLOUDFLARE-TUNNEL-UUID>.json
+
+ingress:
+  # Route traffic for stocks.primerllm.com to local FastAPI instance
+  - hostname: stocks.primerllm.com
+    service: http://127.0.0.1:8000
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+  
+  # Catch-all rule (required by Cloudflare)
+  - service: http_status:404
