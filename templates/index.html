@@ -36,9 +36,9 @@
         <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
         Forecast
       </button>
-      <button type="button" class="nav-btn" id="nav-btn-leaderboard" onclick="switchAppView('leaderboard')">
+      <button type="button" class="nav-btn" id="nav-btn-leaderboard" onclick="switchAppView('leaderboard')" title="Best Now: Multi-Factor Market Screener">
         <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-        Best Now (Market Screener)
+        Best Now
       </button>
       <button type="button" class="nav-btn" id="nav-btn-portfolio" onclick="switchAppView('portfolio')">
         <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
@@ -900,7 +900,7 @@
           <svg style="width:26px;height:26px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.5h-2v-2h2zm0-4h-2V7h2z"/></svg>
           TimesFM Generative Price Oracle
         </h1>
-        <p>Google Research TimesFM Foundation Modeli ile Noktasal &amp; Kuantil Fiyat Kehaneti: Tıpkı büyük dil modellerinin (LLM) bir sonraki kelimeyi olasılık dağılımıyla türetmesi gibi; TimesFM de zaman serisi yamalarını oto-regresif işleyerek seçtiğiniz hedef gün/saatte fiyatın nerede olacağını, %80 güven bandını ve olasılık yoğunluğunu hesaplar.</p>
+        <p>Autoregressive Point &amp; Quantile Price Forecasting: Similar to how Large Language Models (LLMs) predict the next token with a calibrated probability distribution, Google Research TimesFM-3 processes historical time-series patch tokens to compute the expected target price, 80% statistical confidence interval, and continuous probability density at your chosen target horizon.</p>
         <div class="oracle-pill-tag">
           <svg style="width:14px;height:14px;fill:currentColor;" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
           Zero-Shot Stochastic Patch Diffusion • Continuous Log-Normal Quantile Engine
@@ -912,17 +912,17 @@
         <!-- Search Row -->
         <div class="oracle-search-row">
           <div class="oracle-input-wrap">
-            <input type="text" id="oracle-ticker-input" class="oracle-input" placeholder="Hisse veya Kripto Sembolü girin (örn. NVDA, AAPL, BTC, TSLA)..." value="NVDA">
+            <input type="text" id="oracle-ticker-input" class="oracle-input" placeholder="Enter stock or crypto ticker (e.g. NVDA, AAPL, BTC, TSLA)..." value="NVDA">
           </div>
           <button type="button" class="oracle-btn-submit" onclick="submitOracleSearch()">
             <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-            Fiyatı Kehanet Et
+            Predict Target Price
           </button>
         </div>
 
         <!-- Quick Pick Chips -->
         <div class="oracle-chips-row">
-          <span class="oracle-chip-label">Popüler Varlıklar:</span>
+          <span class="oracle-chip-label">Popular Markets:</span>
           <button type="button" class="oracle-chip active" id="ochip-NVDA" onclick="selectOracleChip('NVDA')">NVDA</button>
           <button type="button" class="oracle-chip" id="ochip-AAPL" onclick="selectOracleChip('AAPL')">AAPL</button>
           <button type="button" class="oracle-chip" id="ochip-BTC-USD" onclick="selectOracleChip('BTC-USD')">BTC</button>
@@ -937,25 +937,25 @@
         <!-- Target Horizon Section -->
         <div class="oracle-horizon-section">
           <div class="oracle-horizon-title">
-            <span>Hedef Zaman / Projeksiyon Vadesi:</span>
-            <span id="oracle-horizon-selected-txt" style="font-weight:800; color:#4f46e5;">1 Ay (21 İş Günü)</span>
+            <span>Target Horizon / Projection Window:</span>
+            <span id="oracle-horizon-selected-txt" style="font-weight:800; color:#4f46e5;">1 Month (21 Trading Days)</span>
           </div>
 
           <div class="oracle-horizon-pills">
-            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(1, this)">1 Gün (Yarın)</button>
-            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(3, this)">3 Gün</button>
-            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(5, this)">1 Hafta (5 Gün)</button>
-            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(10, this)">2 Hafta (10 Gün)</button>
-            <button type="button" class="oracle-h-pill active" onclick="selectOracleHorizon(21, this)">1 Ay (21 Gün)</button>
-            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(63, this)">3 Ay (63 Gün)</button>
-            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(126, this)">6 Ay (126 Gün)</button>
-            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(252, this)">1 Yıl (252 Gün)</button>
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(1, this)">1 Day (Tomorrow)</button>
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(3, this)">3 Days</button>
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(5, this)">1 Week (5 Days)</button>
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(10, this)">2 Weeks (10 Days)</button>
+            <button type="button" class="oracle-h-pill active" onclick="selectOracleHorizon(21, this)">1 Month (21 Days)</button>
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(63, this)">3 Months (63 Days)</button>
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(126, this)">6 Months (126 Days)</button>
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(252, this)">1 Year (252 Days)</button>
           </div>
 
           <div class="oracle-slider-wrap">
-            <span style="font-size:12px; font-weight:700; color:var(--text-muted);">Özel Gün:</span>
+            <span style="font-size:12px; font-weight:700; color:var(--text-muted);">Custom Horizon:</span>
             <input type="range" id="oracle-days-slider" class="oracle-slider" min="1" max="252" value="21" oninput="onOracleSliderInput(this.value)">
-            <span class="oracle-slider-val" id="oracle-slider-val-txt">21 Gün</span>
+            <span class="oracle-slider-val" id="oracle-slider-val-txt">21 Days</span>
           </div>
         </div>
       </div>
@@ -964,43 +964,43 @@
       <div class="oracle-verdict-card" id="oracle-verdict-card">
         <div class="oracle-verdict-header">
           <div>
-            <div class="oracle-target-headline" id="oracle-verdict-headline">Hedef Tarih Projeksiyonu</div>
+            <div class="oracle-target-headline" id="oracle-verdict-headline">Target Horizon Projection</div>
             <div class="oracle-target-price-big">
               <span id="oracle-target-price-val">$---.--</span>
               <span class="oracle-badge-return bullish" id="oracle-badge-return">+--%</span>
             </div>
             <div style="font-size:13px; color:var(--text-muted); margin-top:6px;">
-              Mevcut Fiyat: <strong id="oracle-current-price-val">$---.--</strong> • Hedef Tarih: <strong id="oracle-target-date-val">----</strong>
+              Current Price: <strong id="oracle-current-price-val">$---.--</strong> • Target Date: <strong id="oracle-target-date-val">----</strong>
             </div>
           </div>
           <div style="text-align:right;">
-            <div style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px;">Model Yönsel Güveni</div>
+            <div style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px;">Directional Confidence</div>
             <div style="font-size:28px; font-weight:800; color:#4f46e5; font-family:var(--font-mono);" id="oracle-conf-val">--%</div>
-            <div style="font-size:11.5px; color:var(--text-muted);" id="oracle-conf-sub">Kuantil Sürüklenme Güveni</div>
+            <div style="font-size:11.5px; color:var(--text-muted);" id="oracle-conf-sub">Quantile Drift Confidence</div>
           </div>
         </div>
 
         <!-- 4 KPI Boxes -->
         <div class="oracle-kpi-grid">
           <div class="oracle-kpi-box">
-            <div class="oracle-kpi-lbl">%80 Güven Bandı (P10 - P90)</div>
+            <div class="oracle-kpi-lbl">80% Confidence Interval (P10 - P90)</div>
             <div class="oracle-kpi-num" id="oracle-kpi-80band">$--- - $---</div>
-            <div class="oracle-kpi-sub" id="oracle-kpi-80spread">Yayılım: --%</div>
+            <div class="oracle-kpi-sub" id="oracle-kpi-80spread">Spread: --%</div>
           </div>
           <div class="oracle-kpi-box">
-            <div class="oracle-kpi-lbl">Kazanma / Yükseliş İhtimali</div>
+            <div class="oracle-kpi-lbl">Probability of Profit (Bullish)</div>
             <div class="oracle-kpi-num" id="oracle-kpi-prob">--%</div>
-            <div class="oracle-kpi-sub">Gaussian CDF İntegrali</div>
+            <div class="oracle-kpi-sub">Gaussian CDF Integral</div>
           </div>
           <div class="oracle-kpi-box">
-            <div class="oracle-kpi-lbl">Yıllık Volatilite (σ)</div>
+            <div class="oracle-kpi-lbl">Annualized Volatility (σ)</div>
             <div class="oracle-kpi-num" id="oracle-kpi-vol">--%</div>
-            <div class="oracle-kpi-sub" id="oracle-kpi-sigmat">Vade Varyansı: --</div>
+            <div class="oracle-kpi-sub" id="oracle-kpi-sigmat">Horizon Variance: --</div>
           </div>
           <div class="oracle-kpi-box">
-            <div class="oracle-kpi-lbl">Trend &amp; Rejim Durumu</div>
+            <div class="oracle-kpi-lbl">Trend &amp; Regime State</div>
             <div class="oracle-kpi-num" style="font-size:15px;" id="oracle-kpi-regime">---</div>
-            <div class="oracle-kpi-sub">SMA50 / SMA200 Filtresi</div>
+            <div class="oracle-kpi-sub">SMA50 / SMA200 Alignment</div>
           </div>
         </div>
       </div>
@@ -1010,10 +1010,10 @@
         <div class="oracle-chart-header">
           <div class="oracle-chart-title">
             <svg style="width:18px;height:18px;fill:#4f46e5;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-            Hedef Vadedeki Sürekli Fiyat Olasılık Dağılımı (Probability Density Function)
+            Continuous Price Probability Density Function (PDF)
           </div>
           <div style="font-size:12px; color:var(--text-muted);">
-            Tepe Noktası: <strong style="color:#4f46e5;">Medyan Hedef (P50)</strong> • Mavi Alan: <strong>%80 Güven Aralığı</strong>
+            Peak: <strong style="color:#4f46e5;">Median Target (P50)</strong> • Shaded Area: <strong>80% Confidence Interval [P10 — P90]</strong>
           </div>
         </div>
         <div style="height:320px; position:relative;">
@@ -1025,19 +1025,19 @@
       <div class="oracle-reasoning-card">
         <div class="oracle-reasoning-title">
           <svg style="width:20px;height:20px;fill:currentColor;" viewBox="0 0 24 24"><path d="M9.5 2C5.36 2 2 5.36 2 9.5c0 2.76 1.48 5.17 3.68 6.46.3.17.49.5.49.85V18c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1.19c0-.35.19-.68.49-.85C14.52 14.67 16 12.26 16 9.5 16 5.36 12.64 2 9.5 2zM9 21c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-1H9v1z"/></svg>
-          Yapay Zeka Karar Özeti &amp; Generative Kuantil Gerekçelendirmesi
+          AI Synthesis &amp; Generative Quantile Reasoning
         </div>
         <div class="oracle-reasoning-item" id="oracle-reason-headline">
-          <strong>Özet Teşhis:</strong> Yükleniyor...
+          <strong>Executive Verdict:</strong> Loading...
         </div>
         <div class="oracle-reasoning-item" id="oracle-reason-patch">
-          <strong>Zaman Serisi &amp; Trend:</strong> Yükleniyor...
+          <strong>Time-Series &amp; Trend:</strong> Loading...
         </div>
         <div class="oracle-reasoning-item" id="oracle-reason-macro">
-          <strong>Makro Risk &amp; VIX Şartlandırması:</strong> Yükleniyor...
+          <strong>Macro Risk &amp; VIX Conditioning:</strong> Loading...
         </div>
         <div class="oracle-reasoning-item" id="oracle-reason-uncertainty">
-          <strong>Oto-Regresif Belirsizlik Yayılımı:</strong> Yükleniyor...
+          <strong>Autoregressive Uncertainty Dispersion:</strong> Loading...
         </div>
       </div>
     </div><!-- End of view-oracle -->
@@ -2563,14 +2563,14 @@
       const slider = document.getElementById('oracle-days-slider');
       if (slider) slider.value = days;
       const sliderTxt = document.getElementById('oracle-slider-val-txt');
-      if (sliderTxt) sliderTxt.textContent = `${days} Gün`;
+      if (sliderTxt) sliderTxt.textContent = `${days} Days`;
       fetchOraclePrediction(currentOracleTicker, currentOracleDays);
     }
 
     function onOracleSliderInput(val) {
       currentOracleDays = parseInt(val, 10);
       const sliderTxt = document.getElementById('oracle-slider-val-txt');
-      if (sliderTxt) sliderTxt.textContent = `${val} Gün`;
+      if (sliderTxt) sliderTxt.textContent = `${val} Days`;
       document.querySelectorAll('.oracle-h-pill').forEach(el => el.classList.remove('active'));
       
       clearTimeout(oracleDebounceTimer);
@@ -2593,19 +2593,20 @@
     async function fetchOraclePrediction(ticker, days) {
       const horizonTxt = document.getElementById('oracle-horizon-selected-txt');
       if (horizonTxt) {
-        let label = `${days} İş Günü`;
-        if (days === 1) label = "1 Gün (Yarın Kapanış)";
-        else if (days === 5) label = "1 Hafta (5 İş Günü)";
-        else if (days === 10) label = "2 Hafta (10 İş Günü)";
-        else if (days === 21) label = "1 Ay (21 İş Günü)";
-        else if (days === 63) label = "3 Ay (63 İş Günü)";
-        else if (days === 126) label = "6 Ay (126 İş Günü)";
-        else if (days === 252) label = "1 Yıl (252 İş Günü)";
+        let label = `${days} Trading Days`;
+        if (days === 1) label = "1 Day (Tomorrow Close)";
+        else if (days === 3) label = "3 Days";
+        else if (days === 5) label = "1 Week (5 Trading Days)";
+        else if (days === 10) label = "2 Weeks (10 Trading Days)";
+        else if (days === 21) label = "1 Month (21 Trading Days)";
+        else if (days === 63) label = "3 Months (63 Trading Days)";
+        else if (days === 126) label = "6 Months (126 Trading Days)";
+        else if (days === 252) label = "1 Year (252 Trading Days)";
         horizonTxt.textContent = label;
       }
 
       const verdictHeadline = document.getElementById('oracle-verdict-headline');
-      if (verdictHeadline) verdictHeadline.textContent = `${ticker} • ${days} Gün Sonrası Fiyat Kehaneti Hesaplanıyor...`;
+      if (verdictHeadline) verdictHeadline.textContent = `${ticker} • Computing Generative Price Oracle for ${days} days ahead...`;
 
       try {
         const res = await fetch(`/api/oracle?ticker=${encodeURIComponent(ticker)}&days=${days}`);
@@ -2615,7 +2616,7 @@
         renderOracleUI(data);
       } catch (err) {
         console.error("Oracle fetch error:", err);
-        if (verdictHeadline) verdictHeadline.textContent = `Hata: ${err.message}`;
+        if (verdictHeadline) verdictHeadline.textContent = `Error: ${err.message}`;
       }
     }
 
@@ -2646,23 +2647,23 @@
       if (targetDateElem) targetDateElem.textContent = data.target_date;
 
       const confElem = document.getElementById('oracle-conf-val');
-      if (confElem) confElem.textContent = `%${pt.directional_confidence_pct}`;
+      if (confElem) confElem.textContent = `${pt.directional_confidence_pct}%`;
 
       // 4 KPI boxes
       const kpi80 = document.getElementById('oracle-kpi-80band');
       if (kpi80) kpi80.textContent = `$${pt.confidence_80_range.p10.toFixed(2)} - $${pt.confidence_80_range.p90.toFixed(2)}`;
 
       const kpiSpread = document.getElementById('oracle-kpi-80spread');
-      if (kpiSpread) kpiSpread.textContent = `Yayılım: %${pt.confidence_80_range.spread_pct}`;
+      if (kpiSpread) kpiSpread.textContent = `Spread: ${pt.confidence_80_range.spread_pct}%`;
 
       const kpiProb = document.getElementById('oracle-kpi-prob');
       if (kpiProb) {
-        kpiProb.textContent = `%${pt.profit_probability_pct}`;
+        kpiProb.textContent = `${pt.profit_probability_pct}%`;
         kpiProb.style.color = pt.profit_probability_pct >= 55 ? 'var(--google-green)' : (pt.profit_probability_pct <= 45 ? 'var(--google-red)' : 'var(--text-primary)');
       }
 
       const kpiVol = document.getElementById('oracle-kpi-vol');
-      if (kpiVol) kpiVol.textContent = `%${pt.annualized_volatility_pct}`;
+      if (kpiVol) kpiVol.textContent = `${pt.annualized_volatility_pct}%`;
 
       const kpiSigma = document.getElementById('oracle-kpi-sigmat');
       if (kpiSigma) kpiSigma.textContent = `σ(t): ${pt.sigma_t}`;
@@ -2677,13 +2678,13 @@
       const r = data.generative_reasoning;
       if (r) {
         const hElem = document.getElementById('oracle-reason-headline');
-        if (hElem) hElem.innerHTML = `<strong>Özet Teşhis:</strong> ${r.headline}`;
+        if (hElem) hElem.innerHTML = `<strong>Executive Verdict:</strong> ${r.headline}`;
         const pElem = document.getElementById('oracle-reason-patch');
-        if (pElem) pElem.innerHTML = `<strong>Zaman Serisi &amp; Trend:</strong> ${r.patch_analysis}`;
+        if (pElem) pElem.innerHTML = `<strong>Time-Series &amp; Trend:</strong> ${r.patch_analysis}`;
         const mElem = document.getElementById('oracle-reason-macro');
-        if (mElem) mElem.innerHTML = `<strong>Makro Risk &amp; VIX Şartlandırması:</strong> ${r.macro_risk}`;
+        if (mElem) mElem.innerHTML = `<strong>Macro Risk &amp; VIX Conditioning:</strong> ${r.macro_risk}`;
         const uElem = document.getElementById('oracle-reason-uncertainty');
-        if (uElem) uElem.innerHTML = `<strong>Oto-Regresif Belirsizlik Yayılımı:</strong> ${r.uncertainty_analysis}`;
+        if (uElem) uElem.innerHTML = `<strong>Autoregressive Uncertainty Dispersion:</strong> ${r.uncertainty_analysis}`;
       }
 
       // Render Chart
@@ -2720,7 +2721,7 @@
         data: {
           labels: labels,
           datasets: [{
-            label: 'Olasılık Yoğunluğu f(P)',
+            label: 'Probability Density f(P)',
             data: densities,
             borderColor: '#4f46e5',
             borderWidth: 2.5,
@@ -2740,11 +2741,11 @@
             legend: { display: false },
             tooltip: {
               callbacks: {
-                title: (items) => `Fiyat: ${items[0].label}`,
+                title: (items) => `Price: ${items[0].label}`,
                 label: (item) => {
                   const pt = curve[item.dataIndex];
-                  const inRange = pt.in_80_ci ? ' (%80 Güven Aralığı İçinde)' : '';
-                  return `Yoğunluk: ${pt.density}${inRange}`;
+                  const inRange = pt.in_80_ci ? ' (Inside 80% CI)' : '';
+                  return `Density: ${pt.density}${inRange}`;
                 }
               }
             }

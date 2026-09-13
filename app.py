@@ -173,9 +173,9 @@ async def api_oracle(
 
     is_bull = target_p50 >= current_price
     headline = (
-        f"TimesFM Foundation Modeli {days} günlük projeksiyonda +%{expected_return_pct} yukarı yönlü momentuma işaret ediyor."
+        f"TimesFM Foundation Model projects +{expected_return_pct}% upward momentum over the {days}-day horizon."
         if is_bull else
-        f"TimesFM Foundation Modeli {days} günlük projeksiyonda -%{abs(expected_return_pct)} düzeltme ve baskı öngörüyor."
+        f"TimesFM Foundation Model indicates -{abs(expected_return_pct)}% downward correction and consolidation over the {days}-day horizon."
     )
 
     return {
@@ -184,7 +184,7 @@ async def api_oracle(
         "current_price": round(float(current_price), 2),
         "target_date": target_date,
         "days_ahead": days,
-        "horizon_label": f"{days} İş Günü",
+        "horizon_label": f"{days} Trading Days",
         "point_forecast": {
             "target_price_p50": target_p50,
             "expected_return_pct": expected_return_pct,
@@ -204,9 +204,9 @@ async def api_oracle(
         "distribution_curve": distribution_curve,
         "generative_reasoning": {
             "headline": headline,
-            "patch_analysis": f"Fiyat (${current_price:.2f}), SMA50 (${sma_50:.2f}) ve SMA200 (${sma_200:.2f}) seviyelerine göre değerlendirildi.",
-            "macro_risk": f"VIX risk faktörü {vix_stress:.2f}x olarak kalibre edildi.",
-            "uncertainty_analysis": f"Difüzyon yayılımı %80 güven aralığını [${p10} - ${p90}] bandında tutmaktadır."
+            "patch_analysis": f"Price (${current_price:.2f}) evaluated against 50-day SMA (${sma_50:.2f}) and 200-day SMA (${sma_200:.2f}).",
+            "macro_risk": f"CBOE VIX and Treasury yield spread scale the macroeconomic risk factor to {vix_stress:.2f}x.",
+            "uncertainty_analysis": f"Stochastic diffusion expands 80% confidence interval to [${p10} - ${p90}] at target horizon."
         },
         "model_metadata": {
             "model_name": "TimesFM-3 Generative Oracle",

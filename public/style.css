@@ -18,7 +18,11 @@
   --border-light: #f3f4f6;
   --bg-page: #ffffff;
   --bg-card: #ffffff;
+  --surface-color: #ffffff;
   --bg-hover: #f9fafb;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-search: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -40,6 +44,7 @@
   --border-light: #282a2d;
   --bg-page: #121316;
   --bg-card: #1e1f24;
+  --surface-color: #1e1f24;
   --bg-hover: #26282e;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
@@ -596,10 +601,12 @@ input, button, select, textarea, table, th, td {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 24px;
+  padding: 12px 24px;
   border-bottom: 1px solid var(--border-color);
   font-size: 13px;
   color: var(--text-secondary);
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .brand-domain {
@@ -1936,13 +1943,15 @@ footer a, .app-footer a {
   background: #ffffff;
   border: 1px solid var(--border-color);
   border-radius: 20px;
-  padding: 8px 16px;
-  font-size: 13px;
+  padding: 7px 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  gap: 5px;
+  white-space: nowrap;
   transition: all 0.15s ease;
   font-family: var(--font-family);
 }
@@ -3147,5 +3156,62 @@ footer a, .app-footer a {
 .oracle-reasoning-item strong {
   color: var(--text-primary);
 }
+
+/* Dark Theme Overrides for TimesFM Oracle */
+[data-theme="dark"] .oracle-controls-card,
+[data-theme="dark"] .oracle-verdict-card,
+[data-theme="dark"] .oracle-chart-card,
+[data-theme="dark"] .oracle-reasoning-card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .oracle-kpi-box {
+  background: #17181c;
+  border-color: #2c2f35;
+}
+
+[data-theme="dark"] .oracle-chip {
+  background: #252830;
+  border-color: #383c44;
+  color: #c4c7c5;
+}
+
+[data-theme="dark"] .oracle-chip:hover,
+[data-theme="dark"] .oracle-chip.active {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .oracle-h-pill {
+  background: #1e1f24;
+  border-color: #383c44;
+  color: #c4c7c5;
+}
+
+[data-theme="dark"] .oracle-h-pill:hover,
+[data-theme="dark"] .oracle-h-pill.active {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .oracle-badge-return.bullish {
+  background: rgba(129, 201, 149, 0.18);
+  color: #81c995;
+  border: 1px solid rgba(129, 201, 149, 0.35);
+}
+
+[data-theme="dark"] .oracle-badge-return.bearish {
+  background: rgba(242, 139, 130, 0.18);
+  color: #f28b82;
+  border: 1px solid rgba(242, 139, 130, 0.35);
+}
+
+[data-theme="dark"] .oracle-reasoning-title {
+  color: #818cf8;
+}
+
 
 

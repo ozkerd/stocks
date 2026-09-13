@@ -283,28 +283,29 @@ export async function onRequestGet(context) {
     }
 
     // Horizon Description
-    let horizonLabel = `${days} İş Günü`;
-    if (days === 1) horizonLabel = "1 Gün (Yarın Kapanış)";
-    else if (days === 5) horizonLabel = "1 Hafta (5 İş Günü)";
-    else if (days === 10) horizonLabel = "2 Hafta (10 İş Günü)";
-    else if (days === 21) horizonLabel = "1 Ay (21 İş Günü)";
-    else if (days === 63) horizonLabel = "3 Ay (63 İş Günü)";
-    else if (days === 126) horizonLabel = "6 Ay (126 İş Günü)";
-    else if (days === 252) horizonLabel = "1 Yıl (252 İş Günü)";
+    let horizonLabel = `${days} Trading Days`;
+    if (days === 1) horizonLabel = "1 Day (Next Day Close)";
+    else if (days === 3) horizonLabel = "3 Days";
+    else if (days === 5) horizonLabel = "1 Week (5 Trading Days)";
+    else if (days === 10) horizonLabel = "2 Weeks (10 Trading Days)";
+    else if (days === 21) horizonLabel = "1 Month (21 Trading Days)";
+    else if (days === 63) horizonLabel = "3 Months (63 Trading Days)";
+    else if (days === 126) horizonLabel = "6 Months (126 Trading Days)";
+    else if (days === 252) horizonLabel = "1 Year (252 Trading Days)";
 
     // Generative AI Reasoning Synthesis
     const isBull = targetP50 >= currentPrice;
     const headline = isBull
-      ? `TimesFM Foundation Modeli ${days} günlük projeksiyonda +%${expectedReturnPct} yukarı yönlü momentuma işaret ediyor.`
-      : `TimesFM Foundation Modeli ${days} günlük projeksiyonda -%${Math.abs(expectedReturnPct)} düzeltme ve baskı öngörüyor.`;
+      ? `TimesFM Foundation Model projects +${expectedReturnPct}% upward momentum over the ${days}-day horizon.`
+      : `TimesFM Foundation Model indicates -${Math.abs(expectedReturnPct)}% downward correction and consolidation over the ${days}-day horizon.`;
 
     const patchReason = isGoldenCross
-      ? `Fiyat ($${currentPrice.toFixed(2)}), 50-günlük ($${curSMA50.toFixed(2)}) ve 200-günlük ($${curSMA200.toFixed(2)}) hareketli ortalamalarının üzerinde kalarak pozitif trend kanalını (Golden Cross) koruyor.`
+      ? `Price ($${currentPrice.toFixed(2)}) holds above both 50-day ($${curSMA50.toFixed(2)}) and 200-day ($${curSMA200.toFixed(2)}) moving averages, sustaining a robust Golden Cross breakout channel.`
       : isDeathCross
-      ? `Fiyat ($${currentPrice.toFixed(2)}), 200-günlük hareketli ortalamanın ($${curSMA200.toFixed(2)}) altında kalarak negatif rejimde (Death Cross) işlem görüyor.`
-      : `Fiyat hareketli ortalamaların arasında konsolide oluyor; yatay-volatil kuantil dağılımı oluştu.`;
+      ? `Price ($${currentPrice.toFixed(2)}) is suppressed below the 200-day moving average ($${curSMA200.toFixed(2)}), exhibiting structural weakness under a primary Death Cross regime.`
+      : `Price consolidates between key moving average baselines, indicating a rangebound stochastic quantile cone.`;
 
-    const uncertaintyReason = `Zaman serisi difüzyon teorisine göre ${days} gün sonrasındaki varyans yayılımı (\\sigma\\sqrt{t}) %80 güven aralığını [$${p10} - $${p90}] bandına genişletmiştir. Bu vadede yükseliş ihtimali %${profitProbPct} olarak hesaplanmıştır.`;
+    const uncertaintyReason = `Stochastic diffusion theory expands the 80% confidence interval to [$${p10} - $${p90}] at t=${days} trading days. The empirical probability of positive price gain is evaluated at ${profitProbPct}%.`;
 
     const payload = {
       symbol,
@@ -337,7 +338,7 @@ export async function onRequestGet(context) {
       generative_reasoning: {
         headline,
         patch_analysis: patchReason,
-        macro_risk: `CBOE VIX (${vixLevel}) ve makro getiri eğrisi risk çarpanı ${vixStress.toFixed(2)}x olarak kalibre edildi.`,
+        macro_risk: `CBOE VIX (${vixLevel}) and Treasury yield spread scale the macroeconomic risk factor to ${vixStress.toFixed(2)}x.`,
         uncertainty_analysis: uncertaintyReason
       },
       model_metadata: {
