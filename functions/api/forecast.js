@@ -308,7 +308,10 @@ const FALLBACK_PRICES = {
   "RKLB": { price: 62.95, name: "Rocket Lab USA Inc.", type: "EQUITY" },
   "IONQ": { price: 36.75, name: "IonQ Inc.", type: "EQUITY" },
   "MSTR": { price: 130.97, name: "MicroStrategy Inc.", type: "EQUITY" },
-  "ARM": { price: 264.79, name: "Arm Holdings plc", type: "EQUITY" }
+  "ARM": { price: 264.79, name: "Arm Holdings plc", type: "EQUITY" },
+  "TEM": { price: 68.50, name: "Tempus AI Inc.", type: "EQUITY" },
+  "ATOS": { price: 2.51, name: "Atossa Therapeutics Inc.", type: "EQUITY" },
+  "ATO.PA": { price: 24.82, name: "Atos SE", type: "EQUITY" }
 };
 
 function generateFallbackAsset(symbol) {
@@ -1029,35 +1032,38 @@ export async function onRequest(context) {
     let ratingScore = 50; // Neutral baseline
 
     // Technical Component (40 pts)
+    const isBullTrend = currentPrice > sma200[n - 1] && sma50[n - 1] > sma200[n - 1];
+    const isDeathCross = currentPrice < sma200[n - 1] && sma50[n - 1] < sma200[n - 1];
+
     const latestRSI = rsi[n - 1];
-    if (latestRSI > 50 && latestRSI < 70) ratingScore += 12;
-    else if (latestRSI >= 70) ratingScore -= 6; // Overbought fatigue
-    else if (latestRSI < 35) ratingScore += 8;  // Oversold value dip
-    else ratingScore -= 4;
+    if (isBullTrend) {
+      if (latestRSI > 50 && latestRSI < 68) ratingScore += 12;
+      else if (latestRSI >= 68) ratingScore -= 4; // Overbought fatigue
+      else if (latestRSI < 38) ratingScore += 8;  // Bull market dip buy
+      else ratingScore += 2;
+    } else if (isDeathCross) {
+      if (latestRSI < 35) ratingScore -= 12; // In death cross, RSI < 35 is a breakdown, NOT a dip buy!
+      else if (latestRSI > 60) ratingScore -= 8; // Bear market rally failure
+      else ratingScore -= 6;
+    } else {
+      if (latestRSI > 50) ratingScore += 4;
+      else ratingScore -= 4;
+    }
 
-    if (macd.hist[n - 1] > 0) ratingScore += 12;
-    else ratingScore -= 8;
+    if (macd.hist[n - 1] > 0) ratingScore += isBullTrend ? 12 : 5;
+    else ratingScore -= isDeathCross ? 14 : 8;
 
-    // Moving average positioning & mean-reversion bounce dynamics
-    const price5dAgo = records[Math.max(0, n - 6)]?.close || currentPrice;
-    const return5d = (currentPrice - price5dAgo) / price5dAgo;
-    const isRebounding = return5d > 0.02 && macd.hist[n - 1] > 0;
-
+    // Moving average positioning
     if (currentPrice > sma50[n - 1]) {
       ratingScore += 10;
-    } else if (isRebounding) {
-      // Rebound / oversold bounce turning positive: don't penalize as a dead downtrend
-      ratingScore += 6;
     } else {
       ratingScore -= 8;
     }
 
     if (currentPrice > sma200[n - 1]) {
-      ratingScore += 8;
-    } else if (isRebounding) {
-      ratingScore += 4;
+      ratingScore += 10;
     } else {
-      ratingScore -= 6;
+      ratingScore -= isDeathCross ? 16 : 8;
     }
 
     // Macroeconomic Component (30 pts)
@@ -1077,12 +1083,7 @@ export async function onRequest(context) {
 
     // Foundation Model Neural Drift Component (30 pts)
     const maSlope = (sma50[n - 1] - sma50[Math.max(0, n - 20)]) / sma50[Math.max(0, n - 20)];
-    if (!isRebounding) {
-      ratingScore += Math.min(15, Math.max(-15, Math.round(maSlope * 200)));
-    } else {
-      // In a bounce reversal, use short-term 5-day momentum slope instead of lagging 50-day drop
-      ratingScore += Math.min(15, Math.max(0, Math.round(return5d * 250)));
-    }
+    ratingScore += Math.min(15, Math.max(-15, Math.round(maSlope * 200)));
 
     if (isDeep) {
       // 500M model uses multi-head cross-attention weighting
@@ -1091,9 +1092,17 @@ export async function onRequest(context) {
 
     // Statistical Risk & Volatility Adjustment
     if (annualizedVol > 0.65 && ratingScore < 55) {
-      ratingScore -= 6; // Penalize hyper-volatility lacking upward trend
+      ratingScore -= 8; // Penalize hyper-volatility lacking upward trend
     } else if (annualizedVol < 0.25 && ratingScore > 50) {
       ratingScore += 4; // Low-volatility trend stability bonus
+    }
+
+    // Penny Stock & Structural Death Cross Guards
+    if (currentPrice < 3.0) {
+      ratingScore = Math.min(45, ratingScore - 10); // Penny stock dilution/volatility penalty
+    }
+    if (isDeathCross) {
+      ratingScore = Math.min(38, ratingScore); // Hard ceiling for primary bear trends
     }
 
     ratingScore = Math.min(96, Math.max(15, Math.round(ratingScore)));
