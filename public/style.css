@@ -1912,4 +1912,193 @@ footer a {
   font-weight: 600;
 }
 
+/* ==========================================================================
+   AI LIE DETECTOR & ACCURACY AUDIT
+   ========================================================================== */
+
+.detector-hero-banner {
+  background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+  color: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 24px 32px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.detector-hero-banner h1 {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.detector-hero-banner p {
+  font-size: 14px;
+  opacity: 0.92;
+  max-width: 860px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.detector-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .detector-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .detector-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detector-kpi-card {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.detector-kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--kpi-accent, var(--google-blue));
+}
+
+.detector-kpi-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detector-kpi-val {
+  font-size: 26px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.detector-kpi-sub {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+.truth-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.truth-badge.verified {
+  background: #e6f4ea;
+  color: #137333;
+  border: 1px solid #ceead6;
+}
+
+.truth-badge.accurate {
+  background: #e8f0fe;
+  color: #1a73e8;
+  border: 1px solid #aecbfa;
+}
+
+.truth-badge.moderate {
+  background: #fef7e0;
+  color: #b06000;
+  border: 1px solid #feefc3;
+}
+
+.truth-badge.outlier {
+  background: #fce8e6;
+  color: #c5221f;
+  border: 1px solid #fad2cf;
+}
+
+.cone-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.cone-badge.in-cone {
+  background: #e6f4ea;
+  color: #137333;
+  border: 1px solid #ceead6;
+}
+
+.cone-badge.out-cone {
+  background: #fce8e6;
+  color: #c5221f;
+  border: 1px solid #fad2cf;
+}
+
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #f1f3f4;
+  color: #3c4043;
+  white-space: nowrap;
+}
+
+.tier-badge.max-conviction {
+  background: #fef7e0;
+  color: #b06000;
+  border: 1px solid #feefc3;
+}
+
+.tier-badge.alpha {
+  background: #f3e8fd;
+  color: #8430ce;
+  border: 1px solid #e9d5ff;
+}
+
+.tier-badge.defensive {
+  background: #e8f0fe;
+  color: #1a73e8;
+  border: 1px solid #aecbfa;
+}
+
 
