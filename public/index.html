@@ -6,8 +6,8 @@
   <title>AI Stock & Crypto Price Forecaster | stocks.primerllm.com</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=20260913-06">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=20260913-07">
   <script>
     (function() {
       try {
@@ -24,7 +24,10 @@
   <!-- Top Bar -->
   <header class="top-nav">
     <div class="brand-domain">
-      <span style="font-weight:700; color:var(--text-primary); letter-spacing:-0.2px;">make money or widows</span>
+      <div class="brand-logo-text" onclick="switchAppView('forecast')" title="TimesFM-3 Stock &amp; Crypto Forecasting">
+        <span class="brand-make-money">make money</span>
+        <span class="brand-or-widows" title="High risk, high return... don't say we didn't warn you 😉">or widows</span>
+      </div>
       <span class="badge">AI Market Forecasting Engine</span>
       <span class="badge badge-stocks-crypto">Stocks & Crypto</span>
     </div>
@@ -884,8 +887,22 @@
     </div><!-- End of view-detector -->
   </main>
 
-  <footer>
-    <p>Powered by Google TimesFM-3 Architecture • <strong>stocks.primerllm.com</strong></p>
+  <footer class="app-footer">
+    <div class="footer-disclaimer-box">
+      <div class="disclaimer-header">
+        <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24">
+          <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+        </svg>
+        <span>Important Disclaimer: Not Financial Advice</span>
+      </div>
+      <p class="disclaimer-text">
+        The information, neural price targets, probability bands (P10/P50/P90), walk-forward backtest statistics, and trade setups provided on this platform are strictly for informational, educational, and computational research purposes only. 
+        <strong>None of the content constitutes financial, investment, legal, tax, or trading advice.</strong> Trading equities and cryptocurrencies involves substantial risk of capital loss. Past statistical model accuracy does not guarantee future financial results. Always conduct your own independent due diligence (DYOR) and consult a licensed financial advisor before executing trades.
+      </p>
+    </div>
+    <div class="footer-bottom-line">
+      <p>Powered by Google TimesFM-3 Architecture • <strong>make money or widows</strong> • All Market Feeds Hydrated Live</p>
+    </div>
   </footer>
 
   <!-- Frontend Logic -->
