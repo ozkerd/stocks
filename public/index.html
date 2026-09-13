@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=20260913-04">
+  <link rel="stylesheet" href="/style.css?v=20260913-05">
   <script>
     (function() {
       try {
@@ -1570,13 +1570,16 @@
       scoreElem.style.color = q.color;
 
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      actionElem.textContent = q.action;
-      actionElem.style.background = isDark
-        ? (q.score >= 60 ? '#132a1c' : (q.score <= 44 ? '#331a1a' : '#282a30'))
-        : (q.score >= 60 ? '#e6f4ea' : (q.score <= 44 ? '#fce8e6' : '#f1f3f4'));
-      actionElem.style.color = isDark
-        ? (q.score >= 60 ? '#81c995' : (q.score <= 44 ? '#f28b82' : '#bdc1c6'))
-        : q.color;
+      const actionElem = document.getElementById('res-rating-action');
+      if (actionElem) {
+        actionElem.textContent = q.action;
+        actionElem.style.background = isDark
+          ? (q.score >= 60 ? '#132a1c' : (q.score <= 44 ? '#331a1a' : '#282a30'))
+          : (q.score >= 60 ? '#e6f4ea' : (q.score <= 44 ? '#fce8e6' : '#f1f3f4'));
+        actionElem.style.color = isDark
+          ? (q.score >= 60 ? '#81c995' : (q.score <= 44 ? '#f28b82' : '#bdc1c6'))
+          : q.color;
+      }
 
       document.getElementById('res-confidence-pct').textContent = `${q.confidence_pct}% Directional Confidence`;
       
