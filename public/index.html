@@ -964,32 +964,84 @@
       }
     }
 
+    // Instant local asset list for 0ms autocomplete suggestions
+    const CLIENT_QUICK_ASSETS = [
+      { symbol: "NVDA", name: "NVIDIA Corporation", type: "Stock", exchange: "NASDAQ", aliases: ["NVDA", "NVIDIA"] },
+      { symbol: "TEM", name: "Tempus AI, Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["TEM", "TEMPUS", "TEMPUS AI"] },
+      { symbol: "ATOS", name: "Atossa Therapeutics, Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["ATOS", "ATOSSA"] },
+      { symbol: "ATO.PA", name: "Atos SE", type: "Stock", exchange: "Euronext Paris", aliases: ["ATO", "ATOS", "ATOS SE"] },
+      { symbol: "APP", name: "AppLovin Corporation", type: "Stock", exchange: "NASDAQ", aliases: ["APP", "APPLOVIN"] },
+      { symbol: "PLTR", name: "Palantir Technologies", type: "Stock", exchange: "NYSE", aliases: ["PLTR", "PALANTIR"] },
+      { symbol: "BTC-USD", name: "Bitcoin USD", type: "Crypto", exchange: "Crypto", aliases: ["BTC", "BITCOIN"] },
+      { symbol: "ETH-USD", name: "Ethereum USD", type: "Crypto", exchange: "Crypto", aliases: ["ETH", "ETHEREUM"] },
+      { symbol: "SOL-USD", name: "Solana USD", type: "Crypto", exchange: "Crypto", aliases: ["SOL", "SOLANA"] },
+      { symbol: "AAPL", name: "Apple Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["AAPL", "APPLE"] },
+      { symbol: "MSFT", name: "Microsoft Corporation", type: "Stock", exchange: "NASDAQ", aliases: ["MSFT", "MICROSOFT"] },
+      { symbol: "AMZN", name: "Amazon.com Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["AMZN", "AMAZON"] },
+      { symbol: "TSLA", name: "Tesla Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["TSLA", "TESLA"] },
+      { symbol: "META", name: "Meta Platforms Inc. (Facebook)", type: "Stock", exchange: "NASDAQ", aliases: ["META", "FACEBOOK"] },
+      { symbol: "AMD", name: "Advanced Micro Devices", type: "Stock", exchange: "NASDAQ", aliases: ["AMD"] },
+      { symbol: "COIN", name: "Coinbase Global Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["COIN", "COINBASE"] },
+      { symbol: "ARM", name: "Arm Holdings plc", type: "Stock", exchange: "NASDAQ", aliases: ["ARM"] },
+      { symbol: "SMCI", name: "Super Micro Computer Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["SMCI", "SUPERMICRO"] },
+      { symbol: "ASTS", name: "AST SpaceMobile Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["ASTS", "SPACEMOBILE"] },
+      { symbol: "RKLB", name: "Rocket Lab USA Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["RKLB", "ROCKET LAB"] },
+      { symbol: "IONQ", name: "IonQ Inc. (Quantum)", type: "Stock", exchange: "NYSE", aliases: ["IONQ"] },
+      { symbol: "MSTR", name: "MicroStrategy Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["MSTR", "MICROSTRATEGY"] },
+      { symbol: "HYPE32196-USD", name: "Hyperliquid USD (HYPE)", type: "Crypto", exchange: "Crypto", aliases: ["HYPE", "HYPERLIQUID"] },
+      { symbol: "LIT6833-USD", name: "Litentry USD (LIT)", type: "Crypto", exchange: "Crypto", aliases: ["LIT", "LITENTRY"] },
+      { symbol: "SUI20947-USD", name: "Sui Network USD (SUI)", type: "Crypto", exchange: "Crypto", aliases: ["SUI"] },
+      { symbol: "SEI-USD", name: "Sei Network USD (SEI)", type: "Crypto", exchange: "Crypto", aliases: ["SEI"] },
+      { symbol: "APT21794-USD", name: "Aptos USD (APT)", type: "Crypto", exchange: "Crypto", aliases: ["APT", "APTOS"] },
+      { symbol: "TAO-USD", name: "Bittensor USD (TAO)", type: "Crypto", exchange: "Crypto", aliases: ["TAO", "BITTENSOR"] },
+      { symbol: "NEAR-USD", name: "NEAR Protocol USD", type: "Crypto", exchange: "Crypto", aliases: ["NEAR"] },
+      { symbol: "ONDO-USD", name: "Ondo Finance RWA USD (ONDO)", type: "Crypto", exchange: "Crypto", aliases: ["ONDO"] },
+      { symbol: "AAVE-USD", name: "Aave USD", type: "Crypto", exchange: "Crypto", aliases: ["AAVE"] },
+      { symbol: "LINK-USD", name: "Chainlink USD", type: "Crypto", exchange: "Crypto", aliases: ["LINK", "CHAINLINK"] },
+      { symbol: "AVAX-USD", name: "Avalanche USD", type: "Crypto", exchange: "Crypto", aliases: ["AVAX", "AVALANCHE"] },
+      { symbol: "XRP-USD", name: "XRP Ripple USD", type: "Crypto", exchange: "Crypto", aliases: ["XRP", "RIPPLE"] },
+      { symbol: "DOGE-USD", name: "Dogecoin USD", type: "Crypto", exchange: "Crypto", aliases: ["DOGE", "DOGECOIN"] }
+    ];
+
     // Autocomplete Input Handling
     function handleInputSearch(val) {
       clearTimeout(searchDebounceTimer);
       const box = document.getElementById('autocomplete-box');
-      const clean = val.trim();
+      const clean = (val || '').trim().toLowerCase();
       if (clean.length < 1) {
         box.style.display = 'none';
         return;
       }
 
+      // 1. Instant client-side match (<1ms) so dropdown never delays
+      const localMatches = CLIENT_QUICK_ASSETS.filter(item => {
+        return item.symbol.toLowerCase().includes(clean) ||
+               item.name.toLowerCase().includes(clean) ||
+               (item.aliases && item.aliases.some(a => a.toLowerCase().includes(clean)));
+      });
+      if (localMatches.length > 0) {
+        renderAutocomplete(localMatches);
+      }
+
+      // 2. Debounced remote API search
       searchDebounceTimer = setTimeout(async () => {
         try {
           const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(clean)}`);
           if (!res.ok) return;
           const data = await res.json();
-          renderAutocomplete(data.results || []);
+          if (data.results && data.results.length > 0) {
+            renderAutocomplete(data.results);
+          }
         } catch (e) {
           // ignore
         }
-      }, 180);
+      }, 150);
     }
 
     function renderAutocomplete(results) {
       const box = document.getElementById('autocomplete-box');
       box.innerHTML = '';
-      if (results.length === 0) {
+      if (!results || results.length === 0) {
         box.style.display = 'none';
         return;
       }
@@ -1043,12 +1095,17 @@
       }
     }
 
-    // Close top pick dropdown on outside click
+    // Close top pick dropdown and autocomplete box on outside click
     document.addEventListener('click', function(e) {
       const dd = document.getElementById('dropdown-top-pick');
       if (dd && !dd.contains(e.target)) {
         const menu = document.getElementById('top-pick-menu');
         if (menu) menu.classList.remove('show');
+      }
+      const searchForm = document.getElementById('search-form');
+      const box = document.getElementById('autocomplete-box');
+      if (searchForm && box && !searchForm.contains(e.target)) {
+        box.style.display = 'none';
       }
     });
 

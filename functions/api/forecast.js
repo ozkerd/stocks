@@ -101,6 +101,8 @@ const COMMON_COMPANY_NAMES = {
   "ARM": "ARM",
   "ATOS": "ATOS",
   "ATOSSA": "ATOS",
+  "ATO": "ATO.PA",
+  "ATOS SE": "ATO.PA",
   "TEMPUS": "TEM",
   "TEMPUS AI": "TEM",
   "TEM": "TEM"
@@ -186,6 +188,12 @@ const QUANT_UNIVERSE_MAP = {
   "META": { conviction: 88, rating: "STRONG BUY", base_return: 18.9 },
   "COIN": { conviction: 87, rating: "STRONG BUY", base_return: 27.5 },
   "ARM": { conviction: 87, rating: "STRONG BUY", base_return: 22.0 },
+  "TEM": { conviction: 88, rating: "BUY", base_return: 34.0 },
+  "TEMPUS": { conviction: 88, rating: "BUY", base_return: 34.0 },
+  "TEMPUS AI": { conviction: 88, rating: "BUY", base_return: 34.0 },
+  "ATOS": { conviction: 82, rating: "BUY", base_return: 28.5 },
+  "ATOSSA": { conviction: 82, rating: "BUY", base_return: 28.5 },
+  "ATO.PA": { conviction: 80, rating: "BUY", base_return: 24.0 },
   "SMCI": { conviction: 87, rating: "BUY", base_return: 36.0 },
   "APT21794-USD": { conviction: 87, rating: "BUY", base_return: 28.0 },
   "APT": { conviction: 87, rating: "BUY", base_return: 28.0 },
@@ -688,6 +696,13 @@ const FALLBACK_PROFILES = {
     industry: "Health Information Services & AI Precision Medicine",
     headquarters: "Chicago, Illinois, USA",
     website: "https://www.tempus.com"
+  },
+  "ATO.PA": {
+    description: "Atos SE is a European multinational information technology service and consulting company specializing in hi-tech transactional services, unified communications, cloud, big data, and cybersecurity services.",
+    sector: "Technology",
+    industry: "IT Services & Cloud Consulting",
+    headquarters: "Bezons, France",
+    website: "https://atos.net"
   }
 };
 
@@ -779,7 +794,8 @@ const ASSET_NAME_MAP = {
   "ADA-USD": "Cardano",
   "BNB-USD": "BNB Binance",
   "ATOS": "Atossa Therapeutics",
-  "TEM": "Tempus AI"
+  "TEM": "Tempus AI",
+  "ATO.PA": "Atos SE"
 };
 
 function isHeadlineRelevant(title, ticker, assetName) {

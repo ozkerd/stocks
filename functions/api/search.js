@@ -28,6 +28,7 @@ const POPULAR_ASSETS = [
   { symbol: "MSTR", name: "MicroStrategy Inc.", type: "Stock", exchange: "NASDAQ" },
   { symbol: "TEM", name: "Tempus AI, Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["TEM", "TEMPUS", "TEMPUS AI"] },
   { symbol: "ATOS", name: "Atossa Therapeutics, Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["ATOS", "ATOSSA"] },
+  { symbol: "ATO.PA", name: "Atos SE", type: "Stock", exchange: "Euronext Paris", aliases: ["ATO", "ATOS", "ATOS SE"] },
 
   // Crypto Assets & Trending Coins
   { symbol: "BTC-USD", name: "Bitcoin USD", type: "Crypto", exchange: "Crypto", aliases: ["BTC", "BITCOIN"] },
@@ -79,13 +80,17 @@ export async function onRequest(context) {
   // 2. Query Yahoo Finance Search API for broad coverage
   let remoteMatches = [];
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 650);
     const yUrl = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(q)}&quotesCount=8&newsCount=0&enableFuzzyQuery=true`;
     const res = await fetch(yUrl, {
+      signal: controller.signal,
       headers: {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Accept": "application/json"
       }
     });
+    clearTimeout(timeoutId);
     if (res.ok) {
       const data = await res.json();
       const quotes = data.quotes || [];
