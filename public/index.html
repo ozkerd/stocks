@@ -2609,7 +2609,7 @@
       if (verdictHeadline) verdictHeadline.textContent = `${ticker} • Computing Generative Price Oracle for ${days} days ahead...`;
 
       try {
-        const res = await fetch(`/api/oracle?ticker=${encodeURIComponent(ticker)}&days=${days}`);
+        const res = await fetch(`${API_BASE}/api/oracle?ticker=${encodeURIComponent(ticker)}&days=${days}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         cachedOracleData = data;
