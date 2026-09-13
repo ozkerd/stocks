@@ -619,25 +619,33 @@
 
         <!-- SUBMODE 2: TRADE SETUPS CARDS -->
         <div id="submode-setups" style="display:none;">
-          <div class="category-filter-bar">
-            <span class="category-filter-label">Filter Setups:</span>
-            <button type="button" class="cat-pill active" id="btn-setups-all" onclick="filterTradeSetups('all')">🎯 All Setups</button>
-            <button type="button" class="cat-pill" id="btn-setups-strong" onclick="filterTradeSetups('STRONG BUY')">🔥 Strong Buy Setups</button>
-            <button type="button" class="cat-pill" id="btn-setups-buy" onclick="filterTradeSetups('BUY')">✅ Buy Setups</button>
-            <button type="button" class="cat-pill" id="btn-setups-crypto" onclick="filterTradeSetups('crypto')">⚡ Crypto 24/7</button>
+          <div class="leaderboard-toolbar" style="margin-bottom:14px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px;">
+            <div class="horizon-selector" style="margin-bottom:0;">
+              <span class="horizon-label" style="font-weight:700; color:var(--text-primary);">Timeframe:</span>
+              <button type="button" class="pill-btn active" data-tf="daily" onclick="changeTradeSetupsTimeframe('daily')">☀️ Daily Swing</button>
+              <button type="button" class="pill-btn" data-tf="weekly" onclick="changeTradeSetupsTimeframe('weekly')">📅 Weekly Momentum</button>
+              <button type="button" class="pill-btn" data-tf="monthly" onclick="changeTradeSetupsTimeframe('monthly')">🚀 Monthly Expansion</button>
+            </div>
+            <div class="category-filter-bar" style="margin-bottom:0;">
+              <span class="category-filter-label">Filter:</span>
+              <button type="button" class="cat-pill active" id="btn-setups-all" onclick="filterTradeSetups('all')">🎯 All Setups</button>
+              <button type="button" class="cat-pill" id="btn-setups-strong" onclick="filterTradeSetups('STRONG BUY')">🔥 Strong Buy</button>
+              <button type="button" class="cat-pill" id="btn-setups-buy" onclick="filterTradeSetups('BUY')">✅ Buy</button>
+              <button type="button" class="cat-pill" id="btn-setups-crypto" onclick="filterTradeSetups('crypto')">⚡ Crypto 24/7</button>
+            </div>
           </div>
           <div style="overflow-x:auto;">
             <table class="leaderboard-table">
               <thead>
                 <tr>
                   <th>Asset</th>
-                  <th>Horizon</th>
-                  <th>Entry Zone</th>
-                  <th>Target Sell</th>
+                  <th>Setup Pattern & Thesis</th>
+                  <th>Target Entry Zone</th>
+                  <th>Target Sell (TP1 / TP2)</th>
                   <th>Stop Loss</th>
                   <th>Risk / Reward</th>
                   <th>Conviction</th>
-                  <th>Action Plan</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody id="trade-setups-body">
@@ -1360,6 +1368,9 @@
       fetchLeaderboard(currentHorizon, currentLeaderboardCategory);
     }
 
+    let allLoadedTradeSetups = [];
+    let currentSetupsFilter = 'all';
+
     function changeTradeSetupsTimeframe(tf) {
       currentTradeSetupsTimeframe = tf;
       document.querySelectorAll('[data-tf]').forEach(btn => {
@@ -1368,26 +1379,52 @@
       fetchTradeSetups(tf);
     }
 
+    function filterTradeSetups(filterType) {
+      currentSetupsFilter = filterType;
+      document.querySelectorAll('#submode-setups .cat-pill').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const activeBtn = document.getElementById(
+        filterType === 'all' ? 'btn-setups-all' :
+        filterType === 'STRONG BUY' ? 'btn-setups-strong' :
+        filterType === 'BUY' ? 'btn-setups-buy' : 'btn-setups-crypto'
+      );
+      if (activeBtn) activeBtn.classList.add('active');
+
+      let filtered = allLoadedTradeSetups;
+      if (filterType === 'STRONG BUY') {
+        filtered = allLoadedTradeSetups.filter(s => (s.action && s.action.includes('STRONG')) || s.conviction >= 95);
+      } else if (filterType === 'BUY') {
+        filtered = allLoadedTradeSetups.filter(s => (s.action && (s.action.includes('BUY') || s.action.includes('LONG') || s.action.includes('ACCUMULATE') || s.action.includes('BOUNCE'))));
+      } else if (filterType === 'crypto') {
+        filtered = allLoadedTradeSetups.filter(s => s.type === 'Crypto' || s.symbol.includes('-USD'));
+      }
+      renderTradeSetupsTable(filtered);
+    }
+
     // Trade Setups Controller
     async function fetchTradeSetups(tf) {
-      const body = document.getElementById('setups-table-body');
+      const body = document.getElementById('trade-setups-body') || document.getElementById('setups-table-body');
+      if (!body) return;
       body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:36px; color:var(--text-muted);">Loading ${tf.toUpperCase()} Trade Setups with Target Buy & Sell Levels...</td></tr>`;
 
       try {
         const res = await fetch(`${API_BASE}/api/trade_setups?timeframe=${encodeURIComponent(tf)}`);
         if (!res.ok) throw new Error("Failed to load trade setups");
         const data = await res.json();
-        renderTradeSetupsTable(data.setups || []);
+        allLoadedTradeSetups = data.setups || [];
+        filterTradeSetups(currentSetupsFilter);
       } catch (err) {
         body.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--google-red); padding:24px;">Error loading trade setups: ${err.message}</td></tr>`;
       }
     }
 
     function renderTradeSetupsTable(setups) {
-      const body = document.getElementById('setups-table-body');
+      const body = document.getElementById('trade-setups-body') || document.getElementById('setups-table-body');
+      if (!body) return;
       body.innerHTML = '';
       if (!setups || setups.length === 0) {
-        body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No setups available for this timeframe.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No trade setups available for this filter.</td></tr>`;
         return;
       }
 

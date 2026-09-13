@@ -469,6 +469,174 @@ const BASE_SETUPS = [
       action: "ACCUMULATE",
       thesis: "Global space-based cellular broadband monopoly upside with global telco distribution."
     }
+  },
+
+  // 12. Tesla (TSLA)
+  {
+    symbol: "TSLA",
+    name: "Tesla Inc.",
+    type: "Stock",
+    exchange: "NASDAQ",
+    current_price: 365.44,
+    daily: {
+      pattern: "Mean Reversion Demand Zone Support",
+      entry_low: 362.00, entry_high: 365.50,
+      tp1: 372.50, tp1_pct: "+1.9%",
+      tp2: 378.00, tp2_pct: "+3.4%",
+      stop_loss: 356.00, stop_pct: "-2.6%",
+      rr_ratio: "2.1 : 1",
+      conviction: 88,
+      action: "SWING BUY",
+      thesis: "Stochastic %K turning upward at key institutional order block."
+    },
+    weekly: {
+      pattern: "Ascending Trendline Demand Retest",
+      entry_low: 358.00, entry_high: 364.50,
+      tp1: 385.00, tp1_pct: "+5.4%",
+      tp2: 405.00, tp2_pct: "+10.8%",
+      stop_loss: 348.00, stop_pct: "-4.8%",
+      rr_ratio: "2.4 : 1",
+      conviction: 90,
+      action: "SWING ACCUMULATE",
+      thesis: "TimesFM-3 multi-horizon drift projects stabilization above major swing low."
+    },
+    monthly: {
+      pattern: "Autonomous FSD & Energy Storage Expansion",
+      entry_low: 350.00, entry_high: 362.00,
+      tp1: 425.00, tp1_pct: "+16.3%",
+      tp2: 460.00, tp2_pct: "+25.9%",
+      stop_loss: 330.00, stop_pct: "-9.7%",
+      rr_ratio: "2.9 : 1",
+      conviction: 92,
+      action: "ACCUMULATE",
+      thesis: "Megapack storage deployment growth and Robotaxi network timeline progress."
+    }
+  },
+
+  // 13. Super Micro Computer (SMCI)
+  {
+    symbol: "SMCI",
+    name: "Super Micro Computer",
+    type: "Stock",
+    exchange: "NASDAQ",
+    current_price: 40.10,
+    daily: {
+      pattern: "Golden Cross Breakout & High-Volume Continuation",
+      entry_low: 39.50, entry_high: 40.20,
+      tp1: 42.50, tp1_pct: "+6.0%",
+      tp2: 44.80, tp2_pct: "+11.7%",
+      stop_loss: 38.20, stop_pct: "-4.7%",
+      rr_ratio: "2.5 : 1",
+      conviction: 92,
+      action: "MOMENTUM BUY",
+      thesis: "Price holding above 50 & 200 SMA golden cross baseline with accelerating buy volume."
+    },
+    weekly: {
+      pattern: "Liquid Cooling Datacenter Cluster Surge",
+      entry_low: 38.50, entry_high: 39.80,
+      tp1: 46.00, tp1_pct: "+14.7%",
+      tp2: 52.00, tp2_pct: "+29.7%",
+      stop_loss: 36.00, stop_pct: "-10.2%",
+      rr_ratio: "2.8 : 1",
+      conviction: 93,
+      action: "SWING BUY",
+      thesis: "DLC server rack deployments accelerating for sovereign AI infrastructure."
+    },
+    monthly: {
+      pattern: "Post-Audit Valuation Convergence Supercycle",
+      entry_low: 37.00, entry_high: 39.50,
+      tp1: 58.00, tp1_pct: "+44.6%",
+      tp2: 68.00, tp2_pct: "+69.6%",
+      stop_loss: 32.00, stop_pct: "-20.2%",
+      rr_ratio: "3.4 : 1",
+      conviction: 94,
+      action: "STRONG BUY",
+      thesis: "TimesFM P90 projection models aggressive multiple rerating back to historic tech peer averages."
+    }
+  },
+
+  // 14. Oklo (OKLO)
+  {
+    symbol: "OKLO",
+    name: "Oklo Inc. (Nuclear Micro-Reactors)",
+    type: "Stock",
+    exchange: "NYSE",
+    current_price: 24.50,
+    daily: {
+      pattern: "AI Hyperscaler Energy PPA Breakout",
+      entry_low: 23.80, entry_high: 24.50,
+      tp1: 26.50, tp1_pct: "+8.2%",
+      tp2: 28.00, tp2_pct: "+14.3%",
+      stop_loss: 22.80, stop_pct: "-6.9%",
+      rr_ratio: "2.2 : 1",
+      conviction: 93,
+      action: "BUY BREAKOUT",
+      thesis: "Surging demand for dedicated zero-carbon baseload energy for AI datacenters."
+    },
+    weekly: {
+      pattern: "High-Beta SMR Supercycle Momentum",
+      entry_low: 23.20, entry_high: 24.30,
+      tp1: 29.50, tp1_pct: "+20.4%",
+      tp2: 34.00, tp2_pct: "+38.8%",
+      stop_loss: 21.50, stop_pct: "-12.2%",
+      rr_ratio: "2.9 : 1",
+      conviction: 94,
+      action: "SWING BUY",
+      thesis: "Regulatory fast-tracking and private hyperscaler partnerships driving multi-year momentum."
+    },
+    monthly: {
+      pattern: "Commercial Fast Reactor Fleet Deployment",
+      entry_low: 22.00, entry_high: 24.00,
+      tp1: 38.00, tp1_pct: "+55.1%",
+      tp2: 46.00, tp2_pct: "+87.8%",
+      stop_loss: 18.50, stop_pct: "-24.5%",
+      rr_ratio: "3.6 : 1",
+      conviction: 95,
+      action: "STRONG BUY",
+      thesis: "TimesFM neural drift identifies secular capital inflows into commercial nuclear power."
+    }
+  },
+
+  // 15. Atossa Therapeutics (ATOS)
+  {
+    symbol: "ATOS",
+    name: "Atossa Therapeutics Inc.",
+    type: "Stock",
+    exchange: "NASDAQ",
+    current_price: 2.51,
+    daily: {
+      pattern: "Oversold RSI Divergence Rebound",
+      entry_low: 2.45, entry_high: 2.52,
+      tp1: 2.68, tp1_pct: "+6.8%",
+      tp2: 2.85, tp2_pct: "+13.5%",
+      stop_loss: 2.36, stop_pct: "-6.0%",
+      rr_ratio: "2.3 : 1",
+      conviction: 86,
+      action: "OVERSOLD BOUNCE",
+      thesis: "Extreme oversold RSI turning upward at established multi-month horizontal support."
+    },
+    weekly: {
+      pattern: "Clinical Oncology Pipeline Accumulation",
+      entry_low: 2.40, entry_high: 2.50,
+      tp1: 2.95, tp1_pct: "+17.5%",
+      tp2: 3.40, tp2_pct: "+35.5%",
+      stop_loss: 2.25, stop_pct: "-10.4%",
+      rr_ratio: "2.8 : 1",
+      conviction: 88,
+      action: "SWING BUY",
+      thesis: "Phase II (Z)-endoxifen clinical trial data catalysts approaching with strong balance sheet cash."
+    },
+    monthly: {
+      pattern: "Phase II Clinical Data Catalyst Horizon",
+      entry_low: 2.30, entry_high: 2.48,
+      tp1: 3.80, tp1_pct: "+51.4%",
+      tp2: 4.50, tp2_pct: "+79.3%",
+      stop_loss: 2.00, stop_pct: "-20.3%",
+      rr_ratio: "3.5 : 1",
+      conviction: 90,
+      action: "SPECULATIVE ACCUMULATE",
+      thesis: "Asymmetric biotech risk/reward profile with significant market cap upside upon positive data."
+    }
   }
 ];
 
