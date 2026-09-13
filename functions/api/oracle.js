@@ -113,50 +113,96 @@ function computeRSI(series, period = 14) {
   return 100 - (100 / (1 + rs));
 }
 
-function computeQuantitativeMetrics(currentPrice, sma50, sma200, rsi = 50, isCrypto = false, vix = 15.8, yieldSpread = 0.5) {
+const GROWTH_NARRATIVE_SYMBOLS = new Set([
+  "NVDA", "PLTR", "APP", "OKLO", "SMR", "NNE", "CEG", "VST", "CCJ", 
+  "ALAB", "RGTI", "QBTS", "SOUN", "BBAI", "TSM", "ASML", "AMD", "MRVL", 
+  "BTC-USD", "ETH-USD", "SOL-USD", "SUI-USD", "AVAX-USD", "RDDT", "CELH", "HOOD"
+]);
+
+function computeQuantitativeMetrics(currentPrice, sma50, sma200, rsi = 50, isCrypto = false, vix = 15.8, yieldSpread = 0.5, extra = {}) {
   const p = Math.max(0.0001, currentPrice);
   const s50 = sma50 > 0 ? sma50 : p;
   const s200 = sma200 > 0 ? sma200 : p;
+  const symbol = (extra.symbol || "").toUpperCase();
 
+  // 1. Technical Trends (Moving Averages & Distance)
   const diff50 = (p - s50) / s50;
   const diff200 = (p - s200) / s200;
 
-  const isGoldenCross = (p > s50) && (s50 > s200);
-  const isDeathCross = (p < s200) || ((p < s50) && (s50 < s200));
+  // Authentic moving average crosses (not crude p < sma200 check)
+  const isRealGoldenCross = (s50 > s200) && (p > s50);
+  const isRealDeathCross = (s50 < s200) && (p < s50);
 
-  let annualDrift = isCrypto ? 0.08 : 0.05;
-  annualDrift += 0.18 * Math.tanh(diff50 * 3.0) + 0.12 * Math.tanh(diff200 * 2.0);
+  // Base institutional drift
+  let annualDrift = isCrypto ? 0.09 : 0.055;
 
-  if (isGoldenCross) annualDrift += 0.08;
-  else if (isDeathCross) annualDrift -= 0.14;
-
-  if (rsi > 72) annualDrift -= 0.03;
-  else if (rsi < 32) {
-    if (isDeathCross) annualDrift -= 0.05;
-    else annualDrift += 0.04;
+  // Secular Growth & Narrative Multiplier (AI, Nuclear, Quantum, Leading Crypto)
+  if (GROWTH_NARRATIVE_SYMBOLS.has(symbol) || isCrypto) {
+    annualDrift += 0.035;
   }
 
-  if (vix < 18) annualDrift += 0.02;
-  else if (vix > 24) annualDrift -= 0.03;
+  // Trend factor (+/- 0.12)
+  annualDrift += 0.10 * Math.tanh(diff50 * 2.5) + 0.06 * Math.tanh(diff200 * 2.0);
+  if (isRealGoldenCross) annualDrift += 0.03;
+  if (isRealDeathCross) annualDrift -= 0.05;
 
-  if (yieldSpread > 0) annualDrift += 0.02;
-  else annualDrift -= 0.03;
+  // Momentum & Mean Reversion (RSI & MACD)
+  const macdHist = extra.macdHist !== undefined ? extra.macdHist : (diff50 > 0 ? 0.5 : -0.5);
+  if (rsi < 30) {
+    // Oversold: if growth or fundamentally sound, strong bounce factor
+    if (GROWTH_NARRATIVE_SYMBOLS.has(symbol) || isCrypto || diff200 > -0.15) {
+      annualDrift += 0.035; // Value dip / oversold rebound
+    } else {
+      annualDrift -= 0.02; // Breakdown continuation
+    }
+  } else if (rsi > 75) {
+    annualDrift -= 0.025; // Overbought consolidation drag
+  } else if (rsi >= 48 && rsi <= 68) {
+    annualDrift += 0.02; // Optimal momentum continuation zone
+  }
 
-  if (isDeathCross) annualDrift = Math.min(-0.035, annualDrift);
-  else if (isGoldenCross) annualDrift = Math.max(0.055, annualDrift);
+  if (macdHist > 0) annualDrift += 0.015;
+  else if (macdHist < 0) annualDrift -= 0.015;
 
-  let conviction = Math.round(50 + annualDrift * 115);
-  if (isGoldenCross) conviction = Math.max(72, conviction);
-  if (isDeathCross) conviction = Math.min(48, conviction);
-  conviction = Math.min(98, Math.max(15, conviction));
+  // Volume & Institutional Accumulation
+  const volumeRatio = extra.volumeRatio || 1.0;
+  if (volumeRatio > 1.25 && diff50 > -0.05) {
+    annualDrift += 0.025; // Institutional accumulation burst
+  } else if (volumeRatio > 1.4 && diff50 < -0.10) {
+    annualDrift -= 0.025; // Distribution selling pressure
+  }
+
+  // Macro & Volatility Regime
+  if (vix < 16) annualDrift += 0.015;
+  else if (vix > 23) annualDrift -= 0.03;
+
+  if (yieldSpread > 0) annualDrift += 0.01;
+  else if (yieldSpread < -0.4) annualDrift -= 0.02;
+
+  // Price Action & 52-Week Range
+  const pos52 = extra.pos52 !== undefined ? extra.pos52 : 0.5;
+  if (pos52 > 0.85) annualDrift += 0.015; // 52w high breakout strength
+  else if (pos52 < 0.15 && diff200 < -0.20) annualDrift -= 0.02; // deep breakdown
+
+  // Smooth Conviction Scoring (15 - 98)
+  let conviction = Math.round(50 + annualDrift * 120);
+  conviction = Math.min(96, Math.max(18, conviction));
 
   let action = "HOLD";
-  if (conviction >= 82) action = "STRONG BUY";
-  else if (conviction >= 70) action = "BUY";
-  else if (conviction <= 28) action = "STRONG SELL";
-  else if (conviction <= 44) action = "SELL";
+  if (conviction >= 80) action = "STRONG BUY";
+  else if (conviction >= 66) action = "BUY";
+  else if (conviction <= 32) action = "STRONG SELL";
+  else if (conviction <= 45) action = "SELL";
 
-  return { annualDrift, isGoldenCross, isDeathCross, conviction, action, diff50, diff200 };
+  return { 
+    annualDrift, 
+    isGoldenCross: isRealGoldenCross, 
+    isDeathCross: isRealDeathCross, 
+    conviction, 
+    action, 
+    diff50, 
+    diff200 
+  };
 }
 
 function generateSyntheticPrices(symbol) {
@@ -262,7 +308,7 @@ function getFutureDate(start, daysAhead, isCrypto) {
 
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);
-  const rawTicker = (url.searchParams.get("ticker") || "NVDA").trim().toUpperCase();
+  const rawTicker = (url.searchParams.get("ticker") || url.searchParams.get("symbol") || "NVDA").trim().toUpperCase();
   const symbol = CRYPTO_ALIASES[rawTicker] || COMMON_NAMES[rawTicker] || rawTicker;
   const isCrypto = symbol.includes("-USD");
 
@@ -322,7 +368,8 @@ const GLOBAL_MACRO = {
       effectiveRSI,
       isCrypto,
       vixLevel,
-      yieldSpread
+      yieldSpread,
+      { symbol }
     );
 
     const isGoldenCross = metrics.isGoldenCross;
@@ -456,3 +503,5 @@ const GLOBAL_MACRO = {
     });
   }
 }
+
+export const onRequest = onRequestGet;

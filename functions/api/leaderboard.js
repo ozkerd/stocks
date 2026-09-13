@@ -285,50 +285,96 @@ async function fetchLivePrices(assets) {
   return prices;
 }
 
-function computeQuantitativeMetrics(currentPrice, sma50, sma200, rsi = 50, isCrypto = false, vix = 15.8, yieldSpread = 0.5) {
+const GROWTH_NARRATIVE_SYMBOLS = new Set([
+  "NVDA", "PLTR", "APP", "OKLO", "SMR", "NNE", "CEG", "VST", "CCJ", 
+  "ALAB", "RGTI", "QBTS", "SOUN", "BBAI", "TSM", "ASML", "AMD", "MRVL", 
+  "BTC-USD", "ETH-USD", "SOL-USD", "SUI-USD", "AVAX-USD", "RDDT", "CELH", "HOOD"
+]);
+
+function computeQuantitativeMetrics(currentPrice, sma50, sma200, rsi = 50, isCrypto = false, vix = 15.8, yieldSpread = 0.5, extra = {}) {
   const p = Math.max(0.0001, currentPrice);
   const s50 = sma50 > 0 ? sma50 : p;
   const s200 = sma200 > 0 ? sma200 : p;
+  const symbol = (extra.symbol || "").toUpperCase();
 
+  // 1. Technical Trends (Moving Averages & Distance)
   const diff50 = (p - s50) / s50;
   const diff200 = (p - s200) / s200;
 
-  const isGoldenCross = (p > s50) && (s50 > s200);
-  const isDeathCross = (p < s200) || ((p < s50) && (s50 < s200));
+  // Authentic moving average crosses (not crude p < sma200 check)
+  const isRealGoldenCross = (s50 > s200) && (p > s50);
+  const isRealDeathCross = (s50 < s200) && (p < s50);
 
-  let annualDrift = isCrypto ? 0.08 : 0.05;
-  annualDrift += 0.18 * Math.tanh(diff50 * 3.0) + 0.12 * Math.tanh(diff200 * 2.0);
+  // Base institutional drift
+  let annualDrift = isCrypto ? 0.09 : 0.055;
 
-  if (isGoldenCross) annualDrift += 0.08;
-  else if (isDeathCross) annualDrift -= 0.14;
-
-  if (rsi > 72) annualDrift -= 0.03;
-  else if (rsi < 32) {
-    if (isDeathCross) annualDrift -= 0.05;
-    else annualDrift += 0.04;
+  // Secular Growth & Narrative Multiplier (AI, Nuclear, Quantum, Leading Crypto)
+  if (GROWTH_NARRATIVE_SYMBOLS.has(symbol) || isCrypto) {
+    annualDrift += 0.035;
   }
 
-  if (vix < 18) annualDrift += 0.02;
-  else if (vix > 24) annualDrift -= 0.03;
+  // Trend factor (+/- 0.12)
+  annualDrift += 0.10 * Math.tanh(diff50 * 2.5) + 0.06 * Math.tanh(diff200 * 2.0);
+  if (isRealGoldenCross) annualDrift += 0.03;
+  if (isRealDeathCross) annualDrift -= 0.05;
 
-  if (yieldSpread > 0) annualDrift += 0.02;
-  else annualDrift -= 0.03;
+  // Momentum & Mean Reversion (RSI & MACD)
+  const macdHist = extra.macdHist !== undefined ? extra.macdHist : (diff50 > 0 ? 0.5 : -0.5);
+  if (rsi < 30) {
+    // Oversold: if growth or fundamentally sound, strong bounce factor
+    if (GROWTH_NARRATIVE_SYMBOLS.has(symbol) || isCrypto || diff200 > -0.15) {
+      annualDrift += 0.035; // Value dip / oversold rebound
+    } else {
+      annualDrift -= 0.02; // Breakdown continuation
+    }
+  } else if (rsi > 75) {
+    annualDrift -= 0.025; // Overbought consolidation drag
+  } else if (rsi >= 48 && rsi <= 68) {
+    annualDrift += 0.02; // Optimal momentum continuation zone
+  }
 
-  if (isDeathCross) annualDrift = Math.min(-0.035, annualDrift);
-  else if (isGoldenCross) annualDrift = Math.max(0.055, annualDrift);
+  if (macdHist > 0) annualDrift += 0.015;
+  else if (macdHist < 0) annualDrift -= 0.015;
 
-  let conviction = Math.round(50 + annualDrift * 115);
-  if (isGoldenCross) conviction = Math.max(72, conviction);
-  if (isDeathCross) conviction = Math.min(48, conviction);
-  conviction = Math.min(98, Math.max(15, conviction));
+  // Volume & Institutional Accumulation
+  const volumeRatio = extra.volumeRatio || 1.0;
+  if (volumeRatio > 1.25 && diff50 > -0.05) {
+    annualDrift += 0.025; // Institutional accumulation burst
+  } else if (volumeRatio > 1.4 && diff50 < -0.10) {
+    annualDrift -= 0.025; // Distribution selling pressure
+  }
+
+  // Macro & Volatility Regime
+  if (vix < 16) annualDrift += 0.015;
+  else if (vix > 23) annualDrift -= 0.03;
+
+  if (yieldSpread > 0) annualDrift += 0.01;
+  else if (yieldSpread < -0.4) annualDrift -= 0.02;
+
+  // Price Action & 52-Week Range
+  const pos52 = extra.pos52 !== undefined ? extra.pos52 : 0.5;
+  if (pos52 > 0.85) annualDrift += 0.015; // 52w high breakout strength
+  else if (pos52 < 0.15 && diff200 < -0.20) annualDrift -= 0.02; // deep breakdown
+
+  // Smooth Conviction Scoring (15 - 98)
+  let conviction = Math.round(50 + annualDrift * 120);
+  conviction = Math.min(96, Math.max(18, conviction));
 
   let action = "HOLD";
-  if (conviction >= 82) action = "STRONG BUY";
-  else if (conviction >= 70) action = "BUY";
-  else if (conviction <= 28) action = "STRONG SELL";
-  else if (conviction <= 44) action = "SELL";
+  if (conviction >= 80) action = "STRONG BUY";
+  else if (conviction >= 66) action = "BUY";
+  else if (conviction <= 32) action = "STRONG SELL";
+  else if (conviction <= 45) action = "SELL";
 
-  return { annualDrift, isGoldenCross, isDeathCross, conviction, action, diff50, diff200 };
+  return { 
+    annualDrift, 
+    isGoldenCross: isRealGoldenCross, 
+    isDeathCross: isRealDeathCross, 
+    conviction, 
+    action, 
+    diff50, 
+    diff200 
+  };
 }
 
 export async function onRequest(context) {
@@ -372,13 +418,22 @@ export async function onRequest(context) {
   const ranked = filtered.map((item, index) => {
     const fallbackPrice = (item.base_price && item.base_price > 0) ? item.base_price : 1.0;
     const isBear = item.is_bear_regime || false;
+    const baseRating = item.rating || "BUY";
+    const defaultMAs = (isBear || baseRating === "SELL" || baseRating === "STRONG SELL")
+      ? { ma50: fallbackPrice * 1.03, ma200: fallbackPrice * 1.08, rsi: 36.0 }
+      : (baseRating === "HOLD")
+      ? { ma50: fallbackPrice * 1.005, ma200: fallbackPrice * 1.02, rsi: 48.0 }
+      : (baseRating === "STRONG BUY")
+      ? { ma50: fallbackPrice * 0.94, ma200: fallbackPrice * 0.88, rsi: 62.0 }
+      : { ma50: fallbackPrice * 0.98, ma200: fallbackPrice * 0.95, rsi: 54.0 };
+
     const live = (typeof livePrices[item.symbol] === "object" && livePrices[item.symbol] !== null)
       ? livePrices[item.symbol]
       : { 
           price: fallbackPrice, 
           changePct: 0, 
-          ma50: (item.sma50 && item.sma50 > 0) ? item.sma50 : (isBear ? fallbackPrice * 0.97 : fallbackPrice * 0.98), 
-          ma200: (item.sma200 && item.sma200 > 0) ? item.sma200 : (isBear ? fallbackPrice * 1.09 : fallbackPrice * 0.95), 
+          ma50: (item.sma50 && item.sma50 > 0) ? item.sma50 : defaultMAs.ma50, 
+          ma200: (item.sma200 && item.sma200 > 0) ? item.sma200 : defaultMAs.ma200, 
           high52: fallbackPrice * 1.15, 
           low52: fallbackPrice * 0.85,
           marketCap: item.cap === "high_cap" ? 200e9 : (item.cap === "mid_cap" ? 25e9 : 2e9),
@@ -386,16 +441,22 @@ export async function onRequest(context) {
         };
 
     const currentPrice = (live.price && live.price > 0) ? live.price : fallbackPrice;
-    const ma50 = (live.ma50 && live.ma50 > 0) ? live.ma50 : ((item.sma50) ? item.sma50 : currentPrice);
-    const ma200 = (live.ma200 && live.ma200 > 0) ? live.ma200 : ((item.sma200) ? item.sma200 : currentPrice);
+    const ma50 = (live.ma50 && live.ma50 > 0) ? live.ma50 : ((item.sma50) ? item.sma50 : defaultMAs.ma50);
+    const ma200 = (live.ma200 && live.ma200 > 0) ? live.ma200 : ((item.sma200) ? item.sma200 : defaultMAs.ma200);
     const high52 = Math.max((live.high52 && live.high52 > 0) ? live.high52 : currentPrice * 1.1, currentPrice);
     const low52 = Math.min((live.low52 && live.low52 > 0) ? live.low52 : currentPrice * 0.9, currentPrice);
     const changePct = Number.isFinite(live.changePct) ? live.changePct : 0;
     const marketCap = live.marketCap || (item.cap === "high_cap" ? 200e9 : (item.cap === "mid_cap" ? 25e9 : 2e9));
 
+    // Technical & Price Action factor subscores
+    const diff50 = ma50 > 0 ? (currentPrice - ma50) / ma50 : 0;
+    const diff200 = ma200 > 0 ? (currentPrice - ma200) / ma200 : 0;
+    const range52 = Math.max(0.01, high52 - low52);
+    const pos52 = Math.min(1, Math.max(0, (currentPrice - low52) / range52));
+
     // Shared Quantitative Metrics matching Forecast and Oracle
     const isCrypto = item.type === "Crypto";
-    const rsi = isBear ? 24.54 : 52.0;
+    const rsi = (live && live.rsi) ? live.rsi : ((item.is_bear_regime) ? 28.5 : defaultMAs.rsi);
     const metrics = computeQuantitativeMetrics(
       currentPrice,
       ma50,
@@ -403,7 +464,8 @@ export async function onRequest(context) {
       rsi,
       isCrypto,
       15.4, // VIX
-      -0.07 // Yield Spread
+      -0.07, // Yield Spread
+      { symbol: item.symbol, pos52 }
     );
 
     const periodsPerYear = isCrypto ? 365.0 : 252.0;
@@ -414,13 +476,7 @@ export async function onRequest(context) {
     const conviction_score = metrics.conviction;
     const action = metrics.action;
 
-    // Technical & Price Action factor subscores
-    const diff50 = ma50 > 0 ? (currentPrice - ma50) / ma50 : 0;
-    const diff200 = ma200 > 0 ? (currentPrice - ma200) / ma200 : 0;
-    const range52 = Math.max(0.01, high52 - low52);
-    const pos52 = Math.min(1, Math.max(0, (currentPrice - low52) / range52));
-
-    const tech_score = metrics.isGoldenCross ? Math.min(98, 75 + Math.round(diff50 * 50)) : (metrics.isDeathCross ? Math.max(18, 42 + Math.round(diff200 * 40)) : 55);
+    const tech_score = Math.min(98, Math.max(20, Math.round(50 + diff50 * 50 + diff200 * 30 + (metrics.isGoldenCross ? 8 : 0) - (metrics.isDeathCross ? 8 : 0))));
     const pa_score = Math.min(97, Math.max(20, Math.round(30 + 55 * pos52 + 5 * Math.tanh(changePct / 3))));
     const quality_score = marketCap > 500e9 ? 95 : (marketCap > 100e9 ? 88 : (marketCap > 10e9 ? 80 : 65));
 
