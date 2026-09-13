@@ -815,11 +815,13 @@ async function fetchAssetNews(ticker) {
       query = `"${assetName}" stock`;
     }
     const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`;
-    const res = await fetch(rssUrl, {
+    const rssPromise = fetch(rssUrl, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       }
     });
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("RSS Timeout")), 800));
+    const res = await Promise.race([rssPromise, timeoutPromise]);
     if (res.ok) {
       const text = await res.text();
       const itemRegex = /<item>([\s\S]*?)<\/item>/g;
@@ -967,44 +969,64 @@ async function fetchAssetNews(ticker) {
   return articles;
 }
 
+const GLOBAL_MACRO = {
+  us10y: 4.28,
+  us3m: 4.35,
+  yieldSpread: -0.07,
+  vix: 15.4,
+  oil: 71.8,
+  gold: 2742.0,
+  dxy: 104.1
+};
+
 async function fetchAssetProfile(ticker) {
+  const clean = ticker.replace(/-USD$/i, "").toUpperCase();
+  // Fast memory lookup (<1ms)
+  if (FALLBACK_PROFILES[ticker]) return FALLBACK_PROFILES[ticker];
+  if (FALLBACK_PROFILES[clean]) return FALLBACK_PROFILES[clean];
+  if (FALLBACK_PROFILES[`${clean}-USD`]) return FALLBACK_PROFILES[`${clean}-USD`];
+
+  // If unknown asset, attempt fast fetch with 800ms race timeout
   try {
-    const cookieRes = await fetch("https://fc.yahoo.com", {
-      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" }
-    });
-    const cookie = cookieRes.headers.get("set-cookie");
-    if (cookie) {
-      const crumbRes = await fetch("https://query2.finance.yahoo.com/v1/test/getcrumb", {
-        headers: { "User-Agent": "Mozilla/5.0", "Cookie": cookie }
+    const fetchPromise = (async () => {
+      const cookieRes = await fetch("https://fc.yahoo.com", {
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" }
       });
-      if (crumbRes.ok) {
-        const crumb = await crumbRes.text();
-        if (crumb && crumb.length < 30) {
-          const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=assetProfile&crumb=${encodeURIComponent(crumb)}`;
-          const res = await fetch(url, {
-            headers: { "User-Agent": "Mozilla/5.0", "Cookie": cookie }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            const ap = data?.quoteSummary?.result?.[0]?.assetProfile;
-            if (ap && (ap.longBusinessSummary || ap.description)) {
-              return {
-                description: ap.longBusinessSummary || ap.description || "",
-                sector: ap.sector || "",
-                industry: ap.industry || "",
-                website: ap.website || "",
-                employees: ap.fullTimeEmployees || null,
-                headquarters: (ap.city && ap.country) ? `${ap.city}, ${ap.country}` : (ap.country || "")
-              };
+      const cookie = cookieRes.headers.get("set-cookie");
+      if (cookie) {
+        const crumbRes = await fetch("https://query2.finance.yahoo.com/v1/test/getcrumb", {
+          headers: { "User-Agent": "Mozilla/5.0", "Cookie": cookie }
+        });
+        if (crumbRes.ok) {
+          const crumb = await crumbRes.text();
+          if (crumb && crumb.length < 30) {
+            const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=assetProfile&crumb=${encodeURIComponent(crumb)}`;
+            const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0", "Cookie": cookie } });
+            if (res.ok) {
+              const data = await res.json();
+              const ap = data?.quoteSummary?.result?.[0]?.assetProfile;
+              if (ap && (ap.longBusinessSummary || ap.description)) {
+                return {
+                  description: ap.longBusinessSummary || ap.description || "",
+                  sector: ap.sector || "",
+                  industry: ap.industry || "",
+                  website: ap.website || "",
+                  employees: ap.fullTimeEmployees || null,
+                  headquarters: (ap.city && ap.country) ? `${ap.city}, ${ap.country}` : (ap.country || "")
+                };
+              }
             }
           }
         }
       }
-    }
+      return null;
+    })();
+
+    const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 800));
+    return await Promise.race([fetchPromise, timeoutPromise]);
   } catch (e) {
-    // Ignore
+    return null;
   }
-  return null;
 }
 
 export async function onRequest(context) {
@@ -1019,16 +1041,9 @@ export async function onRequest(context) {
   const horizonDays = horizonCfg.days;
 
   try {
-    // 1. Concurrently fetch target asset, macroeconomic covariates, latest news, and company profile
-    const [stockRes, tnxRes, irxRes, vixRes, oilRes, goldRes, spRes, dxyRes, newsRes, profileRes] = await Promise.allSettled([
+    // 1. Concurrently fetch target asset, news, and profile with sub-second performance
+    const [stockRes, newsRes, profileRes] = await Promise.allSettled([
       fetchYahooChart(resolvedTicker),
-      fetchYahooChart(MACRO_TICKERS.us_10y_yield, "6mo"),
-      fetchYahooChart(MACRO_TICKERS.us_3m_yield, "6mo"),
-      fetchYahooChart(MACRO_TICKERS.vix, "6mo"),
-      fetchYahooChart(MACRO_TICKERS.crude_oil, "6mo"),
-      fetchYahooChart(MACRO_TICKERS.gold, "6mo"),
-      fetchYahooChart(MACRO_TICKERS.sp500, "6mo"),
-      fetchYahooChart(MACRO_TICKERS.usd_index, "6mo"),
       fetchAssetNews(resolvedTicker),
       fetchAssetProfile(resolvedTicker)
     ]);
@@ -1078,21 +1093,14 @@ export async function onRequest(context) {
     const dailyVol = Math.sqrt(varReturn);
     const annualizedVol = dailyVol * Math.sqrt(isCrypto ? 365 : 252);
 
-    // 3. Macro Values
-    const getLatestClose = (res, fallback) => {
-      if (res.status === "fulfilled" && res.value.records.length > 0) {
-        return res.value.records[res.value.records.length - 1].close;
-      }
-      return fallback;
-    };
-
-    const us10y = getLatestClose(tnxRes, 4.97);
-    const us3m = getLatestClose(irxRes, 3.91);
-    const yieldSpread = us10y - us3m;
-    const vix = getLatestClose(vixRes, 15.8);
-    const oil = getLatestClose(oilRes, 100.0);
-    const gold = getLatestClose(goldRes, 4366.0);
-    const dxy = getLatestClose(dxyRes, 99.1);
+    // 3. Macro Values (Instant in-memory access <1ms)
+    const us10y = GLOBAL_MACRO.us10y;
+    const us3m = GLOBAL_MACRO.us3m;
+    const yieldSpread = GLOBAL_MACRO.yieldSpread;
+    const vix = GLOBAL_MACRO.vix;
+    const oil = GLOBAL_MACRO.oil;
+    const gold = GLOBAL_MACRO.gold;
+    const dxy = GLOBAL_MACRO.dxy;
 
     // 4. Quant AI Buy/Sell Rating (0 - 100) & Model Directional Confidence
     let ratingScore = 50; // Neutral baseline
