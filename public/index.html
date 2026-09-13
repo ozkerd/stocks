@@ -1449,40 +1449,43 @@
         const tr = document.createElement('tr');
         tr.className = 'leaderboard-row';
         const isCrypto = a.type === 'Crypto' || (a.symbol && a.symbol.includes('-USD'));
-        const retSign = a.expected_return_pct >= 0 ? '+' : '';
-        const retColor = a.expected_return_pct >= 0 ? 'var(--google-green)' : 'var(--google-red)';
+        const retPct = (typeof a.expected_return_pct === 'number' && !isNaN(a.expected_return_pct)) ? a.expected_return_pct : 0;
+        const retSign = retPct >= 0 ? '+' : '';
+        const retColor = retPct >= 0 ? 'var(--google-green)' : 'var(--google-red)';
+        const curPrice = (typeof a.current_price === 'number' && !isNaN(a.current_price)) ? a.current_price : 0;
+        const tgtPrice = (typeof a.target_price === 'number' && !isNaN(a.target_price)) ? a.target_price : curPrice;
         const sym = a.display_symbol || a.symbol;
 
         // Cap badge text & style
         let capBadge = `<span class="cap-badge cap-mid">Mid Cap</span>`;
         if (a.cap === 'high_cap') capBadge = `<span class="cap-badge cap-high">High Cap</span>`;
-        else if (a.cap === 'low_cap') capBadge = `<span class="cap-badge cap-low">Low Cap / Gem</span>`;
+        else if (a.cap === 'low_cap') capBadge = `<span class="cap-badge cap-low">Low Cap</span>`;
 
         // Score display based on active category
-        let scoreVal = `${a.conviction_score}/100`;
-        if (currentLeaderboardCategory === 'technicals') scoreVal = `${a.tech_score || a.conviction_score}/100`;
-        else if (currentLeaderboardCategory === 'price_action') scoreVal = `${a.pa_score || a.conviction_score}/100`;
+        let scoreVal = `${a.conviction_score || 50}/100`;
+        if (currentLeaderboardCategory === 'technicals') scoreVal = `${a.tech_score || a.conviction_score || 50}/100`;
+        else if (currentLeaderboardCategory === 'price_action') scoreVal = `${a.pa_score || a.conviction_score || 50}/100`;
 
         tr.innerHTML = `
           <td>
-            <span class="rank-badge ${a.rank <= 3 ? 'rank-top3' : ''}">#${a.rank}</span>
+            <span class="rank-badge ${a.rank <= 3 ? 'rank-top3' : ''}">#${a.rank || 1}</span>
           </td>
           <td>
             <div style="display:flex; align-items:center; gap:8px;">
               <strong style="color:var(--text-primary); font-size:15px; font-weight:700;">${sym}</strong>
-              <span style="font-size:13px; color:var(--text-secondary); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${a.name}</span>
-              <span class="item-badge ${isCrypto ? 'crypto' : ''}" style="font-size:10px;">${isCrypto ? 'Crypto' : a.exchange}</span>
+              <span style="font-size:13px; color:var(--text-secondary); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${a.name || sym}</span>
+              <span class="item-badge ${isCrypto ? 'crypto' : ''}" style="font-size:10px;">${isCrypto ? 'Crypto' : (a.exchange || 'US')}</span>
             </div>
           </td>
           <td>${capBadge}</td>
-          <td style="font-weight:700; font-size:14px;">$${a.current_price.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+          <td style="font-weight:700; font-size:14px;">$${curPrice.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
           <td>
-            <span style="font-weight:800; font-size:14px; color:${retColor};">${retSign}${a.expected_return_pct.toFixed(2)}%</span>
-            <span style="font-size:11px; color:var(--text-muted); margin-left:4px;">($${a.target_price.toLocaleString()})</span>
+            <span style="font-weight:800; font-size:14px; color:${retColor};">${retSign}${retPct.toFixed(2)}%</span>
+            <span style="font-size:11px; color:var(--text-muted); margin-left:4px;">($${tgtPrice.toLocaleString()})</span>
           </td>
           <td>
-            <div style="font-size:12px; font-weight:600; color:var(--google-blue);">${a.entry_zone || '$' + (a.current_price * 0.99).toFixed(2)}</div>
-            <div style="font-size:11px; color:var(--google-red);">Stop: ${a.stop_loss || '$' + (a.current_price * 0.95).toFixed(2)}</div>
+            <div style="font-size:12px; font-weight:600; color:var(--google-blue);">${a.entry_zone || '$' + (curPrice * 0.99).toFixed(2)}</div>
+            <div style="font-size:11px; color:var(--google-red);">Stop: ${a.stop_loss || '$' + (curPrice * 0.95).toFixed(2)}</div>
           </td>
           <td>
             <span class="conviction-pill">${scoreVal}</span>
@@ -1689,9 +1692,10 @@
       document.getElementById('bar-fill-neural').style.width = `${bd.neural_drift_score || 78}%`;
 
       // Forecast Bar
-      document.getElementById('res-target-p50').textContent = `$${data.target_price_p50.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
-      const retSign = data.expected_return_pct >= 0 ? '+' : '';
-      document.getElementById('res-target-return').textContent = `${retSign}${data.expected_return_pct.toFixed(2)}% (${data.horizon_label})`;
+      document.getElementById('res-target-p50').textContent = `$${(data.target_price_p50 || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+      const retPct = (typeof data.expected_return_pct === 'number' && !isNaN(data.expected_return_pct)) ? data.expected_return_pct : 0;
+      const retSign = retPct >= 0 ? '+' : '';
+      document.getElementById('res-target-return').textContent = `${retSign}${retPct.toFixed(2)}% (${data.horizon_label || ''})`;
       document.getElementById('res-target-p10').textContent = `$${data.p10_bear_case.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
       document.getElementById('res-target-p90').textContent = `$${data.p90_bull_case.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
       document.getElementById('res-uncertainty-spread').textContent = `±${(data.confidence_band_spread_pct / 2).toFixed(1)}%`;
@@ -1957,17 +1961,18 @@
 
       // 2. Update Most Probable Path Summary Banner
       const finalP50 = fc.length > 0 ? fc[fc.length - 1].p50 : data.target_price_p50;
-      const retSign = data.expected_return_pct >= 0 ? '+' : '';
-      const retColor = data.expected_return_pct >= 0 ? 'var(--google-green)' : 'var(--google-red)';
+      const retPct = (typeof data.expected_return_pct === 'number' && !isNaN(data.expected_return_pct)) ? data.expected_return_pct : 0;
+      const retSign = retPct >= 0 ? '+' : '';
+      const retColor = retPct >= 0 ? 'var(--google-green)' : 'var(--google-red)';
       const targetDate = fc.length > 0 ? fc[fc.length - 1].date : '';
       
       const p50TargetEl = document.getElementById('chart-p50-target');
       const p50ReturnEl = document.getElementById('chart-p50-return');
       const p50DateEl = document.getElementById('chart-p50-date');
       const isPepe = data.symbol && data.symbol.includes('PEPE');
-      if (p50TargetEl) p50TargetEl.textContent = `$${finalP50.toFixed(isPepe ? 7 : 2)}`;
+      if (p50TargetEl && typeof finalP50 === 'number' && !isNaN(finalP50)) p50TargetEl.textContent = `$${finalP50.toFixed(isPepe ? 7 : 2)}`;
       if (p50ReturnEl) {
-        p50ReturnEl.textContent = `${retSign}${data.expected_return_pct.toFixed(2)}%`;
+        p50ReturnEl.textContent = `${retSign}${retPct.toFixed(2)}%`;
         p50ReturnEl.style.color = retColor;
       }
       if (p50DateEl && targetDate) p50DateEl.textContent = `(Target Date: ${targetDate})`;

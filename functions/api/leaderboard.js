@@ -62,7 +62,7 @@ const ASSET_UNIVERSE = [
   { symbol: "AVAX-USD", display_symbol: "AVAX-USD", name: "Avalanche", type: "Crypto", exchange: "Crypto", base_price: 7.42, base_return: 27.0, conviction: 80, rating: "BUY", cap: "low_cap", tech_score: 82, pa_score: 82 },
   { symbol: "DOGE-USD", display_symbol: "DOGE-USD", name: "Dogecoin", type: "Crypto", exchange: "Crypto", base_price: 0.09, base_return: 29.5, conviction: 80, rating: "BUY", cap: "low_cap", tech_score: 80, pa_score: 78 },
   { symbol: "LINK-USD", display_symbol: "LINK-USD", name: "Chainlink", type: "Crypto", exchange: "Crypto", base_price: 11.57, base_return: 25.2, conviction: 80, rating: "BUY", cap: "low_cap", tech_score: 81, pa_score: 84 },
-  { symbol: "SUI-USD", display_symbol: "SUI-USD", name: "Sui Network", type: "Crypto", exchange: "Crypto", base_price: 0.0, base_return: 36.0, conviction: 80, rating: "BUY", cap: "low_cap", tech_score: 81, pa_score: 82 },
+  { symbol: "SUI-USD", display_symbol: "SUI-USD", name: "Sui Network", type: "Crypto", exchange: "Crypto", base_price: 0.72, base_return: 36.0, conviction: 80, rating: "BUY", cap: "low_cap", tech_score: 81, pa_score: 82 },
   { symbol: "UBER", display_symbol: "UBER", name: "Uber Technologies", type: "Stock", exchange: "NYSE", base_price: 71.67, base_return: 18.4, conviction: 80, rating: "BUY", cap: "mid_cap", tech_score: 77, pa_score: 79 },
   { symbol: "ABNB", display_symbol: "ABNB", name: "Airbnb Inc.", type: "Stock", exchange: "NASDAQ", base_price: 170.19, base_return: 15.6, conviction: 79, rating: "BUY", cap: "mid_cap", tech_score: 80, pa_score: 77 },
   { symbol: "SHOP", display_symbol: "SHOP", name: "Shopify Inc.", type: "Stock", exchange: "NYSE", base_price: 128.79, base_return: 21.5, conviction: 79, rating: "BUY", cap: "mid_cap", tech_score: 81, pa_score: 82 },
@@ -287,39 +287,43 @@ export async function onRequest(context) {
 
   // Calculate horizon-adjusted metrics and trade setup levels with live pricing and mathematical quantitative formulas
   const ranked = filtered.map((item, index) => {
+    const fallbackPrice = (item.base_price && item.base_price > 0) ? item.base_price : 1.0;
     const live = (typeof livePrices[item.symbol] === "object" && livePrices[item.symbol] !== null)
       ? livePrices[item.symbol]
-      : { price: livePrices[item.symbol] ?? item.base_price, changePct: 0, ma50: item.base_price * 0.96, ma200: item.base_price * 0.90, high52: item.base_price * 1.18, low52: item.base_price * 0.82 };
+      : { price: (livePrices[item.symbol] && livePrices[item.symbol] > 0) ? livePrices[item.symbol] : fallbackPrice, changePct: 0, ma50: fallbackPrice * 0.96, ma200: fallbackPrice * 0.90, high52: fallbackPrice * 1.18, low52: fallbackPrice * 0.82 };
 
-    const currentPrice = live.price || item.base_price;
-    const ma50 = live.ma50 || currentPrice * 0.96;
-    const ma200 = live.ma200 || currentPrice * 0.90;
-    const high52 = Math.max(live.high52 || currentPrice * 1.15, currentPrice);
-    const low52 = Math.min(live.low52 || currentPrice * 0.85, currentPrice);
-    const changePct = live.changePct || 0;
+    const currentPrice = (live.price && live.price > 0) ? live.price : fallbackPrice;
+    const ma50 = (live.ma50 && live.ma50 > 0) ? live.ma50 : currentPrice * 0.96;
+    const ma200 = (live.ma200 && live.ma200 > 0) ? live.ma200 : currentPrice * 0.90;
+    const high52 = Math.max((live.high52 && live.high52 > 0) ? live.high52 : currentPrice * 1.15, currentPrice);
+    const low52 = Math.min((live.low52 && live.low52 > 0) ? live.low52 : currentPrice * 0.85, currentPrice);
+    const changePct = Number.isFinite(live.changePct) ? live.changePct : 0;
 
     // 1. Technical Score (S_tech) calculated purely from mathematical MA differentials & Golden Cross
-    const diff50 = (currentPrice - ma50) / ma50;
-    const diff200 = (currentPrice - ma200) / ma200;
+    const diff50 = ma50 > 0 ? (currentPrice - ma50) / ma50 : 0;
+    const diff200 = ma200 > 0 ? (currentPrice - ma200) / ma200 : 0;
     const goldenCross = ma50 > ma200;
     const rawTech = 50 + 25 * Math.tanh(diff50 * 4) + 15 * Math.tanh(diff200 * 2) + (goldenCross ? 8 : -8);
-    const tech_score = Math.min(96, Math.max(22, Math.round(rawTech)));
+    const tech_score = Math.min(96, Math.max(22, Math.round(Number.isFinite(rawTech) ? rawTech : 50)));
 
     // 2. Price Action Score (S_pa) calculated from 52-week position & daily velocity
     const range52 = Math.max(0.001, high52 - low52);
     const pos52 = Math.min(1, Math.max(0, (currentPrice - low52) / range52));
     const rawPa = 38 + 48 * pos52 + 8 * Math.tanh(changePct / 3);
-    const pa_score = Math.min(96, Math.max(20, Math.round(rawPa)));
+    const pa_score = Math.min(96, Math.max(20, Math.round(Number.isFinite(rawPa) ? rawPa : 50)));
 
     // 3. Multi-Factor Mathematical Conviction Score (Strictly rule-based, no subjective overrides)
     const conviction_score = Math.min(96, Math.max(20, Math.round(tech_score * 0.52 + pa_score * 0.48)));
 
     // 4. Expected Return calculated mathematically from time-series momentum & horizon scaling
     const annualized_momentum = (diff50 * 0.65 + diff200 * 0.35) * 100;
-    const base_drift = Math.max(4.0, Math.min(45.0, 14.0 + annualized_momentum * 0.7));
-    const expected_return = Number((base_drift * (mult / 3.0)).toFixed(2));
+    const safe_momentum = Number.isFinite(annualized_momentum) ? annualized_momentum : 0;
+    const base_drift = Math.max(4.0, Math.min(45.0, 14.0 + safe_momentum * 0.7));
+    let expected_return = Number((base_drift * (mult / 3.0)).toFixed(2));
+    if (!Number.isFinite(expected_return)) expected_return = 12.5;
     const decimals = currentPrice < 1 ? 4 : 2;
-    const target_price = Number((currentPrice * (1 + expected_return / 100)).toFixed(decimals));
+    let target_price = Number((currentPrice * (1 + expected_return / 100)).toFixed(decimals));
+    if (!Number.isFinite(target_price)) target_price = Number((currentPrice * 1.12).toFixed(decimals));
     
     // Calibrated trade levels
     const entry_low = Number((currentPrice * 0.985).toFixed(decimals));
@@ -329,7 +333,7 @@ export async function onRequest(context) {
     const potential_risk = Math.max(0.0001, currentPrice - stop_loss);
     const rr = (potential_gain > 0) ? Number((potential_gain / potential_risk).toFixed(1)) : 1.0;
 
-    const fmtPrice = (val) => currentPrice < 1 ? "$" + val.toFixed(4) : "$" + val.toLocaleString();
+    const fmtPrice = (val) => currentPrice < 1 ? "$" + (val || 0).toFixed(4) : "$" + (val || 0).toLocaleString();
 
     // 5. Action determined strictly by quantitative conviction thresholds
     let action = "HOLD";
