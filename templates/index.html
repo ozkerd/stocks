@@ -920,7 +920,19 @@
         <!-- Search Row -->
         <div class="oracle-search-row">
           <div class="oracle-input-wrap">
-            <input type="text" id="oracle-ticker-input" class="oracle-input" placeholder="Enter stock or crypto ticker (e.g. NVDA, AAPL, BTC, TSLA)..." value="NVDA">
+            <input 
+              type="text" 
+              id="oracle-ticker-input" 
+              class="oracle-input" 
+              placeholder="Search 100+ stocks, cryptos or companies (e.g. NVDA, Apple, BTC, TSLA)..." 
+              value="NVDA"
+              autocomplete="off"
+              spellcheck="false"
+              oninput="handleOracleInputSearch(this.value)"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();submitOracleSearch();}"
+            >
+            <!-- Oracle Autocomplete Suggestions Dropdown -->
+            <div id="oracle-autocomplete-box" class="autocomplete-box"></div>
           </div>
           <button type="button" class="oracle-btn-submit" onclick="submitOracleSearch()">
             <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
@@ -1279,6 +1291,11 @@
       const box = document.getElementById('autocomplete-box');
       if (searchForm && box && !searchForm.contains(e.target)) {
         box.style.display = 'none';
+      }
+      const oracleBox = document.getElementById('oracle-autocomplete-box');
+      const oracleInputWrap = document.querySelector('.oracle-input-wrap');
+      if (oracleInputWrap && oracleBox && !oracleInputWrap.contains(e.target)) {
+        oracleBox.style.display = 'none';
       }
     });
 
@@ -2616,7 +2633,91 @@
       }, 250);
     }
 
+    let oracleSearchDebounceTimer;
+
+    function handleOracleInputSearch(val) {
+      clearTimeout(oracleSearchDebounceTimer);
+      const box = document.getElementById('oracle-autocomplete-box');
+      if (!box) return;
+      const clean = (val || '').trim().toLowerCase();
+      if (clean.length < 1) {
+        box.style.display = 'none';
+        return;
+      }
+
+      // 1. Instant client-side match (<1ms) so dropdown never delays
+      const localMatches = CLIENT_QUICK_ASSETS.filter(item => {
+        return item.symbol.toLowerCase().includes(clean) ||
+               item.name.toLowerCase().includes(clean) ||
+               (item.aliases && item.aliases.some(a => a.toLowerCase().includes(clean)));
+      });
+      if (localMatches.length > 0) {
+        renderOracleAutocomplete(localMatches);
+      }
+
+      // 2. Debounced remote API search
+      oracleSearchDebounceTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(clean)}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data.results && data.results.length > 0) {
+            renderOracleAutocomplete(data.results);
+          }
+        } catch (e) {
+          // ignore
+        }
+      }, 150);
+    }
+
+    function renderOracleAutocomplete(results) {
+      const box = document.getElementById('oracle-autocomplete-box');
+      if (!box) return;
+      box.innerHTML = '';
+      if (!results || results.length === 0) {
+        box.style.display = 'none';
+        return;
+      }
+
+      results.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'autocomplete-item';
+        const isCrypto = item.type === 'Crypto' || item.symbol.includes('-USD');
+        let iconText = item.symbol.slice(0, 2);
+        if (isCrypto) {
+          if (item.symbol.includes('BTC')) iconText = '₿';
+          else if (item.symbol.includes('ETH')) iconText = 'Ξ';
+          else if (item.symbol.includes('SOL')) iconText = '◎';
+          else if (item.symbol.includes('XRP')) iconText = '✕';
+          else iconText = '⚡';
+        }
+        div.innerHTML = `
+          <div class="item-left-col">
+            <div class="asset-icon-box ${isCrypto ? 'crypto' : ''}">${iconText}</div>
+            <div class="item-text-info">
+              <span class="item-symbol">${item.symbol}</span>
+              <span class="item-name">${item.name}</span>
+            </div>
+          </div>
+          <span class="item-badge ${isCrypto ? 'crypto' : ''}">${isCrypto ? 'Crypto 24/7' : item.exchange}</span>
+        `;
+        div.onclick = () => {
+          document.getElementById('oracle-ticker-input').value = item.symbol;
+          box.style.display = 'none';
+          currentOracleTicker = item.symbol.toUpperCase();
+          document.querySelectorAll('.oracle-chip').forEach(btn => btn.classList.remove('active'));
+          const activeBtn = document.getElementById(`ochip-${currentOracleTicker}`);
+          if (activeBtn) activeBtn.classList.add('active');
+          fetchOraclePrediction(currentOracleTicker, currentOracleDays);
+        };
+        box.appendChild(div);
+      });
+      box.style.display = 'block';
+    }
+
     function submitOracleSearch() {
+      const oracleBox = document.getElementById('oracle-autocomplete-box');
+      if (oracleBox) oracleBox.style.display = 'none';
       const input = document.getElementById('oracle-ticker-input');
       if (input && input.value.trim()) {
         currentOracleTicker = input.value.trim().toUpperCase();

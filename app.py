@@ -317,6 +317,59 @@ async def api_trade_setups(timeframe: str = Query("daily", description="Timefram
     return {"timeframe": tf, "total": len(formatted), "setups": formatted}
 
 
+@app.get("/api/search")
+async def api_search(q: str = Query("", description="Search term for asset or company name")):
+    """Autocomplete search endpoint matching stocks, cryptos, and aliases."""
+    clean = q.strip().lower()
+    if not clean:
+        return {"query": q, "count": 0, "results": []}
+
+    assets = [
+        {"symbol": "NVDA", "name": "NVIDIA Corporation", "type": "Stock", "exchange": "NASDAQ", "aliases": ["NVDA", "NVIDIA"]},
+        {"symbol": "TEM", "name": "Tempus AI, Inc.", "type": "Stock", "exchange": "NASDAQ", "aliases": ["TEM", "TEMPUS", "TEMPUS AI"]},
+        {"symbol": "ATOS", "name": "Atossa Therapeutics, Inc.", "type": "Stock", "exchange": "NASDAQ", "aliases": ["ATOS", "ATOSSA"]},
+        {"symbol": "ATO.PA", "name": "Atos SE", "type": "Stock", "exchange": "Euronext Paris", "aliases": ["ATO", "ATOS", "ATOS SE"]},
+        {"symbol": "APP", "name": "AppLovin Corporation", "type": "Stock", "exchange": "NASDAQ", "aliases": ["APP", "APPLOVIN"]},
+        {"symbol": "PLTR", "name": "Palantir Technologies", "type": "Stock", "exchange": "NYSE", "aliases": ["PLTR", "PALANTIR"]},
+        {"symbol": "BTC-USD", "name": "Bitcoin USD", "type": "Crypto", "exchange": "Crypto", "aliases": ["BTC", "BITCOIN"]},
+        {"symbol": "ETH-USD", "name": "Ethereum USD", "type": "Crypto", "exchange": "Crypto", "aliases": ["ETH", "ETHEREUM"]},
+        {"symbol": "SOL-USD", "name": "Solana USD", "type": "Crypto", "exchange": "Crypto", "aliases": ["SOL", "SOLANA"]},
+        {"symbol": "AAPL", "name": "Apple Inc.", "type": "Stock", "exchange": "NASDAQ", "aliases": ["AAPL", "APPLE"]},
+        {"symbol": "MSFT", "name": "Microsoft Corporation", "type": "Stock", "exchange": "NASDAQ", "aliases": ["MSFT", "MICROSOFT"]},
+        {"symbol": "AMZN", "name": "Amazon.com Inc.", "type": "Stock", "exchange": "NASDAQ", "aliases": ["AMZN", "AMAZON"]},
+        {"symbol": "TSLA", "name": "Tesla Inc.", "type": "Stock", "exchange": "NASDAQ", "aliases": ["TSLA", "TESLA"]},
+        {"symbol": "META", "name": "Meta Platforms Inc. (Facebook)", "type": "Stock", "exchange": "NASDAQ", "aliases": ["META", "FACEBOOK"]},
+        {"symbol": "AMD", "name": "Advanced Micro Devices", "type": "Stock", "exchange": "NASDAQ", "aliases": ["AMD"]},
+        {"symbol": "COIN", "name": "Coinbase Global Inc.", "type": "Stock", "exchange": "NASDAQ", "aliases": ["COIN", "COINBASE"]},
+        {"symbol": "ARM", "name": "Arm Holdings plc", "type": "Stock", "exchange": "NASDAQ", "aliases": ["ARM"]},
+        {"symbol": "SMCI", "name": "Super Micro Computer Inc.", "type": "Stock", "exchange": "NASDAQ", "aliases": ["SMCI", "SUPERMICRO"]},
+        {"symbol": "ASTS", "name": "AST SpaceMobile Inc.", "type": "Stock", "exchange": "NASDAQ", "aliases": ["ASTS", "SPACEMOBILE"]},
+        {"symbol": "RKLB", "name": "Rocket Lab USA Inc.", "type": "Stock", "exchange": "NASDAQ", "aliases": ["RKLB", "ROCKET LAB"]},
+        {"symbol": "IONQ", "name": "IonQ Inc. (Quantum)", "type": "Stock", "exchange": "NYSE", "aliases": ["IONQ"]},
+        {"symbol": "MSTR", "name": "MicroStrategy Inc.", "type": "Stock", "exchange": "NASDAQ", "aliases": ["MSTR", "MICROSTRATEGY"]},
+        {"symbol": "OKLO", "name": "Oklo Inc. (Micro-Nuclear)", "type": "Stock", "exchange": "NYSE", "aliases": ["OKLO"]},
+        {"symbol": "SMR", "name": "NuScale Power Corp", "type": "Stock", "exchange": "NYSE", "aliases": ["SMR", "NUSCALE"]},
+        {"symbol": "ALAB", "name": "Astera Labs Inc. (AI Connectivity)", "type": "Stock", "exchange": "NASDAQ", "aliases": ["ALAB", "ASTERA"]},
+        {"symbol": "RGTI", "name": "Rigetti Computing Inc. (Quantum)", "type": "Stock", "exchange": "NASDAQ", "aliases": ["RGTI", "RIGETTI"]},
+        {"symbol": "QBTS", "name": "D-Wave Quantum Inc.", "type": "Stock", "exchange": "NYSE", "aliases": ["QBTS", "DWAVE"]},
+        {"symbol": "SOUN", "name": "SoundHound AI Inc.", "type": "Stock", "exchange": "NASDAQ", "aliases": ["SOUN", "SOUNDHOUND"]},
+        {"symbol": "HIMS", "name": "Hims & Hers Health Inc.", "type": "Stock", "exchange": "NYSE", "aliases": ["HIMS"]},
+        {"symbol": "CAVA", "name": "CAVA Group Inc.", "type": "Stock", "exchange": "NYSE", "aliases": ["CAVA"]},
+        {"symbol": "RDDT", "name": "Reddit Inc.", "type": "Stock", "exchange": "NYSE", "aliases": ["RDDT", "REDDIT"]},
+        {"symbol": "HYPE32196-USD", "name": "Hyperliquid USD (HYPE)", "type": "Crypto", "exchange": "Crypto", "aliases": ["HYPE", "HYPERLIQUID"]},
+        {"symbol": "SUI20947-USD", "name": "Sui Network USD (SUI)", "type": "Crypto", "exchange": "Crypto", "aliases": ["SUI"]},
+        {"symbol": "NEAR-USD", "name": "NEAR Protocol USD", "type": "Crypto", "exchange": "Crypto", "aliases": ["NEAR"]},
+        {"symbol": "TAO-USD", "name": "Bittensor USD (TAO)", "type": "Crypto", "exchange": "Crypto", "aliases": ["TAO", "BITTENSOR"]}
+    ]
+
+    matched = []
+    for a in assets:
+        if clean in a["symbol"].lower() or clean in a["name"].lower() or any(clean in alias.lower() for alias in a.get("aliases", [])):
+            matched.append(a)
+
+    return {"query": q, "count": len(matched), "results": matched}
+
+
 @app.get("/health")
 async def health_check():
     """Healthcheck endpoint for Cloudflare Tunnel / load balancer."""
