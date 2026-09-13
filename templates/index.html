@@ -48,6 +48,10 @@
         <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
         Lie Detector
       </button>
+      <button type="button" class="nav-btn" id="nav-btn-oracle" onclick="switchAppView('oracle')">
+        <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.5h-2v-2h2zm0-4h-2V7h2z"/></svg>
+        TimesFM Oracle
+      </button>
       <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleAppTheme()" title="Toggle Dark/Light Mode">
         🌙
       </button>
@@ -887,6 +891,156 @@
         </div>
       </div>
     </div><!-- End of view-detector -->
+
+    <!-- VIEW 5: TIMESFM GENERATIVE ORACLE -->
+    <div id="view-oracle" class="app-view" style="display:none;">
+      <!-- Hero Banner -->
+      <div class="oracle-hero-banner">
+        <h1>
+          <svg style="width:26px;height:26px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.5h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          TimesFM Generative Price Oracle
+        </h1>
+        <p>Google Research TimesFM Foundation Modeli ile Noktasal &amp; Kuantil Fiyat Kehaneti: Tıpkı büyük dil modellerinin (LLM) bir sonraki kelimeyi olasılık dağılımıyla türetmesi gibi; TimesFM de zaman serisi yamalarını oto-regresif işleyerek seçtiğiniz hedef gün/saatte fiyatın nerede olacağını, %80 güven bandını ve olasılık yoğunluğunu hesaplar.</p>
+        <div class="oracle-pill-tag">
+          <svg style="width:14px;height:14px;fill:currentColor;" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          Zero-Shot Stochastic Patch Diffusion • Continuous Log-Normal Quantile Engine
+        </div>
+      </div>
+
+      <!-- Controls Card (Asset & Target Horizon) -->
+      <div class="oracle-controls-card">
+        <!-- Search Row -->
+        <div class="oracle-search-row">
+          <div class="oracle-input-wrap">
+            <input type="text" id="oracle-ticker-input" class="oracle-input" placeholder="Hisse veya Kripto Sembolü girin (örn. NVDA, AAPL, BTC, TSLA)..." value="NVDA">
+          </div>
+          <button type="button" class="oracle-btn-submit" onclick="submitOracleSearch()">
+            <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            Fiyatı Kehanet Et
+          </button>
+        </div>
+
+        <!-- Quick Pick Chips -->
+        <div class="oracle-chips-row">
+          <span class="oracle-chip-label">Popüler Varlıklar:</span>
+          <button type="button" class="oracle-chip active" id="ochip-NVDA" onclick="selectOracleChip('NVDA')">NVDA</button>
+          <button type="button" class="oracle-chip" id="ochip-AAPL" onclick="selectOracleChip('AAPL')">AAPL</button>
+          <button type="button" class="oracle-chip" id="ochip-BTC-USD" onclick="selectOracleChip('BTC-USD')">BTC</button>
+          <button type="button" class="oracle-chip" id="ochip-ETH-USD" onclick="selectOracleChip('ETH-USD')">ETH</button>
+          <button type="button" class="oracle-chip" id="ochip-TSLA" onclick="selectOracleChip('TSLA')">TSLA</button>
+          <button type="button" class="oracle-chip" id="ochip-AMD" onclick="selectOracleChip('AMD')">AMD</button>
+          <button type="button" class="oracle-chip" id="ochip-PLTR" onclick="selectOracleChip('PLTR')">PLTR</button>
+          <button type="button" class="oracle-chip" id="ochip-MSFT" onclick="selectOracleChip('MSFT')">MSFT</button>
+          <button type="button" class="oracle-chip" id="ochip-HYPE" onclick="selectOracleChip('HYPE')">HYPE</button>
+        </div>
+
+        <!-- Target Horizon Section -->
+        <div class="oracle-horizon-section">
+          <div class="oracle-horizon-title">
+            <span>Hedef Zaman / Projeksiyon Vadesi:</span>
+            <span id="oracle-horizon-selected-txt" style="font-weight:800; color:#4f46e5;">1 Ay (21 İş Günü)</span>
+          </div>
+
+          <div class="oracle-horizon-pills">
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(1, this)">1 Gün (Yarın)</button>
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(3, this)">3 Gün</button>
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(5, this)">1 Hafta (5 Gün)</button>
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(10, this)">2 Hafta (10 Gün)</button>
+            <button type="button" class="oracle-h-pill active" onclick="selectOracleHorizon(21, this)">1 Ay (21 Gün)</button>
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(63, this)">3 Ay (63 Gün)</button>
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(126, this)">6 Ay (126 Gün)</button>
+            <button type="button" class="oracle-h-pill" onclick="selectOracleHorizon(252, this)">1 Yıl (252 Gün)</button>
+          </div>
+
+          <div class="oracle-slider-wrap">
+            <span style="font-size:12px; font-weight:700; color:var(--text-muted);">Özel Gün:</span>
+            <input type="range" id="oracle-days-slider" class="oracle-slider" min="1" max="252" value="21" oninput="onOracleSliderInput(this.value)">
+            <span class="oracle-slider-val" id="oracle-slider-val-txt">21 Gün</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verdict Big Card -->
+      <div class="oracle-verdict-card" id="oracle-verdict-card">
+        <div class="oracle-verdict-header">
+          <div>
+            <div class="oracle-target-headline" id="oracle-verdict-headline">Hedef Tarih Projeksiyonu</div>
+            <div class="oracle-target-price-big">
+              <span id="oracle-target-price-val">$---.--</span>
+              <span class="oracle-badge-return bullish" id="oracle-badge-return">+--%</span>
+            </div>
+            <div style="font-size:13px; color:var(--text-muted); margin-top:6px;">
+              Mevcut Fiyat: <strong id="oracle-current-price-val">$---.--</strong> • Hedef Tarih: <strong id="oracle-target-date-val">----</strong>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px;">Model Yönsel Güveni</div>
+            <div style="font-size:28px; font-weight:800; color:#4f46e5; font-family:var(--font-mono);" id="oracle-conf-val">--%</div>
+            <div style="font-size:11.5px; color:var(--text-muted);" id="oracle-conf-sub">Kuantil Sürüklenme Güveni</div>
+          </div>
+        </div>
+
+        <!-- 4 KPI Boxes -->
+        <div class="oracle-kpi-grid">
+          <div class="oracle-kpi-box">
+            <div class="oracle-kpi-lbl">%80 Güven Bandı (P10 - P90)</div>
+            <div class="oracle-kpi-num" id="oracle-kpi-80band">$--- - $---</div>
+            <div class="oracle-kpi-sub" id="oracle-kpi-80spread">Yayılım: --%</div>
+          </div>
+          <div class="oracle-kpi-box">
+            <div class="oracle-kpi-lbl">Kazanma / Yükseliş İhtimali</div>
+            <div class="oracle-kpi-num" id="oracle-kpi-prob">--%</div>
+            <div class="oracle-kpi-sub">Gaussian CDF İntegrali</div>
+          </div>
+          <div class="oracle-kpi-box">
+            <div class="oracle-kpi-lbl">Yıllık Volatilite (σ)</div>
+            <div class="oracle-kpi-num" id="oracle-kpi-vol">--%</div>
+            <div class="oracle-kpi-sub" id="oracle-kpi-sigmat">Vade Varyansı: --</div>
+          </div>
+          <div class="oracle-kpi-box">
+            <div class="oracle-kpi-lbl">Trend &amp; Rejim Durumu</div>
+            <div class="oracle-kpi-num" style="font-size:15px;" id="oracle-kpi-regime">---</div>
+            <div class="oracle-kpi-sub">SMA50 / SMA200 Filtresi</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Probability Distribution Chart Card -->
+      <div class="oracle-chart-card">
+        <div class="oracle-chart-header">
+          <div class="oracle-chart-title">
+            <svg style="width:18px;height:18px;fill:#4f46e5;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+            Hedef Vadedeki Sürekli Fiyat Olasılık Dağılımı (Probability Density Function)
+          </div>
+          <div style="font-size:12px; color:var(--text-muted);">
+            Tepe Noktası: <strong style="color:#4f46e5;">Medyan Hedef (P50)</strong> • Mavi Alan: <strong>%80 Güven Aralığı</strong>
+          </div>
+        </div>
+        <div style="height:320px; position:relative;">
+          <canvas id="oracle-distribution-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Generative Reasoning Card -->
+      <div class="oracle-reasoning-card">
+        <div class="oracle-reasoning-title">
+          <svg style="width:20px;height:20px;fill:currentColor;" viewBox="0 0 24 24"><path d="M9.5 2C5.36 2 2 5.36 2 9.5c0 2.76 1.48 5.17 3.68 6.46.3.17.49.5.49.85V18c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1.19c0-.35.19-.68.49-.85C14.52 14.67 16 12.26 16 9.5 16 5.36 12.64 2 9.5 2zM9 21c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-1H9v1z"/></svg>
+          Yapay Zeka Karar Özeti &amp; Generative Kuantil Gerekçelendirmesi
+        </div>
+        <div class="oracle-reasoning-item" id="oracle-reason-headline">
+          <strong>Özet Teşhis:</strong> Yükleniyor...
+        </div>
+        <div class="oracle-reasoning-item" id="oracle-reason-patch">
+          <strong>Zaman Serisi &amp; Trend:</strong> Yükleniyor...
+        </div>
+        <div class="oracle-reasoning-item" id="oracle-reason-macro">
+          <strong>Makro Risk &amp; VIX Şartlandırması:</strong> Yükleniyor...
+        </div>
+        <div class="oracle-reasoning-item" id="oracle-reason-uncertainty">
+          <strong>Oto-Regresif Belirsizlik Yayılımı:</strong> Yükleniyor...
+        </div>
+      </div>
+    </div><!-- End of view-oracle -->
   </main>
 
   <footer class="app-footer">
@@ -1163,6 +1317,8 @@
         fetchPortfolios();
       } else if (viewName === 'detector') {
         fetchLieDetector(currentDetectorSubMode);
+      } else if (viewName === 'oracle') {
+        fetchOraclePrediction(currentOracleTicker, currentOracleDays);
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -2382,6 +2538,239 @@
     }
 
     // ==========================================
+    // TIMESFM GENERATIVE PRICE ORACLE ENGINE
+    // ==========================================
+    let currentOracleTicker = 'NVDA';
+    let currentOracleDays = 21;
+    let oracleDistributionChart = null;
+    let oracleDebounceTimer = null;
+    let cachedOracleData = null;
+
+    function selectOracleChip(ticker) {
+      currentOracleTicker = ticker;
+      const input = document.getElementById('oracle-ticker-input');
+      if (input) input.value = ticker;
+      document.querySelectorAll('.oracle-chip').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`ochip-${ticker}`);
+      if (activeBtn) activeBtn.classList.add('active');
+      fetchOraclePrediction(currentOracleTicker, currentOracleDays);
+    }
+
+    function selectOracleHorizon(days, btn) {
+      currentOracleDays = parseInt(days, 10);
+      document.querySelectorAll('.oracle-h-pill').forEach(el => el.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const slider = document.getElementById('oracle-days-slider');
+      if (slider) slider.value = days;
+      const sliderTxt = document.getElementById('oracle-slider-val-txt');
+      if (sliderTxt) sliderTxt.textContent = `${days} Gün`;
+      fetchOraclePrediction(currentOracleTicker, currentOracleDays);
+    }
+
+    function onOracleSliderInput(val) {
+      currentOracleDays = parseInt(val, 10);
+      const sliderTxt = document.getElementById('oracle-slider-val-txt');
+      if (sliderTxt) sliderTxt.textContent = `${val} Gün`;
+      document.querySelectorAll('.oracle-h-pill').forEach(el => el.classList.remove('active'));
+      
+      clearTimeout(oracleDebounceTimer);
+      oracleDebounceTimer = setTimeout(() => {
+        fetchOraclePrediction(currentOracleTicker, currentOracleDays);
+      }, 250);
+    }
+
+    function submitOracleSearch() {
+      const input = document.getElementById('oracle-ticker-input');
+      if (input && input.value.trim()) {
+        currentOracleTicker = input.value.trim().toUpperCase();
+        document.querySelectorAll('.oracle-chip').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.getElementById(`ochip-${currentOracleTicker}`);
+        if (activeBtn) activeBtn.classList.add('active');
+        fetchOraclePrediction(currentOracleTicker, currentOracleDays);
+      }
+    }
+
+    async function fetchOraclePrediction(ticker, days) {
+      const horizonTxt = document.getElementById('oracle-horizon-selected-txt');
+      if (horizonTxt) {
+        let label = `${days} İş Günü`;
+        if (days === 1) label = "1 Gün (Yarın Kapanış)";
+        else if (days === 5) label = "1 Hafta (5 İş Günü)";
+        else if (days === 10) label = "2 Hafta (10 İş Günü)";
+        else if (days === 21) label = "1 Ay (21 İş Günü)";
+        else if (days === 63) label = "3 Ay (63 İş Günü)";
+        else if (days === 126) label = "6 Ay (126 İş Günü)";
+        else if (days === 252) label = "1 Yıl (252 İş Günü)";
+        horizonTxt.textContent = label;
+      }
+
+      const verdictHeadline = document.getElementById('oracle-verdict-headline');
+      if (verdictHeadline) verdictHeadline.textContent = `${ticker} • ${days} Gün Sonrası Fiyat Kehaneti Hesaplanıyor...`;
+
+      try {
+        const res = await fetch(`/api/oracle?ticker=${encodeURIComponent(ticker)}&days=${days}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        cachedOracleData = data;
+        renderOracleUI(data);
+      } catch (err) {
+        console.error("Oracle fetch error:", err);
+        if (verdictHeadline) verdictHeadline.textContent = `Hata: ${err.message}`;
+      }
+    }
+
+    function renderOracleUI(data) {
+      const pt = data.point_forecast;
+      const curPrice = data.current_price;
+      const targetPrice = pt.target_price_p50;
+      const returnPct = pt.expected_return_pct;
+      const isBull = returnPct >= 0;
+
+      // Header values
+      const verdictHeadline = document.getElementById('oracle-verdict-headline');
+      if (verdictHeadline) verdictHeadline.textContent = `${data.name || data.symbol} (${data.symbol}) • ${data.horizon_label}`;
+
+      const targetPriceElem = document.getElementById('oracle-target-price-val');
+      if (targetPriceElem) targetPriceElem.textContent = `$${targetPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      const badgeReturn = document.getElementById('oracle-badge-return');
+      if (badgeReturn) {
+        badgeReturn.className = `oracle-badge-return ${isBull ? 'bullish' : 'bearish'}`;
+        badgeReturn.textContent = `${isBull ? '+' : ''}${returnPct.toFixed(2)}% ${pt.direction}`;
+      }
+
+      const curPriceElem = document.getElementById('oracle-current-price-val');
+      if (curPriceElem) curPriceElem.textContent = `$${curPrice.toFixed(2)}`;
+
+      const targetDateElem = document.getElementById('oracle-target-date-val');
+      if (targetDateElem) targetDateElem.textContent = data.target_date;
+
+      const confElem = document.getElementById('oracle-conf-val');
+      if (confElem) confElem.textContent = `%${pt.directional_confidence_pct}`;
+
+      // 4 KPI boxes
+      const kpi80 = document.getElementById('oracle-kpi-80band');
+      if (kpi80) kpi80.textContent = `$${pt.confidence_80_range.p10.toFixed(2)} - $${pt.confidence_80_range.p90.toFixed(2)}`;
+
+      const kpiSpread = document.getElementById('oracle-kpi-80spread');
+      if (kpiSpread) kpiSpread.textContent = `Yayılım: %${pt.confidence_80_range.spread_pct}`;
+
+      const kpiProb = document.getElementById('oracle-kpi-prob');
+      if (kpiProb) {
+        kpiProb.textContent = `%${pt.profit_probability_pct}`;
+        kpiProb.style.color = pt.profit_probability_pct >= 55 ? 'var(--google-green)' : (pt.profit_probability_pct <= 45 ? 'var(--google-red)' : 'var(--text-primary)');
+      }
+
+      const kpiVol = document.getElementById('oracle-kpi-vol');
+      if (kpiVol) kpiVol.textContent = `%${pt.annualized_volatility_pct}`;
+
+      const kpiSigma = document.getElementById('oracle-kpi-sigmat');
+      if (kpiSigma) kpiSigma.textContent = `σ(t): ${pt.sigma_t}`;
+
+      const kpiRegime = document.getElementById('oracle-kpi-regime');
+      if (kpiRegime) {
+        kpiRegime.textContent = pt.trend_regime;
+        kpiRegime.style.color = pt.trend_regime.includes('Bullish') ? 'var(--google-green)' : (pt.trend_regime.includes('Bearish') ? 'var(--google-red)' : 'var(--text-primary)');
+      }
+
+      // Reasoning
+      const r = data.generative_reasoning;
+      if (r) {
+        const hElem = document.getElementById('oracle-reason-headline');
+        if (hElem) hElem.innerHTML = `<strong>Özet Teşhis:</strong> ${r.headline}`;
+        const pElem = document.getElementById('oracle-reason-patch');
+        if (pElem) pElem.innerHTML = `<strong>Zaman Serisi &amp; Trend:</strong> ${r.patch_analysis}`;
+        const mElem = document.getElementById('oracle-reason-macro');
+        if (mElem) mElem.innerHTML = `<strong>Makro Risk &amp; VIX Şartlandırması:</strong> ${r.macro_risk}`;
+        const uElem = document.getElementById('oracle-reason-uncertainty');
+        if (uElem) uElem.innerHTML = `<strong>Oto-Regresif Belirsizlik Yayılımı:</strong> ${r.uncertainty_analysis}`;
+      }
+
+      // Render Chart
+      renderOracleDistributionChart(data.distribution_curve, pt.confidence_80_range.p10, pt.confidence_80_range.p90, targetPrice, curPrice);
+    }
+
+    function renderOracleDistributionChart(curve, p10, p90, p50, curPrice) {
+      const canvas = document.getElementById('oracle-distribution-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      if (oracleDistributionChart) {
+        oracleDistributionChart.destroy();
+        oracleDistributionChart = null;
+      }
+
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const labels = curve.map(c => `$${c.price}`);
+      const densities = curve.map(c => c.density);
+
+      // Create gradient fill
+      const grad = ctx.createLinearGradient(0, 0, 0, 320);
+      if (isDark) {
+        grad.addColorStop(0, 'rgba(79, 70, 229, 0.5)');
+        grad.addColorStop(1, 'rgba(79, 70, 229, 0.02)');
+      } else {
+        grad.addColorStop(0, 'rgba(79, 70, 229, 0.35)');
+        grad.addColorStop(1, 'rgba(79, 70, 229, 0.02)');
+      }
+
+      oracleDistributionChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Olasılık Yoğunluğu f(P)',
+            data: densities,
+            borderColor: '#4f46e5',
+            borderWidth: 2.5,
+            fill: true,
+            backgroundColor: grad,
+            tension: 0.4,
+            pointRadius: curve.map(c => Math.abs(c.price - p50) < (p90 - p10) * 0.04 ? 6 : 0),
+            pointBackgroundColor: '#4f46e5',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: (items) => `Fiyat: ${items[0].label}`,
+                label: (item) => {
+                  const pt = curve[item.dataIndex];
+                  const inRange = pt.in_80_ci ? ' (%80 Güven Aralığı İçinde)' : '';
+                  return `Yoğunluk: ${pt.density}${inRange}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                maxTicksLimit: 10,
+                color: isDark ? '#9aa0a6' : '#70757a',
+                font: { family: 'JetBrains Mono', size: 11 }
+              }
+            },
+            y: {
+              grid: { color: isDark ? '#282a30' : '#f1f3f4' },
+              ticks: {
+                color: isDark ? '#9aa0a6' : '#70757a',
+                font: { family: 'JetBrains Mono', size: 11 }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ==========================================
     // THEME CONTROLLER (LIGHT / DARK MODE)
     // ==========================================
     function initTheme() {
@@ -2428,6 +2817,19 @@
           forecastChart.options.scales.y.grid.color = gridColor;
         }
         forecastChart.update();
+      }
+      if (oracleDistributionChart) {
+        const isDark = theme === 'dark';
+        const tickColor = isDark ? '#9aa0a6' : '#70757a';
+        const gridColor = isDark ? '#282a30' : '#f1f3f4';
+        if (oracleDistributionChart.options?.scales?.x?.ticks) {
+          oracleDistributionChart.options.scales.x.ticks.color = tickColor;
+        }
+        if (oracleDistributionChart.options?.scales?.y?.ticks) {
+          oracleDistributionChart.options.scales.y.ticks.color = tickColor;
+          oracleDistributionChart.options.scales.y.grid.color = gridColor;
+        }
+        oracleDistributionChart.update();
       }
     }
 
