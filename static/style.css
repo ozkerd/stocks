@@ -619,6 +619,18 @@ input, button, select, textarea, table, th, td {
   border-radius: 12px;
 }
 
+.badge-stocks-crypto {
+  background: #e8f0fe;
+  color: #1a73e8;
+  border: 1px solid #aecbfa;
+}
+
+[data-theme="dark"] .badge-stocks-crypto {
+  background: #172740 !important;
+  color: #8ab4f8 !important;
+  border: 1px solid #24416b !important;
+}
+
 .nav-links a {
   color: var(--text-secondary);
   text-decoration: none;
