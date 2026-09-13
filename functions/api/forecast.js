@@ -98,7 +98,12 @@ const COMMON_COMPANY_NAMES = {
   "IONQ": "IONQ",
   "MSTR": "MSTR",
   "MICROSTRATEGY": "MSTR",
-  "ARM": "ARM"
+  "ARM": "ARM",
+  "ATOS": "ATOS",
+  "ATOSSA": "ATOS",
+  "TEMPUS": "TEM",
+  "TEMPUS AI": "TEM",
+  "TEM": "TEM"
 };
 
 const MACRO_TICKERS = {
@@ -669,6 +674,20 @@ const FALLBACK_PROFILES = {
     industry: "Cloud Computing & Enterprise Software",
     headquarters: "Redmond, Washington, USA",
     website: "https://www.microsoft.com"
+  },
+  "ATOS": {
+    description: "Atossa Therapeutics, Inc. is a clinical-stage biopharmaceutical company focused on developing proprietary medicines in oncology and breast health, including (Z)-endoxifen for pre-menopausal estrogen-receptor positive breast cancer.",
+    sector: "Healthcare",
+    industry: "Biotechnology & Oncology",
+    headquarters: "Seattle, Washington, USA",
+    website: "https://atossatherapeutics.com"
+  },
+  "TEM": {
+    description: "Tempus AI, Inc. is a pioneering technology leader applying artificial intelligence and machine learning to healthcare. Operating one of the world's largest libraries of clinical and molecular data, Tempus empowers physicians to deliver precision medicine and assists pharmaceutical partners in accelerated drug discovery.",
+    sector: "Healthcare Technology",
+    industry: "Health Information Services & AI Precision Medicine",
+    headquarters: "Chicago, Illinois, USA",
+    website: "https://www.tempus.com"
   }
 };
 
@@ -758,7 +777,9 @@ const ASSET_NAME_MAP = {
   "DOGE-USD": "Dogecoin",
   "XRP-USD": "XRP Ripple",
   "ADA-USD": "Cardano",
-  "BNB-USD": "BNB Binance"
+  "BNB-USD": "BNB Binance",
+  "ATOS": "Atossa Therapeutics",
+  "TEM": "Tempus AI"
 };
 
 function isHeadlineRelevant(title, ticker, assetName) {
@@ -1169,7 +1190,8 @@ export async function onRequest(context) {
     // Harmonize with Quantitative Conviction Universe (Best Now & Trade Setups)
     const lookupKey = symbol.toUpperCase().replace(".US", "");
     const quantMatch = QUANT_UNIVERSE_MAP[lookupKey] || 
-                       QUANT_UNIVERSE_MAP[ticker.toUpperCase()] || 
+                       QUANT_UNIVERSE_MAP[resolvedTicker.toUpperCase()] || 
+                       QUANT_UNIVERSE_MAP[rawInput.toUpperCase()] || 
                        QUANT_UNIVERSE_MAP[lookupKey.split("-")[0]];
 
     if (quantMatch) {

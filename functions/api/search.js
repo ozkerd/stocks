@@ -26,6 +26,8 @@ const POPULAR_ASSETS = [
   { symbol: "RKLB", name: "Rocket Lab USA Inc.", type: "Stock", exchange: "NASDAQ" },
   { symbol: "IONQ", name: "IonQ Inc. (Quantum)", type: "Stock", exchange: "NYSE" },
   { symbol: "MSTR", name: "MicroStrategy Inc.", type: "Stock", exchange: "NASDAQ" },
+  { symbol: "TEM", name: "Tempus AI, Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["TEM", "TEMPUS", "TEMPUS AI"] },
+  { symbol: "ATOS", name: "Atossa Therapeutics, Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["ATOS", "ATOSSA"] },
 
   // Crypto Assets & Trending Coins
   { symbol: "BTC-USD", name: "Bitcoin USD", type: "Crypto", exchange: "Crypto", aliases: ["BTC", "BITCOIN"] },
