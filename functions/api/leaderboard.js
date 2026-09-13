@@ -21,7 +21,7 @@ const ASSET_UNIVERSE = [
   { symbol: "NEAR-USD", display_symbol: "NEAR", name: "NEAR Protocol USD", type: "Crypto", exchange: "Crypto", base_price: 2.35, base_return: 30.5, conviction: 89, rating: "BUY", cap: "mid_cap", tech_score: 89, pa_score: 91 },
   { symbol: "ONDO-USD", display_symbol: "ONDO", name: "Ondo Finance RWA USD", type: "Crypto", exchange: "Crypto", base_price: 0.35, base_return: 34.0, conviction: 89, rating: "BUY", cap: "low_cap", tech_score: 90, pa_score: 92 },
   { symbol: "AAVE-USD", display_symbol: "AAVE", name: "Aave USD", type: "Crypto", exchange: "Crypto", base_price: 126.47, base_return: 26.5, conviction: 89, rating: "BUY", cap: "mid_cap", tech_score: 90, pa_score: 91 },
-  { symbol: "TSLA", display_symbol: "TSLA", name: "Tesla Inc.", type: "Stock", exchange: "NASDAQ", base_price: 365.44, base_return: 25.1, conviction: 89, rating: "STRONG BUY", cap: "high_cap", tech_score: 86, pa_score: 91 },
+  { symbol: "TSLA", display_symbol: "TSLA", name: "Tesla Inc.", type: "Stock", exchange: "NASDAQ", base_price: 365.44, sma50: 354.50, sma200: 398.93, is_bear_regime: true, cap: "high_cap" },
   { symbol: "ASTS", display_symbol: "ASTS", name: "AST SpaceMobile Inc.", type: "Stock", exchange: "NASDAQ", base_price: 59.86, base_return: 38.0, conviction: 88, rating: "BUY", cap: "low_cap", tech_score: 91, pa_score: 92 },
   { symbol: "RKLB", display_symbol: "RKLB", name: "Rocket Lab USA Inc.", type: "Stock", exchange: "NASDAQ", base_price: 62.95, base_return: 32.0, conviction: 88, rating: "BUY", cap: "low_cap", tech_score: 90, pa_score: 91 },
   { symbol: "FET-USD", display_symbol: "FET", name: "Artificial Superintelligence Alliance", type: "Crypto", exchange: "Crypto", base_price: 0.167, base_return: 33.5, conviction: 88, rating: "BUY", cap: "low_cap", tech_score: 87, pa_score: 89 },
@@ -33,10 +33,10 @@ const ASSET_UNIVERSE = [
   { symbol: "META", display_symbol: "META", name: "Meta Platforms Inc.", type: "Stock", exchange: "NASDAQ", base_price: 648.03, base_return: 18.9, conviction: 88, rating: "STRONG BUY", cap: "high_cap", tech_score: 87, pa_score: 88 },
   { symbol: "COIN", display_symbol: "COIN", name: "Coinbase Global", type: "Stock", exchange: "NASDAQ", base_price: 175.26, base_return: 27.5, conviction: 87, rating: "STRONG BUY", cap: "mid_cap", tech_score: 86, pa_score: 91 },
   { symbol: "ARM", display_symbol: "ARM", name: "Arm Holdings plc", type: "Stock", exchange: "NASDAQ", base_price: 264.79, base_return: 22.0, conviction: 87, rating: "STRONG BUY", cap: "mid_cap", tech_score: 89, pa_score: 90 },
-  { symbol: "TEM", display_symbol: "TEM", name: "Tempus AI Inc.", type: "Stock", exchange: "NASDAQ", base_price: 68.50, cap: "mid_cap" },
-  { symbol: "ATOS", display_symbol: "ATOS", name: "Atossa Therapeutics Inc.", type: "Stock", exchange: "NASDAQ", base_price: 2.51, cap: "low_cap" },
-  { symbol: "ATO.PA", display_symbol: "ATO.PA", name: "Atos SE", type: "Stock", exchange: "Euronext Paris", base_price: 24.82, cap: "low_cap" },
-  { symbol: "SMCI", display_symbol: "SMCI", name: "Super Micro Computer", type: "Stock", exchange: "NASDAQ", base_price: 40.10, cap: "mid_cap" },
+  { symbol: "TEM", display_symbol: "TEM", name: "Tempus AI Inc.", type: "Stock", exchange: "NASDAQ", base_price: 59.01, cap: "mid_cap" },
+  { symbol: "ATOS", display_symbol: "ATOS", name: "Atossa Therapeutics Inc.", type: "Stock", exchange: "NASDAQ", base_price: 2.51, sma50: 2.45, sma200: 3.10, is_bear_regime: true, cap: "low_cap" },
+  { symbol: "ATO.PA", display_symbol: "ATO.PA", name: "Atos SE", type: "Stock", exchange: "Euronext Paris", base_price: 24.82, sma50: 23.50, sma200: 32.00, is_bear_regime: true, cap: "low_cap" },
+  { symbol: "SMCI", display_symbol: "SMCI", name: "Super Micro Computer", type: "Stock", exchange: "NASDAQ", base_price: 40.10, sma50: 32.51, sma200: 31.51, cap: "mid_cap" },
   { symbol: "APT21794-USD", display_symbol: "APT", name: "Aptos USD", type: "Crypto", exchange: "Crypto", base_price: 0.60, base_return: 28.0, conviction: 87, rating: "BUY", cap: "mid_cap", tech_score: 86, pa_score: 88 },
   { symbol: "JUP-USD", display_symbol: "JUP", name: "Jupiter DEX USD", type: "Crypto", exchange: "Crypto", base_price: 0.24, base_return: 32.0, conviction: 87, rating: "BUY", cap: "low_cap", tech_score: 87, pa_score: 89 },
   { symbol: "IONQ", display_symbol: "IONQ", name: "IonQ Inc. (Quantum)", type: "Stock", exchange: "NYSE", base_price: 36.75, base_return: 35.0, conviction: 86, rating: "BUY", cap: "low_cap", tech_score: 88, pa_score: 87 },
@@ -160,12 +160,19 @@ const ASSET_UNIVERSE = [
   { symbol: "IBIT", display_symbol: "IBIT", name: "iShares Bitcoin Trust", type: "ETF", exchange: "NASDAQ", base_price: 43.77, base_return: 28.0, conviction: 94, rating: "STRONG BUY", cap: "high_cap", tech_score: 97, pa_score: 95 }
 ];
 
+let CACHED_LEADERBOARD_PRICES = {};
+let LAST_LEADERBOARD_FETCH = 0;
+
 /**
  * Real-Time Market Price Fetcher:
- * Concurrently queries Binance API (real-time crypto prices) and Yahoo Finance batch quotes (real-time US stocks).
- * Fast, resilient, and bounded by a 2.5s timeout.
+ * Concurrently queries Binance API (crypto) and Yahoo Finance Spark batch API (stocks).
+ * Caches prices in memory for 5 minutes for sub-10ms response times.
  */
 async function fetchLivePrices(assets) {
+  if (Date.now() - LAST_LEADERBOARD_FETCH < 300000 && Object.keys(CACHED_LEADERBOARD_PRICES).length >= 10) {
+    return CACHED_LEADERBOARD_PRICES;
+  }
+
   const prices = {};
   const cryptoAssets = assets.filter(a => a.type === "Crypto");
   const stockAssets = assets.filter(a => a.type === "Stock" || a.type === "ETF");
@@ -211,69 +218,117 @@ async function fetchLivePrices(assets) {
     }
   })();
 
-  // 2. Yahoo Finance batch quotes for stocks via session crumb
+  // 2. Yahoo Finance batch spark quotes for stocks in chunks of 20
   const stockPromise = (async () => {
     try {
       const symbols = stockAssets.map(a => a.symbol);
-      const cookieRes = await fetch("https://fc.yahoo.com", {
-        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" }
-      });
-      const cookie = cookieRes.headers.get("set-cookie");
-      if (cookie) {
-        const crumbRes = await fetch("https://query2.finance.yahoo.com/v1/test/getcrumb", {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Cookie": cookie
-          }
-        });
-        if (crumbRes.ok) {
-          const crumb = await crumbRes.text();
-          if (crumb && crumb.length < 30) {
-            const chunks = [];
-            for (let i = 0; i < symbols.length; i += 35) {
-              chunks.push(symbols.slice(i, i + 35));
-            }
-            await Promise.allSettled(chunks.map(async chunk => {
-              const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${chunk.join(",")}&crumb=${encodeURIComponent(crumb)}`;
-              const quoteRes = await fetch(url, {
-                headers: {
-                  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                  "Cookie": cookie
-                }
-              });
-              if (quoteRes.ok) {
-                const quoteData = await quoteRes.json();
-                quoteData?.quoteResponse?.result?.forEach(r => {
-                  if (r.regularMarketPrice) {
-                    prices[r.symbol] = {
-                      price: r.regularMarketPrice,
-                      changePct: r.regularMarketChangePercent || 0,
-                      ma50: r.fiftyDayAverage || r.regularMarketPrice,
-                      ma200: r.twoHundredDayAverage || r.regularMarketPrice,
-                      high52: r.fiftyTwoWeekHigh || r.regularMarketPrice * 1.15,
-                      low52: r.fiftyTwoWeekLow || r.regularMarketPrice * 0.85,
-                      marketCap: r.marketCap || 0,
-                      volume: r.regularMarketVolume || 0
-                    };
-                  }
-                });
-              }
-            }));
-          }
-        }
+      const chunks = [];
+      for (let i = 0; i < symbols.length; i += 20) {
+        chunks.push(symbols.slice(i, i + 20));
       }
+      await Promise.allSettled(chunks.map(async chunk => {
+        try {
+          const url = `https://query1.finance.yahoo.com/v7/finance/spark?symbols=${chunk.join(",")}&range=1y&interval=1d`;
+          const res = await fetch(url, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+              "Accept": "application/json"
+            }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const sparkList = data?.spark?.result || [];
+            sparkList.forEach(sItem => {
+              const r0 = sItem?.response?.[0];
+              const sym = sItem?.symbol;
+              const closes = r0?.indicators?.quote?.[0]?.close?.filter(c => c != null) || [];
+              if (sym && closes.length >= 20) {
+                const p = r0?.meta?.regularMarketPrice || closes[closes.length - 1];
+                const ma50 = closes.slice(-50).reduce((a, b) => a + b, 0) / Math.min(50, closes.length);
+                const ma200 = closes.slice(-200).reduce((a, b) => a + b, 0) / Math.min(200, closes.length);
+                const high52 = Math.max(...closes);
+                const low52 = Math.min(...closes);
+                const changePct = closes.length >= 2 ? ((p - closes[closes.length - 2]) / closes[closes.length - 2]) * 100 : 0;
+                prices[sym] = {
+                  price: p,
+                  changePct,
+                  ma50,
+                  ma200,
+                  high52,
+                  low52,
+                  marketCap: 0,
+                  volume: 5e6
+                };
+              }
+            });
+          }
+        } catch (e) {
+          // Ignore
+        }
+      }));
     } catch (e) {
       // Ignore
     }
   })();
 
-  const timeoutPromise = new Promise(resolve => setTimeout(resolve, 2800));
+  const timeoutPromise = new Promise(resolve => setTimeout(resolve, 2500));
   await Promise.race([
     Promise.allSettled([cryptoPromise, stockPromise]),
     timeoutPromise
   ]);
 
+  if (Object.keys(prices).length > 5) {
+    CACHED_LEADERBOARD_PRICES = prices;
+    LAST_LEADERBOARD_FETCH = Date.now();
+  }
+
   return prices;
+}
+
+function computeQuantitativeMetrics(currentPrice, sma50, sma200, rsi = 50, isCrypto = false, vix = 15.8, yieldSpread = 0.5) {
+  const p = Math.max(0.0001, currentPrice);
+  const s50 = sma50 > 0 ? sma50 : p;
+  const s200 = sma200 > 0 ? sma200 : p;
+
+  const diff50 = (p - s50) / s50;
+  const diff200 = (p - s200) / s200;
+
+  const isGoldenCross = (p > s50) && (s50 > s200);
+  const isDeathCross = (p < s200) || ((p < s50) && (s50 < s200));
+
+  let annualDrift = isCrypto ? 0.08 : 0.05;
+  annualDrift += 0.18 * Math.tanh(diff50 * 3.0) + 0.12 * Math.tanh(diff200 * 2.0);
+
+  if (isGoldenCross) annualDrift += 0.08;
+  else if (isDeathCross) annualDrift -= 0.14;
+
+  if (rsi > 72) annualDrift -= 0.03;
+  else if (rsi < 32) {
+    if (isDeathCross) annualDrift -= 0.05;
+    else annualDrift += 0.04;
+  }
+
+  if (vix < 18) annualDrift += 0.02;
+  else if (vix > 24) annualDrift -= 0.03;
+
+  if (yieldSpread > 0) annualDrift += 0.02;
+  else annualDrift -= 0.03;
+
+  if (isDeathCross) annualDrift = Math.min(-0.035, annualDrift);
+  else if (isGoldenCross) annualDrift = Math.max(0.055, annualDrift);
+
+  let conviction = Math.round(50 + annualDrift * 115);
+  if (isGoldenCross) conviction = Math.max(72, conviction);
+  if (isDeathCross) conviction = Math.min(48, conviction);
+  conviction = Math.min(98, Math.max(15, conviction));
+
+  let action = "HOLD";
+  if (conviction >= 82) action = "STRONG BUY";
+  else if (conviction >= 70) action = "BUY";
+  else if (conviction <= 28) action = "STRONG SELL";
+  else if (conviction <= 44) action = "SELL";
+
+  return { annualDrift, isGoldenCross, isDeathCross, conviction, action, diff50, diff200 };
 }
 
 export async function onRequest(context) {
@@ -286,16 +341,15 @@ export async function onRequest(context) {
   // Fetch real-time market prices dynamically
   const livePrices = await fetchLivePrices(ASSET_UNIVERSE);
 
-  // Horizon multiplier scaling
-  const horizonMultipliers = {
-    "1d": 0.05,
-    "1w": 0.20,
-    "1m": 1.0,
-    "3m": 2.4,
-    "6m": 4.2,
-    "1y": 7.0
+  const HORIZON_DAYS = {
+    "1d": 1,
+    "1w": 5,
+    "1m": 21,
+    "3m": 63,
+    "6m": 126,
+    "1y": 252
   };
-  const mult = horizonMultipliers[horizon] || 1.0;
+  const days = HORIZON_DAYS[horizon] || 21;
 
   // Filter universe by asset type
   let filtered = ASSET_UNIVERSE;
@@ -317,13 +371,14 @@ export async function onRequest(context) {
   // Multi-Factor Quantitative Scoring Model
   const ranked = filtered.map((item, index) => {
     const fallbackPrice = (item.base_price && item.base_price > 0) ? item.base_price : 1.0;
+    const isBear = item.is_bear_regime || false;
     const live = (typeof livePrices[item.symbol] === "object" && livePrices[item.symbol] !== null)
       ? livePrices[item.symbol]
       : { 
           price: fallbackPrice, 
           changePct: 0, 
-          ma50: fallbackPrice * 0.98, 
-          ma200: fallbackPrice * 0.95, 
+          ma50: (item.sma50 && item.sma50 > 0) ? item.sma50 : (isBear ? fallbackPrice * 0.97 : fallbackPrice * 0.98), 
+          ma200: (item.sma200 && item.sma200 > 0) ? item.sma200 : (isBear ? fallbackPrice * 1.09 : fallbackPrice * 0.95), 
           high52: fallbackPrice * 1.15, 
           low52: fallbackPrice * 0.85,
           marketCap: item.cap === "high_cap" ? 200e9 : (item.cap === "mid_cap" ? 25e9 : 2e9),
@@ -331,73 +386,45 @@ export async function onRequest(context) {
         };
 
     const currentPrice = (live.price && live.price > 0) ? live.price : fallbackPrice;
-    const ma50 = (live.ma50 && live.ma50 > 0) ? live.ma50 : currentPrice;
-    const ma200 = (live.ma200 && live.ma200 > 0) ? live.ma200 : currentPrice;
+    const ma50 = (live.ma50 && live.ma50 > 0) ? live.ma50 : ((item.sma50) ? item.sma50 : currentPrice);
+    const ma200 = (live.ma200 && live.ma200 > 0) ? live.ma200 : ((item.sma200) ? item.sma200 : currentPrice);
     const high52 = Math.max((live.high52 && live.high52 > 0) ? live.high52 : currentPrice * 1.1, currentPrice);
     const low52 = Math.min((live.low52 && live.low52 > 0) ? live.low52 : currentPrice * 0.9, currentPrice);
     const changePct = Number.isFinite(live.changePct) ? live.changePct : 0;
     const marketCap = live.marketCap || (item.cap === "high_cap" ? 200e9 : (item.cap === "mid_cap" ? 25e9 : 2e9));
 
-    // 1. Quantitative Trend Factor (F_trend, 35% weight)
+    // Shared Quantitative Metrics matching Forecast and Oracle
+    const isCrypto = item.type === "Crypto";
+    const rsi = isBear ? 24.54 : 52.0;
+    const metrics = computeQuantitativeMetrics(
+      currentPrice,
+      ma50,
+      ma200,
+      rsi,
+      isCrypto,
+      15.4, // VIX
+      -0.07 // Yield Spread
+    );
+
+    const periodsPerYear = isCrypto ? 365.0 : 252.0;
+    const dailyDrift = metrics.annualDrift / periodsPerYear;
+    const decimals = currentPrice < 1 ? 4 : 2;
+    const target_price = Number((currentPrice * Math.exp(dailyDrift * days)).toFixed(decimals));
+    const expected_return = Number((((target_price - currentPrice) / currentPrice) * 100).toFixed(2));
+    const conviction_score = metrics.conviction;
+    const action = metrics.action;
+
+    // Technical & Price Action factor subscores
     const diff50 = ma50 > 0 ? (currentPrice - ma50) / ma50 : 0;
     const diff200 = ma200 > 0 ? (currentPrice - ma200) / ma200 : 0;
-    const isGolden = ma50 > ma200;
-    const isSevereDowntrend = (currentPrice < ma50) && (currentPrice < ma200) && !isGolden;
-
-    let rawTrend = 50 + 25 * Math.tanh(diff50 * 4) + 20 * Math.tanh(diff200 * 2) + (isGolden ? 10 : -18);
-    if (isSevereDowntrend) {
-      rawTrend = Math.min(26, rawTrend - 22); // Severe structural penalty for primary bear trends
-    } else if (currentPrice < ma200) {
-      rawTrend = Math.min(42, rawTrend); // Hard ceiling for assets trading below 200-day moving average
-    }
-    const tech_score = Math.min(97, Math.max(15, Math.round(Number.isFinite(rawTrend) ? rawTrend : 50)));
-
-    // 2. Price Action & 52-Week Range Strength (F_pa, 25% weight)
     const range52 = Math.max(0.01, high52 - low52);
     const pos52 = Math.min(1, Math.max(0, (currentPrice - low52) / range52));
-    const rawPa = 25 + 62 * pos52 + 6 * Math.tanh(changePct / 3);
-    const pa_score = Math.min(97, Math.max(15, Math.round(Number.isFinite(rawPa) ? rawPa : 50)));
 
-    // 3. Institutional Quality & Liquidity Factor (F_quality, 20% weight)
-    let quality_score = 65;
-    if (marketCap > 500e9) quality_score = 95;
-    else if (marketCap > 100e9) quality_score = 88;
-    else if (marketCap > 10e9) quality_score = 80;
-    else if (marketCap > 2e9) quality_score = 68;
-    else if (marketCap < 200e6 || currentPrice < 3.0) quality_score = 25; // Micro-cap / Penny Stock heavy risk penalty
-    if (item.type === "Crypto" && quality_score > 85) quality_score = 85;
+    const tech_score = metrics.isGoldenCross ? Math.min(98, 75 + Math.round(diff50 * 50)) : (metrics.isDeathCross ? Math.max(18, 42 + Math.round(diff200 * 40)) : 55);
+    const pa_score = Math.min(97, Math.max(20, Math.round(30 + 55 * pos52 + 5 * Math.tanh(changePct / 3))));
+    const quality_score = marketCap > 500e9 ? 95 : (marketCap > 100e9 ? 88 : (marketCap > 10e9 ? 80 : 65));
 
-    // 4. TimesFM Expected Return & Momentum Drift (F_alpha, 20% weight)
-    const momentum = diff50 * 0.60 + diff200 * 0.40;
-    let base_annual_return = 0;
-    if (tech_score >= 70 && isGolden) {
-      base_annual_return = Math.max(6.5, Math.min(38.0, 10.0 + momentum * 42));
-    } else if (tech_score <= 45 || !isGolden) {
-      base_annual_return = Math.min(-2.5, Math.max(-42.0, -12.0 + momentum * 30));
-    } else {
-      base_annual_return = 3.5 + momentum * 20;
-    }
-
-    // Horizon scaling
-    let expected_return = Number((base_annual_return * (mult / 3.0)).toFixed(2));
-    if (!Number.isFinite(expected_return)) expected_return = 5.0;
-
-    // 5. Composite AI Conviction Score (0 - 100)
-    const alphaScore = expected_return > 0 ? Math.min(95, 60 + expected_return * 2) : Math.max(15, 45 + expected_return * 2);
-    const rawConviction = tech_score * 0.35 + pa_score * 0.25 + quality_score * 0.20 + alphaScore * 0.20;
-    const conviction_score = Math.min(96, Math.max(15, Math.round(rawConviction)));
-
-    // 6. Actionable Ratings based on mathematical conviction
-    let action = "HOLD";
-    if (conviction_score >= 82) action = "STRONG BUY";
-    else if (conviction_score >= 70) action = "BUY";
-    else if (conviction_score <= 40) action = "SELL";
-    else if (conviction_score <= 28) action = "STRONG SELL";
-
-    // 7. Calibrated trade levels
-    const decimals = currentPrice < 1 ? 4 : 2;
-    let target_price = Number((currentPrice * (1 + expected_return / 100)).toFixed(decimals));
-    if (!Number.isFinite(target_price)) target_price = Number((currentPrice * 1.05).toFixed(decimals));
+    // Calibrated trade levels
     const entry_low = Number((currentPrice * 0.985).toFixed(decimals));
     const entry_high = Number((currentPrice * 1.005).toFixed(decimals));
     const stop_loss = Number((currentPrice * (expected_return > 0 ? 0.94 : 1.06)).toFixed(decimals));
