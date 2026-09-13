@@ -105,7 +105,26 @@ const COMMON_COMPANY_NAMES = {
   "ATOS SE": "ATO.PA",
   "TEMPUS": "TEM",
   "TEMPUS AI": "TEM",
-  "TEM": "TEM"
+  "TEM": "TEM",
+  "OKLO": "OKLO",
+  "NUSCALE": "SMR",
+  "SMR": "SMR",
+  "ASTERA": "ALAB",
+  "ALAB": "ALAB",
+  "RIGETTI": "RGTI",
+  "RGTI": "RGTI",
+  "DWAVE": "QBTS",
+  "QBTS": "QBTS",
+  "SOUNDHOUND": "SOUN",
+  "SOUN": "SOUN",
+  "BIGBEAR": "BBAI",
+  "BBAI": "BBAI",
+  "CLOVER": "CLOV",
+  "CLOV": "CLOV",
+  "HIMS": "HIMS",
+  "CAVA": "CAVA",
+  "REDDIT": "RDDT",
+  "RDDT": "RDDT"
 };
 
 const MACRO_TICKERS = {

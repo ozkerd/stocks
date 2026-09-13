@@ -38,7 +38,7 @@
       </button>
       <button type="button" class="nav-btn" id="nav-btn-leaderboard" onclick="switchAppView('leaderboard')">
         <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-        Best Now (Top 100)
+        Best Now (Market Screener)
       </button>
       <button type="button" class="nav-btn" id="nav-btn-portfolio" onclick="switchAppView('portfolio')">
         <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
@@ -545,7 +545,7 @@
           <div class="view-title-wrap">
             <h2>
               <svg style="width:24px;height:24px;fill:var(--google-blue);" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-              Best Now — Top Assets & Actionable Trade Setups
+              Best Now — Multi-Asset Market Screener & Setups
             </h2>
             <p>TimesFM-3 500M neural conviction rankings across Technicals, Price Action, Market Cap Tiers, and Daily/Weekly/Monthly Setups.</p>
           </div>
@@ -558,7 +558,7 @@
         <div class="lb-mode-switcher">
           <button type="button" class="lb-mode-btn active" id="btn-mode-leaderboard" onclick="switchLeaderboardSubMode('leaderboard')">
             <svg style="width:15px;height:15px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-            Top 100 Ranked Leaderboard
+            Ranked Market Universe
           </button>
           <button type="button" class="lb-mode-btn" id="btn-mode-setups" onclick="switchLeaderboardSubMode('setups')">
             <svg style="width:15px;height:15px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
@@ -683,6 +683,18 @@
           <div class="risk-tab-btn" id="ptab-low_risk" onclick="selectPortfolio('low_risk')">
             <div class="risk-tab-title">🛡️ Low Risk (Defensive)</div>
             <div class="risk-tab-sub">Capital Defense (-6.5% Max DD)</div>
+          </div>
+          <div class="risk-tab-btn" id="ptab-ai_revolution" onclick="selectPortfolio('ai_revolution')">
+            <div class="risk-tab-title">🧠 AI Revolution</div>
+            <div class="risk-tab-sub">Deep Tech & Precision (+42.5%)</div>
+          </div>
+          <div class="risk-tab-btn" id="ptab-smallcap_moonshots" onclick="selectPortfolio('smallcap_moonshots')">
+            <div class="risk-tab-title">💎 Small-Cap Gems</div>
+            <div class="risk-tab-sub">Asymmetric Alpha (+49.0%)</div>
+          </div>
+          <div class="risk-tab-btn" id="ptab-all_weather" onclick="selectPortfolio('all_weather')">
+            <div class="risk-tab-title">🌐 All-Weather Macro</div>
+            <div class="risk-tab-sub">Inflation & Debasement Shield</div>
           </div>
         </div>
 
@@ -988,6 +1000,15 @@
       { symbol: "RKLB", name: "Rocket Lab USA Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["RKLB", "ROCKET LAB"] },
       { symbol: "IONQ", name: "IonQ Inc. (Quantum)", type: "Stock", exchange: "NYSE", aliases: ["IONQ"] },
       { symbol: "MSTR", name: "MicroStrategy Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["MSTR", "MICROSTRATEGY"] },
+      { symbol: "OKLO", name: "Oklo Inc. (Micro-Nuclear)", type: "Stock", exchange: "NYSE", aliases: ["OKLO"] },
+      { symbol: "SMR", name: "NuScale Power Corp", type: "Stock", exchange: "NYSE", aliases: ["SMR", "NUSCALE"] },
+      { symbol: "ALAB", name: "Astera Labs Inc. (AI Connectivity)", type: "Stock", exchange: "NASDAQ", aliases: ["ALAB", "ASTERA"] },
+      { symbol: "RGTI", name: "Rigetti Computing Inc. (Quantum)", type: "Stock", exchange: "NASDAQ", aliases: ["RGTI", "RIGETTI"] },
+      { symbol: "QBTS", name: "D-Wave Quantum Inc.", type: "Stock", exchange: "NYSE", aliases: ["QBTS", "DWAVE"] },
+      { symbol: "SOUN", name: "SoundHound AI Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["SOUN", "SOUNDHOUND"] },
+      { symbol: "HIMS", name: "Hims & Hers Health Inc.", type: "Stock", exchange: "NYSE", aliases: ["HIMS"] },
+      { symbol: "CAVA", name: "CAVA Group Inc.", type: "Stock", exchange: "NYSE", aliases: ["CAVA"] },
+      { symbol: "RDDT", name: "Reddit Inc.", type: "Stock", exchange: "NYSE", aliases: ["RDDT", "REDDIT"] },
       { symbol: "HYPE32196-USD", name: "Hyperliquid USD (HYPE)", type: "Crypto", exchange: "Crypto", aliases: ["HYPE", "HYPERLIQUID"] },
       { symbol: "LIT6833-USD", name: "Litentry USD (LIT)", type: "Crypto", exchange: "Crypto", aliases: ["LIT", "LITENTRY"] },
       { symbol: "SUI20947-USD", name: "Sui Network USD (SUI)", type: "Crypto", exchange: "Crypto", aliases: ["SUI"] },
@@ -1418,7 +1439,19 @@
       const body = document.getElementById('leaderboard-table-body');
       body.innerHTML = '';
       if (assets.length === 0) {
-        body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No assets match your search.</td></tr>`;
+        const q = (document.getElementById('leaderboard-search')?.value || '').trim();
+        if (q) {
+          body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:36px 20px; color:var(--text-secondary);">
+            <div style="font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:8px;">No pre-scanned asset matches "<strong>${escapeHtml(q)}</strong>"</div>
+            <div style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">TimesFM-3 is unconstrained and can evaluate ANY ticker worldwide in real time.</div>
+            <button type="button" class="btn-google btn-primary" onclick="quickSelect('${q.replace(/'/g, "\\'")}')" style="display:inline-flex; align-items:center; gap:6px; margin:0 auto; padding:8px 18px; font-size:13px; cursor:pointer;">
+              <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              Generate Live AI Forecast for ${escapeHtml(q.toUpperCase())}
+            </button>
+          </td></tr>`;
+        } else {
+          body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">No assets match your search.</td></tr>`;
+        }
         return;
       }
 
@@ -1502,7 +1535,7 @@
       currentPortfolioProfile = profileKey;
       
       // Update Tab Styles
-      ['balanced', 'high_risk', 'low_risk'].forEach(p => {
+      ['balanced', 'high_risk', 'low_risk', 'ai_revolution', 'smallcap_moonshots', 'all_weather'].forEach(p => {
         const btn = document.getElementById(`ptab-${p}`);
         if (btn) {
           btn.classList.toggle('active', p === profileKey);

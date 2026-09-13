@@ -64,6 +64,65 @@ const PORTFOLIOS = {
       { symbol: "TLT", name: "20+ Year Treasury Bond", type: "ETF", weight_pct: 15, return_target: "+10.5%", role: "Flight-to-Safety Duration Anchor" },
       { symbol: "JPM", name: "JPMorgan Chase", type: "Stock", weight_pct: 10, return_target: "+13.2%", role: "Systemically Important Financial Fortress" }
     ]
+  },
+  ai_revolution: {
+    id: "ai_revolution",
+    name: "AI Revolution & Precision Computing (Deep Tech Disruptors)",
+    icon: "🧠",
+    risk_level: "High Risk (Focused Exponential Tech)",
+    expected_cagr: "+42.5%",
+    sharpe_ratio: 2.15,
+    max_drawdown: "-18.5%",
+    volatility_annual: "28.4%",
+    tagline: "Direct exposure to next-generation AI infrastructure, molecular data intelligence, and quantum acceleration.",
+    thesis: "Concentrated on the secular transition from traditional compute to neural architectures and precision medicine. Anchored by Tempus AI's molecular clinical library, Palantir's ontology, NVIDIA silicon, and commercial quantum processors.",
+    allocations: [
+      { symbol: "NVDA", name: "NVIDIA Corp", type: "Stock", weight_pct: 25, return_target: "+35.0%", role: "Global GPU & AI Accelerated Compute Monopoly" },
+      { symbol: "TEM", name: "Tempus AI, Inc.", type: "Stock", weight_pct: 20, return_target: "+38.0%", role: "Clinical AI & Molecular Precision Medicine" },
+      { symbol: "PLTR", name: "Palantir Technologies", type: "Stock", weight_pct: 20, return_target: "+36.5%", role: "Enterprise AI Operating System & AIP Expansion" },
+      { symbol: "APP", name: "AppLovin Corp", type: "Stock", weight_pct: 15, return_target: "+32.0%", role: "AXON 2.0 AI Ad Engine Monetization" },
+      { symbol: "IONQ", name: "IonQ Inc. (Quantum)", type: "Stock", weight_pct: 10, return_target: "+44.0%", role: "Commercial Trapped-Ion Quantum Processing" },
+      { symbol: "ALAB", name: "Astera Labs Inc.", type: "Stock", weight_pct: 10, return_target: "+34.0%", role: "Cloud AI Connectivity & PCIe Interconnects" }
+    ]
+  },
+  smallcap_moonshots: {
+    id: "smallcap_moonshots",
+    name: "High-Conviction Moonshots & Small-Cap Gems (Asymmetric Alpha)",
+    icon: "💎",
+    risk_level: "Aggressive / Small-Cap Asymmetric",
+    expected_cagr: "+49.0%",
+    sharpe_ratio: 1.88,
+    max_drawdown: "-24.0%",
+    volatility_annual: "36.5%",
+    tagline: "Breakthrough oncology biotechs, satellite direct-to-cell telecom, small modular nuclear, and high-velocity crypto protocols.",
+    thesis: "Targets asymmetric small-cap payoffs where clinical milestones, launch cadences, or power supply agreements generate outsized non-linear capital appreciation.",
+    allocations: [
+      { symbol: "ASTS", name: "AST SpaceMobile Inc.", type: "Stock", weight_pct: 25, return_target: "+52.0%", role: "Space-Based Direct-to-Cell Cellular Broadband" },
+      { symbol: "ATOS", name: "Atossa Therapeutics, Inc.", type: "Stock", weight_pct: 20, return_target: "+46.0%", role: "Phase 2/3 (Z)-Endoxifen Breast Cancer Therapeutics" },
+      { symbol: "RKLB", name: "Rocket Lab USA Inc.", type: "Stock", weight_pct: 20, return_target: "+42.0%", role: "Neutron Medium Launch & Spacecraft Systems" },
+      { symbol: "SMR", name: "NuScale Power Corp", type: "Stock", weight_pct: 20, return_target: "+45.0%", role: "Small Modular Nuclear Clean Energy for AI Datacenters" },
+      { symbol: "HYPE32196-USD", name: "Hyperliquid USD (HYPE)", type: "Crypto", weight_pct: 15, return_target: "+58.0%", role: "High-Throughput Decentralized Perpetual DEX" }
+    ]
+  },
+  all_weather: {
+    id: "all_weather",
+    name: "All-Weather Macro Hegemony (Inflation & Debasement Armor)",
+    icon: "🌐",
+    risk_level: "Balanced / Macro Resilience",
+    expected_cagr: "+18.6%",
+    sharpe_ratio: 2.65,
+    max_drawdown: "-8.5%",
+    volatility_annual: "11.2%",
+    tagline: "Institutional all-weather framework engineered to compound across monetary easing, stagflation, and bull cycles.",
+    thesis: "Engineered to withstand currency debasement and geopolitical volatility by coupling physical gold, mathematical digital scarcity (Bitcoin), energy cash flows, cash fortresses, and defensive retail.",
+    allocations: [
+      { symbol: "GLD", name: "SPDR Gold Shares", type: "ETF", weight_pct: 25, return_target: "+15.0%", role: "Sovereign Reserve Asset & Real Rates Anchor" },
+      { symbol: "BTC-USD", name: "Bitcoin", type: "Crypto", weight_pct: 15, return_target: "+38.0%", role: "Digital Gold & Global Monetary Scarcity" },
+      { symbol: "BRK-B", name: "Berkshire Hathaway", type: "Stock", weight_pct: 20, return_target: "+13.5%", role: "Cash Fortress & Industrial Compounding" },
+      { symbol: "XOM", name: "Exxon Mobil Corp", type: "Stock", weight_pct: 15, return_target: "+16.0%", role: "Hydrocarbon Free Cash Flow & Energy Inflation Hedge" },
+      { symbol: "COST", name: "Costco Wholesale", type: "Stock", weight_pct: 15, return_target: "+15.0%", role: "Recession-Resistant Membership Retail Pillar" },
+      { symbol: "TLT", name: "20+ Year Treasury Bond", type: "ETF", weight_pct: 10, return_target: "+11.0%", role: "Deflationary Flight-to-Safety Duration Buffer" }
+    ]
   }
 };
 

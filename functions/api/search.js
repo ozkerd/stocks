@@ -29,6 +29,15 @@ const POPULAR_ASSETS = [
   { symbol: "TEM", name: "Tempus AI, Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["TEM", "TEMPUS", "TEMPUS AI"] },
   { symbol: "ATOS", name: "Atossa Therapeutics, Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["ATOS", "ATOSSA"] },
   { symbol: "ATO.PA", name: "Atos SE", type: "Stock", exchange: "Euronext Paris", aliases: ["ATO", "ATOS", "ATOS SE"] },
+  { symbol: "OKLO", name: "Oklo Inc. (Micro-Nuclear)", type: "Stock", exchange: "NYSE", aliases: ["OKLO"] },
+  { symbol: "SMR", name: "NuScale Power Corp", type: "Stock", exchange: "NYSE", aliases: ["SMR", "NUSCALE"] },
+  { symbol: "ALAB", name: "Astera Labs Inc. (AI Connectivity)", type: "Stock", exchange: "NASDAQ", aliases: ["ALAB", "ASTERA"] },
+  { symbol: "RGTI", name: "Rigetti Computing Inc. (Quantum)", type: "Stock", exchange: "NASDAQ", aliases: ["RGTI", "RIGETTI"] },
+  { symbol: "QBTS", name: "D-Wave Quantum Inc.", type: "Stock", exchange: "NYSE", aliases: ["QBTS", "DWAVE"] },
+  { symbol: "SOUN", name: "SoundHound AI Inc.", type: "Stock", exchange: "NASDAQ", aliases: ["SOUN", "SOUNDHOUND"] },
+  { symbol: "HIMS", name: "Hims & Hers Health Inc.", type: "Stock", exchange: "NYSE", aliases: ["HIMS"] },
+  { symbol: "CAVA", name: "CAVA Group Inc.", type: "Stock", exchange: "NYSE", aliases: ["CAVA"] },
+  { symbol: "RDDT", name: "Reddit Inc.", type: "Stock", exchange: "NYSE", aliases: ["RDDT", "REDDIT"] },
 
   // Crypto Assets & Trending Coins
   { symbol: "BTC-USD", name: "Bitcoin USD", type: "Crypto", exchange: "Crypto", aliases: ["BTC", "BITCOIN"] },
