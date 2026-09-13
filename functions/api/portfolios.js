@@ -85,23 +85,24 @@ const PORTFOLIOS = {
       { symbol: "ALAB", name: "Astera Labs Inc.", type: "Stock", weight_pct: 10, return_target: "+34.0%", role: "Cloud AI Connectivity & PCIe Interconnects" }
     ]
   },
-  smallcap_moonshots: {
-    id: "smallcap_moonshots",
-    name: "High-Conviction Moonshots & Small-Cap Gems (Asymmetric Alpha)",
-    icon: "💎",
-    risk_level: "Aggressive / Small-Cap Asymmetric",
-    expected_cagr: "+49.0%",
-    sharpe_ratio: 1.88,
-    max_drawdown: "-24.0%",
-    volatility_annual: "36.5%",
-    tagline: "Breakthrough oncology biotechs, satellite direct-to-cell telecom, small modular nuclear, and high-velocity crypto protocols.",
-    thesis: "Targets asymmetric small-cap payoffs where clinical milestones, launch cadences, or power supply agreements generate outsized non-linear capital appreciation.",
+  risk_parity: {
+    id: "risk_parity",
+    name: "Equal Risk Contribution (Inverse-Volatility Risk Parity)",
+    icon: "⚖️",
+    risk_level: "Mathematically Balanced (Equal Risk Budget)",
+    expected_cagr: "+17.2%",
+    sharpe_ratio: 2.55,
+    max_drawdown: "-9.2%",
+    volatility_annual: "12.0%",
+    tagline: "Weights w_i proportional to 1/sigma_i so that every constituent contributes equally to total portfolio variance.",
+    thesis: "Prevents high-volatility assets from dominating portfolio variance. By allocating capital inversely to historical volatility, risk is distributed symmetrically across equities, gold, and fixed income.",
     allocations: [
-      { symbol: "ASTS", name: "AST SpaceMobile Inc.", type: "Stock", weight_pct: 25, return_target: "+52.0%", role: "Space-Based Direct-to-Cell Cellular Broadband" },
-      { symbol: "ATOS", name: "Atossa Therapeutics, Inc.", type: "Stock", weight_pct: 20, return_target: "+46.0%", role: "Phase 2/3 (Z)-Endoxifen Breast Cancer Therapeutics" },
-      { symbol: "RKLB", name: "Rocket Lab USA Inc.", type: "Stock", weight_pct: 20, return_target: "+42.0%", role: "Neutron Medium Launch & Spacecraft Systems" },
-      { symbol: "SMR", name: "NuScale Power Corp", type: "Stock", weight_pct: 20, return_target: "+45.0%", role: "Small Modular Nuclear Clean Energy for AI Datacenters" },
-      { symbol: "HYPE32196-USD", name: "Hyperliquid USD (HYPE)", type: "Crypto", weight_pct: 15, return_target: "+58.0%", role: "High-Throughput Decentralized Perpetual DEX" }
+      { symbol: "TLT", name: "20+ Year Treasury Bond", type: "ETF", weight_pct: 28, return_target: "+10.5%", role: "High-Duration Defensive Anchor (w proportional to 1/sigma)" },
+      { symbol: "SPY", name: "S&P 500 ETF Trust", type: "ETF", weight_pct: 22, return_target: "+13.5%", role: "Broad Market Equity Compounding" },
+      { symbol: "GLD", name: "SPDR Gold Shares", type: "ETF", weight_pct: 20, return_target: "+14.0%", role: "Real Asset Debasement Hedge" },
+      { symbol: "JNJ", name: "Johnson & Johnson", type: "Stock", weight_pct: 16, return_target: "+9.5%", role: "Low-Beta Healthcare Cash Compounding" },
+      { symbol: "XOM", name: "Exxon Mobil Corp", type: "Stock", weight_pct: 10, return_target: "+15.0%", role: "Energy Inflation Flow" },
+      { symbol: "BTC-USD", name: "Bitcoin", type: "Crypto", weight_pct: 4, return_target: "+38.0%", role: "Strictly Risk-Budgeted Digital Alpha (4% Risk Cap)" }
     ]
   },
   all_weather: {

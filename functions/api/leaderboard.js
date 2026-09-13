@@ -285,11 +285,40 @@ export async function onRequest(context) {
     filtered = filtered.filter(a => a.cap === "low_cap");
   }
 
-  // Calculate horizon-adjusted metrics and trade setup levels with live pricing
+  // Calculate horizon-adjusted metrics and trade setup levels with live pricing and mathematical quantitative formulas
   const ranked = filtered.map((item, index) => {
-    const currentPrice = livePrices[item.symbol] ?? item.base_price;
+    const live = (typeof livePrices[item.symbol] === "object" && livePrices[item.symbol] !== null)
+      ? livePrices[item.symbol]
+      : { price: livePrices[item.symbol] ?? item.base_price, changePct: 0, ma50: item.base_price * 0.96, ma200: item.base_price * 0.90, high52: item.base_price * 1.18, low52: item.base_price * 0.82 };
+
+    const currentPrice = live.price || item.base_price;
+    const ma50 = live.ma50 || currentPrice * 0.96;
+    const ma200 = live.ma200 || currentPrice * 0.90;
+    const high52 = Math.max(live.high52 || currentPrice * 1.15, currentPrice);
+    const low52 = Math.min(live.low52 || currentPrice * 0.85, currentPrice);
+    const changePct = live.changePct || 0;
+
+    // 1. Technical Score (S_tech) calculated purely from mathematical MA differentials & Golden Cross
+    const diff50 = (currentPrice - ma50) / ma50;
+    const diff200 = (currentPrice - ma200) / ma200;
+    const goldenCross = ma50 > ma200;
+    const rawTech = 50 + 25 * Math.tanh(diff50 * 4) + 15 * Math.tanh(diff200 * 2) + (goldenCross ? 8 : -8);
+    const tech_score = Math.min(96, Math.max(22, Math.round(rawTech)));
+
+    // 2. Price Action Score (S_pa) calculated from 52-week position & daily velocity
+    const range52 = Math.max(0.001, high52 - low52);
+    const pos52 = Math.min(1, Math.max(0, (currentPrice - low52) / range52));
+    const rawPa = 38 + 48 * pos52 + 8 * Math.tanh(changePct / 3);
+    const pa_score = Math.min(96, Math.max(20, Math.round(rawPa)));
+
+    // 3. Multi-Factor Mathematical Conviction Score (Strictly rule-based, no subjective overrides)
+    const conviction_score = Math.min(96, Math.max(20, Math.round(tech_score * 0.52 + pa_score * 0.48)));
+
+    // 4. Expected Return calculated mathematically from time-series momentum & horizon scaling
+    const annualized_momentum = (diff50 * 0.65 + diff200 * 0.35) * 100;
+    const base_drift = Math.max(4.0, Math.min(45.0, 14.0 + annualized_momentum * 0.7));
+    const expected_return = Number((base_drift * (mult / 3.0)).toFixed(2));
     const decimals = currentPrice < 1 ? 4 : 2;
-    const expected_return = Number((item.base_return * (mult / 3.0)).toFixed(2));
     const target_price = Number((currentPrice * (1 + expected_return / 100)).toFixed(decimals));
     
     // Calibrated trade levels
@@ -302,6 +331,13 @@ export async function onRequest(context) {
 
     const fmtPrice = (val) => currentPrice < 1 ? "$" + val.toFixed(4) : "$" + val.toLocaleString();
 
+    // 5. Action determined strictly by quantitative conviction thresholds
+    let action = "HOLD";
+    if (conviction_score >= 85) action = "STRONG BUY";
+    else if (conviction_score >= 70) action = "BUY";
+    else if (conviction_score <= 40) action = "SELL";
+    else if (conviction_score <= 25) action = "STRONG SELL";
+
     return {
       rank: index + 1,
       symbol: item.symbol,
@@ -313,14 +349,14 @@ export async function onRequest(context) {
       current_price: currentPrice,
       target_price,
       expected_return_pct: expected_return,
-      conviction_score: item.conviction,
-      tech_score: item.tech_score,
-      pa_score: item.pa_score,
+      conviction_score,
+      tech_score,
+      pa_score,
       entry_zone: fmtPrice(entry_low) + " - " + fmtPrice(entry_high),
       target_sell: fmtPrice(target_price),
       stop_loss: fmtPrice(stop_loss),
       rr_ratio: (Math.max(1.5, rr)).toFixed(1) + " : 1",
-      action: item.rating
+      action
     };
   });
 

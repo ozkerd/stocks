@@ -163,142 +163,9 @@ const COVARIATE_METAS = {
   usd_index: { name: "US Dollar Index (DXY)", group: "Macro / Currency" }
 };
 
-// Cross-System Quantitative Conviction Universe (Synchronized with Best Now & Trade Setups)
-const QUANT_UNIVERSE_MAP = {
-  "NVDA": { conviction: 97, rating: "STRONG BUY", base_return: 26.5 },
-  "BTC-USD": { conviction: 96, rating: "STRONG BUY", base_return: 28.2 },
-  "BTC": { conviction: 96, rating: "STRONG BUY", base_return: 28.2 },
-  "APP": { conviction: 95, rating: "STRONG BUY", base_return: 27.8 },
-  "APPLOVIN": { conviction: 95, rating: "STRONG BUY", base_return: 27.8 },
-  "PLTR": { conviction: 94, rating: "STRONG BUY", base_return: 25.4 },
-  "ETH-USD": { conviction: 93, rating: "STRONG BUY", base_return: 24.0 },
-  "ETH": { conviction: 93, rating: "STRONG BUY", base_return: 24.0 },
-  "SOL-USD": { conviction: 93, rating: "STRONG BUY", base_return: 29.0 },
-  "SOL": { conviction: 93, rating: "STRONG BUY", base_return: 29.0 },
-  "MSFT": { conviction: 92, rating: "STRONG BUY", base_return: 18.5 },
-  "AAPL": { conviction: 91, rating: "STRONG BUY", base_return: 16.8 },
-  "AMZN": { conviction: 91, rating: "STRONG BUY", base_return: 19.2 },
-  "HYPE32196-USD": { conviction: 91, rating: "STRONG BUY", base_return: 34.5 },
-  "HYPE": { conviction: 91, rating: "STRONG BUY", base_return: 34.5 },
-  "TAO-USD": { conviction: 90, rating: "STRONG BUY", base_return: 32.0 },
-  "TAO": { conviction: 90, rating: "STRONG BUY", base_return: 32.0 },
-  "GOOGL": { conviction: 90, rating: "STRONG BUY", base_return: 17.6 },
-  "SUI20947-USD": { conviction: 89, rating: "BUY", base_return: 33.0 },
-  "SUI": { conviction: 89, rating: "BUY", base_return: 33.0 },
-  "NEAR-USD": { conviction: 89, rating: "BUY", base_return: 30.5 },
-  "NEAR": { conviction: 89, rating: "BUY", base_return: 30.5 },
-  "ONDO-USD": { conviction: 89, rating: "BUY", base_return: 34.0 },
-  "ONDO": { conviction: 89, rating: "BUY", base_return: 34.0 },
-  "AAVE-USD": { conviction: 89, rating: "BUY", base_return: 26.5 },
-  "AAVE": { conviction: 89, rating: "BUY", base_return: 26.5 },
-  "TSLA": { conviction: 89, rating: "STRONG BUY", base_return: 25.1 },
-  "ASTS": { conviction: 88, rating: "BUY", base_return: 38.0 },
-  "RKLB": { conviction: 88, rating: "BUY", base_return: 32.0 },
-  "FET-USD": { conviction: 88, rating: "BUY", base_return: 33.5 },
-  "FET": { conviction: 88, rating: "BUY", base_return: 33.5 },
-  "RENDER-USD": { conviction: 88, rating: "BUY", base_return: 31.0 },
-  "RENDER": { conviction: 88, rating: "BUY", base_return: 31.0 },
-  "INJ-USD": { conviction: 88, rating: "BUY", base_return: 29.5 },
-  "INJ": { conviction: 88, rating: "BUY", base_return: 29.5 },
-  "LIT6833-USD": { conviction: 88, rating: "BUY", base_return: 32.0 },
-  "LIT": { conviction: 88, rating: "BUY", base_return: 32.0 },
-  "AMD": { conviction: 89, rating: "STRONG BUY", base_return: 21.4 },
-  "AVGO": { conviction: 88, rating: "STRONG BUY", base_return: 20.2 },
-  "META": { conviction: 88, rating: "STRONG BUY", base_return: 18.9 },
-  "COIN": { conviction: 87, rating: "STRONG BUY", base_return: 27.5 },
-  "ARM": { conviction: 87, rating: "STRONG BUY", base_return: 22.0 },
-  "TEM": { conviction: 88, rating: "BUY", base_return: 34.0 },
-  "TEMPUS": { conviction: 88, rating: "BUY", base_return: 34.0 },
-  "TEMPUS AI": { conviction: 88, rating: "BUY", base_return: 34.0 },
-  "ATOS": { conviction: 82, rating: "BUY", base_return: 28.5 },
-  "ATOSSA": { conviction: 82, rating: "BUY", base_return: 28.5 },
-  "ATO.PA": { conviction: 80, rating: "BUY", base_return: 24.0 },
-  "SMCI": { conviction: 87, rating: "BUY", base_return: 36.0 },
-  "APT21794-USD": { conviction: 87, rating: "BUY", base_return: 28.0 },
-  "APT": { conviction: 87, rating: "BUY", base_return: 28.0 },
-  "JUP-USD": { conviction: 87, rating: "BUY", base_return: 32.0 },
-  "JUP": { conviction: 87, rating: "BUY", base_return: 32.0 },
-  "IONQ": { conviction: 86, rating: "BUY", base_return: 35.0 },
-  "SEI-USD": { conviction: 86, rating: "BUY", base_return: 35.0 },
-  "SEI": { conviction: 86, rating: "BUY", base_return: 35.0 },
-  "KAS-USD": { conviction: 86, rating: "BUY", base_return: 29.0 },
-  "KAS": { conviction: 86, rating: "BUY", base_return: 29.0 },
-  "ENA-USD": { conviction: 86, rating: "BUY", base_return: 36.0 },
-  "ENA": { conviction: 86, rating: "BUY", base_return: 36.0 },
-  "TIA-USD": { conviction: 85, rating: "BUY", base_return: 31.0 },
-  "TIA": { conviction: 85, rating: "BUY", base_return: 31.0 },
-  "QCOM": { conviction: 86, rating: "BUY", base_return: 16.5 },
-  "MU": { conviction: 86, rating: "BUY", base_return: 19.8 },
-  "ASML": { conviction: 85, rating: "BUY", base_return: 17.2 },
-  "TSM": { conviction: 85, rating: "BUY", base_return: 18.0 },
-  "XRP-USD": { conviction: 84, rating: "BUY", base_return: 24.0 },
-  "XRP": { conviction: 84, rating: "BUY", base_return: 24.0 },
-  "CRWD": { conviction: 84, rating: "BUY", base_return: 21.0 },
-  "PANW": { conviction: 84, rating: "BUY", base_return: 17.5 },
-  "SNOW": { conviction: 83, rating: "BUY", base_return: 18.2 },
-  "NET": { conviction: 83, rating: "BUY", base_return: 20.8 },
-  "DDOG": { conviction: 83, rating: "BUY", base_return: 19.5 },
-  "NOW": { conviction: 82, rating: "BUY", base_return: 16.0 },
-  "CRM": { conviction: 82, rating: "BUY", base_return: 15.2 },
-  "ADBE": { conviction: 81, rating: "BUY", base_return: 14.8 },
-  "ORCL": { conviction: 81, rating: "BUY", base_return: 16.4 },
-  "MSTR": { conviction: 81, rating: "BUY", base_return: 34.0 },
-  "AVAX-USD": { conviction: 80, rating: "BUY", base_return: 27.0 },
-  "DOGE-USD": { conviction: 80, rating: "BUY", base_return: 29.5 },
-  "LINK-USD": { conviction: 80, rating: "BUY", base_return: 25.2 },
-  "UBER": { conviction: 80, rating: "BUY", base_return: 18.4 },
-  "ABNB": { conviction: 79, rating: "BUY", base_return: 15.6 },
-  "SHOP": { conviction: 79, rating: "BUY", base_return: 21.5 },
-  "SQ": { conviction: 78, rating: "BUY", base_return: 19.8 },
-  "PYPL": { conviction: 78, rating: "BUY", base_return: 14.5 },
-  "V": { conviction: 78, rating: "BUY", base_return: 12.2 },
-  "MA": { conviction: 77, rating: "BUY", base_return: 13.0 },
-  "INTU": { conviction: 77, rating: "BUY", base_return: 15.4 },
-  "BKNG": { conviction: 76, rating: "BUY", base_return: 14.0 },
-  "NFLX": { conviction: 76, rating: "BUY", base_return: 16.8 },
-  "SPOT": { conviction: 76, rating: "BUY", base_return: 19.0 },
-  "LLY": { conviction: 85, rating: "BUY", base_return: 21.2 },
-  "NVO": { conviction: 83, rating: "BUY", base_return: 18.0 },
-  "JPM": { conviction: 82, rating: "BUY", base_return: 13.8 },
-  "BRK-B": { conviction: 81, rating: "BUY", base_return: 12.0 },
-  "COST": { conviction: 80, rating: "BUY", base_return: 14.2 },
-  "WMT": { conviction: 79, rating: "BUY", base_return: 12.6 },
-  "ISRG": { conviction: 79, rating: "BUY", base_return: 17.5 },
-  "UNH": { conviction: 78, rating: "BUY", base_return: 11.5 },
-  "ABT": { conviction: 77, rating: "BUY", base_return: 12.4 },
-  "HD": { conviction: 76, rating: "BUY", base_return: 11.8 },
-  "MCD": { conviction: 75, rating: "BUY", base_return: 10.5 },
-  "KO": { conviction: 74, rating: "BUY", base_return: 9.2 },
-  "PEP": { conviction: 74, rating: "BUY", base_return: 9.8 },
-  "PG": { conviction: 73, rating: "BUY", base_return: 8.9 },
-  "JNJ": { conviction: 72, rating: "BUY", base_return: 8.5 },
-  "GE": { conviction: 82, rating: "BUY", base_return: 19.5 },
-  "RTX": { conviction: 80, rating: "BUY", base_return: 15.2 },
-  "CAT": { conviction: 79, rating: "BUY", base_return: 14.8 },
-  "LMT": { conviction: 78, rating: "BUY", base_return: 13.5 },
-  "XOM": { conviction: 77, rating: "BUY", base_return: 11.2 },
-  "CVX": { conviction: 76, rating: "BUY", base_return: 10.4 },
-  "COP": { conviction: 75, rating: "BUY", base_return: 11.8 },
-  "DE": { conviction: 75, rating: "BUY", base_return: 12.0 },
-  "HON": { conviction: 74, rating: "BUY", base_return: 10.8 },
-  "CELH": { conviction: 81, rating: "BUY", base_return: 23.2 },
-  "DUOL": { conviction: 82, rating: "BUY", base_return: 22.0 },
-  "TOST": { conviction: 80, rating: "BUY", base_return: 21.8 },
-  "HOOD": { conviction: 83, rating: "BUY", base_return: 26.5 },
-  "AFRM": { conviction: 81, rating: "BUY", base_return: 27.2 },
-  "DKNG": { conviction: 79, rating: "BUY", base_return: 20.4 },
-  "RBLX": { conviction: 78, rating: "BUY", base_return: 22.5 },
-  "SE": { conviction: 82, rating: "BUY", base_return: 24.0 },
-  "BABA": { conviction: 79, rating: "BUY", base_return: 21.0 },
-  "PDD": { conviction: 81, rating: "BUY", base_return: 23.5 },
-  "MELI": { conviction: 83, rating: "BUY", base_return: 20.2 },
-  "NU": { conviction: 85, rating: "BUY", base_return: 25.0 },
-  "SPY": { conviction: 88, rating: "BUY", base_return: 13.5 },
-  "QQQ": { conviction: 90, rating: "STRONG BUY", base_return: 17.2 },
-  "SMH": { conviction: 91, rating: "STRONG BUY", base_return: 22.4 },
-  "GLD": { conviction: 86, rating: "BUY", base_return: 14.8 },
-  "IBIT": { conviction: 94, rating: "STRONG BUY", base_return: 28.0 }
-};
+// Quantitative Conviction Engine: Computes real-time mathematical scores directly from
+// time-series price action, technical indicators, volatility, and macro regime without hardcoded overrides.
+
 
 async function resolveTicker(input) {
   const clean = input.trim().toUpperCase();
@@ -1222,19 +1089,14 @@ export async function onRequest(context) {
       ratingScore += (ratingScore >= 50 ? 4 : -4);
     }
 
-    // Harmonize with Quantitative Conviction Universe (Best Now & Trade Setups)
-    const lookupKey = symbol.toUpperCase().replace(".US", "");
-    const quantMatch = QUANT_UNIVERSE_MAP[lookupKey] || 
-                       QUANT_UNIVERSE_MAP[resolvedTicker.toUpperCase()] || 
-                       QUANT_UNIVERSE_MAP[rawInput.toUpperCase()] || 
-                       QUANT_UNIVERSE_MAP[lookupKey.split("-")[0]];
-
-    if (quantMatch) {
-      // Seamlessly harmonize 65% multi-factor conviction + 35% live market metrics
-      ratingScore = Math.round(quantMatch.conviction * 0.65 + ratingScore * 0.35);
+    // Statistical Risk & Volatility Adjustment
+    if (annualizedVol > 0.65 && ratingScore < 55) {
+      ratingScore -= 6; // Penalize hyper-volatility lacking upward trend
+    } else if (annualizedVol < 0.25 && ratingScore > 50) {
+      ratingScore += 4; // Low-volatility trend stability bonus
     }
 
-    ratingScore = Math.min(97, Math.max(12, Math.round(ratingScore)));
+    ratingScore = Math.min(96, Math.max(15, Math.round(ratingScore)));
 
     let ratingAction = "HOLD";
     let ratingColor = "#f9ab00";
@@ -1261,11 +1123,7 @@ export async function onRequest(context) {
     // 5. Dynamic Trajectory Modeling & Most Probable Peak/Target
     // Instead of flatlining, calculate the true multi-factor trajectory velocity
     let netAnnualDrift = 0.0;
-    if (quantMatch && quantMatch.base_return) {
-      // Align projected trajectory with the asset's quantitative model return
-      const baseReturnDec = quantMatch.base_return / 100.0;
-      netAnnualDrift = baseReturnDec * Math.max(0.6, ratingScore / 90.0);
-    } else if (ratingScore > 50) {
+    if (ratingScore > 50) {
       netAnnualDrift = 0.06 + (ratingScore - 50) * 0.007; // e.g. 15% to 35% annualized bullish drift
     } else {
       netAnnualDrift = -0.06 - (50 - ratingScore) * 0.007; // bearish drift

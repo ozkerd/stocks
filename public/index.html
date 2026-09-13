@@ -576,11 +576,11 @@
             <button type="button" class="cat-pill" data-cat="price_action" onclick="changeLeaderboardCategory('price_action')">⚡ Best Price Action</button>
             <button type="button" class="cat-pill" data-cat="high_cap" onclick="changeLeaderboardCategory('high_cap')">🏛️ High Cap (&gt; $100B)</button>
             <button type="button" class="cat-pill" data-cat="mid_cap" onclick="changeLeaderboardCategory('mid_cap')">🚀 Mid Cap ($10B - $100B)</button>
-            <button type="button" class="cat-pill" data-cat="low_cap" onclick="changeLeaderboardCategory('low_cap')">💎 Low Cap Gems (&lt; $10B)</button>
+            <button type="button" class="cat-pill" data-cat="low_cap" onclick="changeLeaderboardCategory('low_cap')">🏢 Low Cap (&lt; $10B)</button>
           </div>
 
           <div class="leaderboard-toolbar">
-            <input type="text" class="leaderboard-search" id="leaderboard-search" placeholder="Filter by symbol or company name (e.g. HYPE, APP, NVDA, LIT, PLTR)..." oninput="filterLeaderboard(this.value)">
+            <input type="text" class="leaderboard-search" id="leaderboard-search" placeholder="Filter by symbol or company name (e.g. NVDA, PLTR, MSFT, BTC)..." oninput="filterLeaderboard(this.value)">
             <div class="horizon-selector" style="margin-bottom:0;">
               <span class="horizon-label">Horizon:</span>
               <button type="button" class="pill-btn" data-lb-h="1d" onclick="changeLeaderboardHorizon('1d')">1 Day</button>
@@ -598,55 +598,45 @@
                 <tr>
                   <th style="width:65px;" class="sortable-th" onclick="sortLeaderboardTable('rank')">Rank <span class="sort-icon" id="sort-icon-rank">▲</span></th>
                   <th class="sortable-th" onclick="sortLeaderboardTable('asset')">Asset <span class="sort-icon" id="sort-icon-asset">↕</span></th>
-                  <th class="sortable-th" onclick="sortLeaderboardTable('cap')">Cap Tier <span class="sort-icon" id="sort-icon-cap">↕</span></th>
-                  <th class="sortable-th" onclick="sortLeaderboardTable('price')">Current Price <span class="sort-icon" id="sort-icon-price">↕</span></th>
+                  <th class="sortable-th" onclick="sortLeaderboardTable('cap')">Market Cap <span class="sort-icon" id="sort-icon-cap">↕</span></th>
+                  <th class="sortable-th" onclick="sortLeaderboardTable('price')">Price <span class="sort-icon" id="sort-icon-price">↕</span></th>
                   <th class="sortable-th" onclick="sortLeaderboardTable('return')">Expected Target <span class="sort-icon" id="sort-icon-return">↕</span></th>
-                  <th class="sortable-th" onclick="sortLeaderboardTable('buy_stop')">Target Buy / Stop-Loss <span class="sort-icon" id="sort-icon-buy_stop">↕</span></th>
-                  <th id="th-score-col" class="sortable-th" onclick="sortLeaderboardTable('score')">Conviction <span class="sort-icon" id="sort-icon-score">↕</span></th>
-                  <th>Action</th>
+                  <th class="sortable-th" onclick="sortLeaderboardTable('score')">AI Conviction <span class="sort-icon" id="sort-icon-score">↕</span></th>
+                  <th>Calibrated Setup Zone</th>
+                  <th>Model Rating</th>
                 </tr>
               </thead>
               <tbody id="leaderboard-table-body">
-                <!-- Dynamically populated rows -->
+                <!-- Dynamically populated -->
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- SUBMODE 2: ACTIONABLE TRADE SETUPS -->
+        <!-- SUBMODE 2: TRADE SETUPS CARDS -->
         <div id="submode-setups" style="display:none;">
-          <div class="setups-header-box">
-            <div class="timeframe-pill-group">
-              <button type="button" class="timeframe-btn active" data-tf="daily" onclick="changeTradeSetupsTimeframe('daily')">
-                ⚡ Daily Setups (1D Intraday)
-              </button>
-              <button type="button" class="timeframe-btn" data-tf="weekly" onclick="changeTradeSetupsTimeframe('weekly')">
-                📅 Weekly Swings (1W Swing)
-              </button>
-              <button type="button" class="timeframe-btn" data-tf="monthly" onclick="changeTradeSetupsTimeframe('monthly')">
-                🗓️ Monthly Positions (1M Position)
-              </button>
-            </div>
-            <div class="setups-subtext">
-              TimesFM-3 neural quantile drift provides calibrated entry zones (Buy Zone), multi-target profit taking (TP1 / TP2), and stop-loss risk floors.
-            </div>
+          <div class="category-filter-bar">
+            <span class="category-filter-label">Filter Setups:</span>
+            <button type="button" class="cat-pill active" id="btn-setups-all" onclick="filterTradeSetups('all')">🎯 All Setups</button>
+            <button type="button" class="cat-pill" id="btn-setups-strong" onclick="filterTradeSetups('STRONG BUY')">🔥 Strong Buy Setups</button>
+            <button type="button" class="cat-pill" id="btn-setups-buy" onclick="filterTradeSetups('BUY')">✅ Buy Setups</button>
+            <button type="button" class="cat-pill" id="btn-setups-crypto" onclick="filterTradeSetups('crypto')">⚡ Crypto 24/7</button>
           </div>
-
           <div style="overflow-x:auto;">
-            <table class="setups-table">
+            <table class="leaderboard-table">
               <thead>
                 <tr>
                   <th>Asset</th>
-                  <th>Setup Pattern & Thesis</th>
-                  <th>Target Buy Zone (Entry)</th>
-                  <th>Target Profit (TP1 / TP2)</th>
-                  <th>Stop-Loss (Risk Floor)</th>
+                  <th>Horizon</th>
+                  <th>Entry Zone</th>
+                  <th>Target Sell</th>
+                  <th>Stop Loss</th>
                   <th>Risk / Reward</th>
-                  <th>AI Action</th>
-                  <th>Action</th>
+                  <th>Conviction</th>
+                  <th>Action Plan</th>
                 </tr>
               </thead>
-              <tbody id="setups-table-body">
+              <tbody id="trade-setups-body">
                 <!-- Dynamically populated trade setups -->
               </tbody>
             </table>
@@ -662,9 +652,9 @@
           <div class="view-title-wrap">
             <h2>
               <svg style="width:24px;height:24px;fill:#7b1fa2;" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
-              Best Portfolio — AI Risk-Optimized Multi-Asset Allocations
+              Best Portfolio — Quantitative Risk-Optimized Allocations
             </h2>
-            <p>TimesFM-3 neural multi-asset allocations calibrated for High Risk (Alpha Growth), Balanced (Optimal Sharpe), and Low Risk (Capital Defense).</p>
+            <p>Modern Portfolio Theory (MPT), Inverse-Volatility Risk Parity, and Cross-Sectional Momentum allocation models.</p>
           </div>
           <button type="button" class="btn-google" onclick="switchAppView('forecast')">
             ← Back to Forecaster
@@ -673,28 +663,28 @@
 
         <div class="portfolio-risk-tabs">
           <div class="risk-tab-btn active" id="ptab-balanced" onclick="selectPortfolio('balanced')">
-            <div class="risk-tab-title">⚖️ Balanced Risk</div>
-            <div class="risk-tab-sub">Optimal Sharpe Ratio (2.42)</div>
+            <div class="risk-tab-title">⚖️ Optimal Sharpe</div>
+            <div class="risk-tab-sub">Markowitz Frontier (Sharpe: 2.42)</div>
           </div>
           <div class="risk-tab-btn" id="ptab-high_risk" onclick="selectPortfolio('high_risk')">
-            <div class="risk-tab-title">🚀 High Risk (Alpha)</div>
+            <div class="risk-tab-title">🚀 Momentum & Drift</div>
             <div class="risk-tab-sub">Max Expected CAGR (+38.5%)</div>
           </div>
           <div class="risk-tab-btn" id="ptab-low_risk" onclick="selectPortfolio('low_risk')">
-            <div class="risk-tab-title">🛡️ Low Risk (Defensive)</div>
-            <div class="risk-tab-sub">Capital Defense (-6.5% Max DD)</div>
+            <div class="risk-tab-title">🛡️ Minimum Variance</div>
+            <div class="risk-tab-sub">Drawdown Defense (-6.5% Max DD)</div>
+          </div>
+          <div class="risk-tab-btn" id="ptab-risk_parity" onclick="selectPortfolio('risk_parity')">
+            <div class="risk-tab-title">⚖️ Equal Risk Parity</div>
+            <div class="risk-tab-sub">Inverse-Volatility Budgeting</div>
           </div>
           <div class="risk-tab-btn" id="ptab-ai_revolution" onclick="selectPortfolio('ai_revolution')">
-            <div class="risk-tab-title">🧠 AI Revolution</div>
-            <div class="risk-tab-sub">Deep Tech & Precision (+42.5%)</div>
-          </div>
-          <div class="risk-tab-btn" id="ptab-smallcap_moonshots" onclick="selectPortfolio('smallcap_moonshots')">
-            <div class="risk-tab-title">💎 Small-Cap Gems</div>
-            <div class="risk-tab-sub">Asymmetric Alpha (+49.0%)</div>
+            <div class="risk-tab-title">🧠 Quantitative AI Factor</div>
+            <div class="risk-tab-sub">Compute & R&D Alpha (+41.5%)</div>
           </div>
           <div class="risk-tab-btn" id="ptab-all_weather" onclick="selectPortfolio('all_weather')">
             <div class="risk-tab-title">🌐 All-Weather Macro</div>
-            <div class="risk-tab-sub">Inflation & Debasement Shield</div>
+            <div class="risk-tab-sub">4-Regime Parity Shield</div>
           </div>
         </div>
 
