@@ -22,8 +22,8 @@ const INCEPTION_BUY_PRICES = {
   "NVDA": 147.20,
   "PLTR": 126.50,
   "APP": 328.00,
-  "BTC-USD": 87400.00,
-  "SOL-USD": 148.20,
+  "BTC-USD": 85400.00,
+  "SOL-USD": 115.20,
   "CEG": 294.50,
   "ALAB": 92.40,
   "TSM": 191.80,
@@ -31,16 +31,16 @@ const INCEPTION_BUY_PRICES = {
   "RDDT": 151.20,
   "OKLO": 25.80,
   "SMR": 19.30,
-  "HYPE32196-USD": 91.80,
-  "HYPE-USD": 91.80,
-  "HYPE": 91.80,
+  "HYPE32196-USD": 93.80,
+  "HYPE-USD": 93.80,
+  "HYPE": 93.80,
   "COIN": 260.20,
   "CAVA": 124.50,
   "CELH": 28.90,
   "MSFT": 459.80,
   "AAPL": 246.20,
   "AMZN": 222.40,
-  "ETH-USD": 3290.00,
+  "ETH-USD": 2710.00,
   "META": 704.50,
   "GOOGL": 190.80,
   "BRK-B": 489.50,
@@ -53,8 +53,8 @@ const FALLBACK_PRICES = {
   "NVDA": 148.20,
   "PLTR": 128.50,
   "APP": 332.40,
-  "BTC-USD": 88400.00,
-  "SOL-USD": 152.80,
+  "BTC-USD": 85870.00,
+  "SOL-USD": 116.80,
   "CEG": 298.50,
   "ALAB": 94.20,
   "TSM": 194.50,
@@ -62,14 +62,16 @@ const FALLBACK_PRICES = {
   "RDDT": 154.80,
   "OKLO": 26.80,
   "SMR": 19.90,
-  "HYPE32196-USD": 92.80,
+  "HYPE32196-USD": 95.20,
+  "HYPE-USD": 95.20,
+  "HYPE": 95.20,
   "COIN": 265.40,
   "CAVA": 126.80,
   "CELH": 29.50,
   "MSFT": 462.50,
   "AAPL": 248.60,
   "AMZN": 224.80,
-  "ETH-USD": 3320.00,
+  "ETH-USD": 2741.00,
   "META": 710.20,
   "GOOGL": 192.40,
   "BRK-B": 492.10,
@@ -292,36 +294,59 @@ async function fetchLiveQuotes(symbols, forceRefresh = false) {
     // Graceful fallback
   }
 
-  // 2. Fetch real-time crypto prices via Binance public ticker
+  // 2. PRIMARY: Fetch real-time crypto spot prices via Coinbase Public API (Zero auth, 100% reliable)
   try {
-    const cryptoSymbols = symbols.filter(s => s.includes("-USD"));
+    const cryptoSymbols = symbols.filter(s => s.includes("-USD") || s.includes("HYPE") || s.includes("BTC") || s.includes("SOL") || s.includes("ETH"));
     if (cryptoSymbols.length > 0) {
-      const res = await fetch("https://api.binance.com/api/v3/ticker/price", {
-        headers: { "Accept": "application/json" }
-      });
-      if (res.ok) {
-        const list = await res.json();
-        const bMap = {};
-        if (Array.isArray(list)) {
-          list.forEach(item => { bMap[item.symbol] = parseFloat(item.price); });
-        }
-        cryptoSymbols.forEach(s => {
-          const clean = s.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
-          const pair = clean + "USDT";
-          if (bMap[pair] && bMap[pair] > 0) {
-            prices[s] = Number(bMap[pair].toFixed(2));
-          }
-        });
-      }
+      await Promise.allSettled(
+        cryptoSymbols.map(async (s) => {
+          try {
+            let base = s.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
+            if (base.includes("HYPE")) base = "HYPE";
+            const cbRes = await fetch(`https://api.coinbase.com/v2/prices/${base}-USD/spot`, {
+              headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0" }
+            });
+            if (cbRes.ok) {
+              const cbData = await cbRes.json();
+              const amt = parseFloat(cbData?.data?.amount);
+              if (amt && amt > 0) {
+                prices[s] = Number(amt.toFixed(2));
+                if (s.includes("HYPE")) {
+                  prices["HYPE32196-USD"] = Number(amt.toFixed(2));
+                  prices["HYPE-USD"] = Number(amt.toFixed(2));
+                  prices["HYPE"] = Number(amt.toFixed(2));
+                }
+              }
+            }
+          } catch (err) {}
+        })
+      );
     }
   } catch (e) {
     // Graceful fallback
   }
 
-  // 3. Fetch CoinGecko & native Hyperliquid L1 mid price for HYPE
+  // 3. SECONDARY / DUAL-CHECK: Fetch Hyperliquid L1 mid price & CoinGecko for HYPE if needed
   try {
     const hasHype = symbols.some(s => s.includes("HYPE"));
-    if (hasHype) {
+    if (hasHype && (!prices["HYPE"] || prices["HYPE"] < 50)) {
+      try {
+        const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({ type: "allMids" })
+        });
+        if (hlRes.ok) {
+          const mids = await hlRes.json();
+          const hypePrice = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
+          if (hypePrice && hypePrice > 50) {
+            prices["HYPE32196-USD"] = Number(hypePrice.toFixed(2));
+            prices["HYPE-USD"] = Number(hypePrice.toFixed(2));
+            prices["HYPE"] = Number(hypePrice.toFixed(2));
+          }
+        }
+      } catch (e) {}
+
       try {
         const cgRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd");
         if (cgRes.ok) {
@@ -334,20 +359,31 @@ async function fetchLiveQuotes(symbols, forceRefresh = false) {
           }
         }
       } catch (e) {}
+    }
+  } catch (e) {
+    // Graceful fallback
+  }
 
-      const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify({ type: "allMids" })
+  // 4. TERTIARY: Binance ticker backup if Coinbase was unreachable
+  try {
+    const missingCrypto = symbols.filter(s => s.includes("-USD") && (!prices[s] || prices[s] === FALLBACK_PRICES[s]));
+    if (missingCrypto.length > 0) {
+      const res = await fetch("https://api.binance.com/api/v3/ticker/price", {
+        headers: { "Accept": "application/json" }
       });
-      if (hlRes.ok) {
-        const mids = await hlRes.json();
-        const hypePrice = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
-        if (hypePrice && hypePrice > 50) {
-          prices["HYPE32196-USD"] = Number(hypePrice.toFixed(2));
-          prices["HYPE-USD"] = Number(hypePrice.toFixed(2));
-          prices["HYPE"] = Number(hypePrice.toFixed(2));
+      if (res.ok) {
+        const list = await res.json();
+        const bMap = {};
+        if (Array.isArray(list)) {
+          list.forEach(item => { bMap[item.symbol] = parseFloat(item.price); });
         }
+        missingCrypto.forEach(s => {
+          const clean = s.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
+          const pair = clean + "USDT";
+          if (bMap[pair] && bMap[pair] > 0) {
+            prices[s] = Number(bMap[pair].toFixed(2));
+          }
+        });
       }
     }
   } catch (e) {

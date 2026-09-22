@@ -18,7 +18,7 @@ const ASSET_UNIVERSE = [
   { symbol: "MSFT", display_symbol: "MSFT", name: "Microsoft Corp", type: "Stock", exchange: "NASDAQ", base_price: 495.63, past_1w_price: 488.20, pred_1w_target: 494.00 },
   { symbol: "AAPL", display_symbol: "AAPL", name: "Apple Inc.", type: "Stock", exchange: "NASDAQ", base_price: 332.27, past_1w_price: 327.40, pred_1w_target: 331.00 },
   { symbol: "AMZN", display_symbol: "AMZN", name: "Amazon.com Inc.", type: "Stock", exchange: "NASDAQ", base_price: 256.78, past_1w_price: 251.00, pred_1w_target: 255.50 },
-  { symbol: "HYPE32196-USD", display_symbol: "HYPE", name: "Hyperliquid USD", type: "Crypto", exchange: "Crypto", base_price: 92.80, past_1w_price: 84.50, pred_1w_target: 98.40 },
+  { symbol: "HYPE32196-USD", display_symbol: "HYPE", name: "Hyperliquid USD", type: "Crypto", exchange: "Crypto", base_price: 95.20, past_1w_price: 88.50, pred_1w_target: 102.40 },
   { symbol: "TAO-USD", display_symbol: "TAO", name: "Bittensor USD", type: "Crypto", exchange: "Crypto", base_price: 232.2, past_1w_price: 218.0, pred_1w_target: 229.0 },
   { symbol: "GOOGL", display_symbol: "GOOGL", name: "Alphabet Inc. (Google)", type: "Stock", exchange: "NASDAQ", base_price: 338.5, past_1w_price: 332.0, pred_1w_target: 336.8 },
   { symbol: "SUI20947-USD", display_symbol: "SUI", name: "Sui Network USD", type: "Crypto", exchange: "Crypto", base_price: 0.72, past_1w_price: 0.67, pred_1w_target: 0.71 },
@@ -65,54 +65,69 @@ async function fetchLivePrices(universe) {
   const cryptoAssets = universe.filter(a => a.type === "Crypto");
   const stockAssets = universe.filter(a => a.type === "Stock" || a.type === "ETF");
 
-  // 1. Binance real-time tickers for cryptos
+  // 1. PRIMARY: Coinbase real-time spot prices for cryptos (Zero auth, 100% reliable)
   const cryptoPromise = (async () => {
     try {
-      const res = await fetch("https://api.binance.com/api/v3/ticker/price");
-      if (res.ok) {
-        const list = await res.json();
-        const map = {};
-        list.forEach(item => { map[item.symbol] = parseFloat(item.price); });
-        cryptoAssets.forEach(a => {
-          const clean = a.symbol.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
-          const pair = clean + "USDT";
-          if (map[pair] !== undefined) prices[a.symbol] = map[pair];
-        });
-      }
-    } catch (e) {
-      // Fallback
-    }
+      await Promise.allSettled(
+        cryptoAssets.map(async (a) => {
+          try {
+            let clean = a.symbol.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
+            if (clean.includes("HYPE")) clean = "HYPE";
+            const cbRes = await fetch(`https://api.coinbase.com/v2/prices/${clean}-USD/spot`, {
+              headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0" }
+            });
+            if (cbRes.ok) {
+              const cbData = await cbRes.json();
+              const p = parseFloat(cbData?.data?.amount);
+              if (p && p > 0) {
+                prices[a.symbol] = p;
+                if (a.symbol.includes("HYPE")) {
+                  prices["HYPE32196-USD"] = p;
+                  prices["HYPE"] = p;
+                }
+              }
+            }
+          } catch (e) {}
+        })
+      );
+    } catch (e) {}
 
-    // Direct Hyperliquid mid price fetch for HYPE
+    // Fallback 1b: Hyperliquid mid price & CoinGecko for HYPE if missing
     try {
-      try {
-        const cgRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd");
-        if (cgRes.ok) {
-          const cgData = await cgRes.json();
-          const p = parseFloat(cgData?.hyperliquid?.usd);
-          if (p && p > 50) {
-            prices["HYPE32196-USD"] = p;
-            prices["HYPE"] = p;
+      if (!prices["HYPE32196-USD"] || prices["HYPE32196-USD"] < 50) {
+        const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "allMids" })
+        });
+        if (hlRes.ok) {
+          const mids = await hlRes.json();
+          const hypeP = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
+          if (hypeP && hypeP > 50) {
+            prices["HYPE32196-USD"] = hypeP;
+            prices["HYPE"] = hypeP;
           }
         }
-      } catch (e) {}
+      }
+    } catch (e) {}
 
-      const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "allMids" })
-      });
-      if (hlRes.ok) {
-        const mids = await hlRes.json();
-        const hypeP = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
-        if (hypeP && hypeP > 50) {
-          prices["HYPE32196-USD"] = hypeP;
-          prices["HYPE"] = hypeP;
+    // Fallback 1c: Binance ticker backup
+    try {
+      const missing = cryptoAssets.filter(a => !prices[a.symbol]);
+      if (missing.length > 0) {
+        const res = await fetch("https://api.binance.com/api/v3/ticker/price");
+        if (res.ok) {
+          const list = await res.json();
+          const map = {};
+          list.forEach(item => { map[item.symbol] = parseFloat(item.price); });
+          missing.forEach(a => {
+            const clean = a.symbol.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
+            const pair = clean + "USDT";
+            if (map[pair] !== undefined) prices[a.symbol] = map[pair];
+          });
         }
       }
-    } catch (e) {
-      // Fallback
-    }
+    } catch (e) {}
   })();
 
   // 2. Yahoo Finance batch quotes for equities

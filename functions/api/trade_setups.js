@@ -54,13 +54,13 @@ const BASE_SETUPS = [
     name: "Hyperliquid USD",
     type: "Crypto",
     exchange: "Crypto",
-    current_price: 92.80,
+    current_price: 95.20,
     daily: {
       pattern: "DEX Volume Surge & Liquidity Expansion",
-      entry_low: 90.00, entry_high: 92.50,
-      tp1: 99.50, tp1_pct: "+7.2%",
-      tp2: 108.00, tp2_pct: "+16.4%",
-      stop_loss: 86.00, stop_pct: "-7.3%",
+      entry_low: 92.00, entry_high: 95.00,
+      tp1: 104.00, tp1_pct: "+9.2%",
+      tp2: 115.00, tp2_pct: "+20.8%",
+      stop_loss: 88.00, stop_pct: "-7.6%",
       rr_ratio: "2.3 : 1",
       conviction: 95,
       action: "BUY BREAKOUT",
@@ -138,37 +138,37 @@ const BASE_SETUPS = [
     name: "Bitcoin",
     type: "Crypto",
     exchange: "Crypto",
-    current_price: 77453.11,
+    current_price: 85870.00,
     daily: {
       pattern: "Range High Liquidity Reclaim",
-      entry_low: 76500.00, entry_high: 77200.00,
-      tp1: 79200.00, tp1_pct: "+2.3%",
-      tp2: 80500.00, tp2_pct: "+3.9%",
-      stop_loss: 75600.00, stop_pct: "-2.4%",
-      rr_ratio: "1.6 : 1",
-      conviction: 93,
+      entry_low: 84500.00, entry_high: 85800.00,
+      tp1: 89500.00, tp1_pct: "+4.2%",
+      tp2: 94000.00, tp2_pct: "+9.5%",
+      stop_loss: 82500.00, stop_pct: "-3.9%",
+      rr_ratio: "2.1 : 1",
+      conviction: 94,
       action: "MOMENTUM BUY",
       thesis: "Spot ETF net inflows absorbing weekend selling; basis trade spreads widening."
     },
     weekly: {
       pattern: "Weekly Candle Bullish Engulfing",
-      entry_low: 75500.00, entry_high: 76900.00,
-      tp1: 82500.00, tp1_pct: "+6.5%",
-      tp2: 86000.00, tp2_pct: "+11.0%",
-      stop_loss: 73200.00, stop_pct: "-5.5%",
-      rr_ratio: "2.0 : 1",
-      conviction: 94,
+      entry_low: 82000.00, entry_high: 85000.00,
+      tp1: 96000.00, tp1_pct: "+11.8%",
+      tp2: 105000.00, tp2_pct: "+22.3%",
+      stop_loss: 78000.00, stop_pct: "-9.1%",
+      rr_ratio: "2.5 : 1",
+      conviction: 95,
       action: "SWING BUY",
       thesis: "Macro monetary debasement hedge; supply on exchanges at multi-year lows."
     },
     monthly: {
       pattern: "Parabolic Cycle Stage-3 Advance",
-      entry_low: 74000.00, entry_high: 76500.00,
-      tp1: 92000.00, tp1_pct: "+18.8%",
-      tp2: 104000.00, tp2_pct: "+34.3%",
-      stop_loss: 68500.00, stop_pct: "-11.6%",
+      entry_low: 78000.00, entry_high: 84000.00,
+      tp1: 112000.00, tp1_pct: "+30.4%",
+      tp2: 125000.00, tp2_pct: "+45.6%",
+      stop_loss: 72000.00, stop_pct: "-16.1%",
       rr_ratio: "3.0 : 1",
-      conviction: 95,
+      conviction: 96,
       action: "ACCUMULATE",
       thesis: "TimesFM P90 bull scenario target matches post-halving structural liquidity cycle."
     }
@@ -222,37 +222,37 @@ const BASE_SETUPS = [
     name: "Solana",
     type: "Crypto",
     exchange: "Crypto",
-    current_price: 101.97,
+    current_price: 116.80,
     daily: {
       pattern: "Ascending Triangle Breakout",
-      entry_low: 99.50, entry_high: 101.50,
-      tp1: 108.00, tp1_pct: "+5.9%",
-      tp2: 112.50, tp2_pct: "+10.3%",
-      stop_loss: 96.00, stop_pct: "-5.9%",
-      rr_ratio: "1.8 : 1",
-      conviction: 92,
+      entry_low: 114.00, entry_high: 116.50,
+      tp1: 124.00, tp1_pct: "+6.2%",
+      tp2: 132.00, tp2_pct: "+13.0%",
+      stop_loss: 110.00, stop_pct: "-5.8%",
+      rr_ratio: "2.1 : 1",
+      conviction: 93,
       action: "BUY LONG",
       thesis: "Decentralized exchange volume exceeding competitors; high developer velocity."
     },
     weekly: {
       pattern: "Golden Cross EMA 50/200 Bounce",
-      entry_low: 97.00, entry_high: 101.00,
-      tp1: 118.00, tp1_pct: "+15.7%",
-      tp2: 132.00, tp2_pct: "+29.5%",
-      stop_loss: 90.00, stop_pct: "-11.7%",
-      rr_ratio: "2.5 : 1",
-      conviction: 93,
+      entry_low: 110.00, entry_high: 115.00,
+      tp1: 138.00, tp1_pct: "+18.1%",
+      tp2: 155.00, tp2_pct: "+32.7%",
+      stop_loss: 102.00, stop_pct: "-12.7%",
+      rr_ratio: "2.6 : 1",
+      conviction: 94,
       action: "SWING BUY",
       thesis: "Network throughput upgrades; institutional staking yields attracting allocators."
     },
     monthly: {
       pattern: "Smart Contract Market Share Conquest",
-      entry_low: 92.00, entry_high: 99.00,
-      tp1: 148.00, tp1_pct: "+45.1%",
-      tp2: 175.00, tp2_pct: "+71.6%",
-      stop_loss: 82.00, stop_pct: "-19.6%",
-      rr_ratio: "3.7 : 1",
-      conviction: 94,
+      entry_low: 102.00, entry_high: 112.00,
+      tp1: 168.00, tp1_pct: "+43.8%",
+      tp2: 195.00, tp2_pct: "+66.9%",
+      stop_loss: 92.00, stop_pct: "-21.2%",
+      rr_ratio: "3.5 : 1",
+      conviction: 95,
       action: "ACCUMULATE",
       thesis: "TimesFM multi-horizon forecast targets substantial beta outperformance vs ETH."
     }
@@ -645,29 +645,35 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const tf = url.searchParams.get("timeframe") || "daily"; // 'daily', 'weekly', 'monthly'
 
-  // Fetch real-time crypto prices to keep setups dynamically hydrated
+  // 1. PRIMARY: Fetch real-time crypto prices via Coinbase Spot API (Zero auth, 100% reliable)
   let liveCryptoMap = {};
-  try {
-    const bRes = await fetch("https://api.binance.com/api/v3/ticker/price");
-    if (bRes.ok) {
-      const list = await bRes.json();
-      if (Array.isArray(list)) {
-        list.forEach(item => { liveCryptoMap[item.symbol] = parseFloat(item.price); });
-      }
-    }
-  } catch (e) {}
+  const cryptoSetups = BASE_SETUPS.filter(i => i.type === "Crypto");
+  await Promise.allSettled(
+    cryptoSetups.map(async (item) => {
+      try {
+        let clean = item.symbol.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
+        if (clean.includes("HYPE")) clean = "HYPE";
+        const cbRes = await fetch(`https://api.coinbase.com/v2/prices/${clean}-USD/spot`, {
+          headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0" }
+        });
+        if (cbRes.ok) {
+          const cbData = await cbRes.json();
+          const p = parseFloat(cbData?.data?.amount);
+          if (p && p > 0) {
+            liveCryptoMap[item.symbol] = p;
+            if (item.symbol.includes("HYPE")) {
+              liveCryptoMap["HYPE32196-USD"] = p;
+              liveCryptoMap["HYPE"] = p;
+            }
+          }
+        }
+      } catch (e) {}
+    })
+  );
 
-  let hypePrice = null;
-  try {
-    const cgRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd");
-    if (cgRes.ok) {
-      const cgData = await cgRes.json();
-      const p = parseFloat(cgData?.hyperliquid?.usd);
-      if (p && p > 50) hypePrice = p;
-    }
-  } catch (e) {}
-
-  if (!hypePrice) {
+  // 2. SECONDARY: Direct Hyperliquid mid price fetch for HYPE if needed
+  let hypePrice = liveCryptoMap["HYPE32196-USD"] || liveCryptoMap["HYPE"] || null;
+  if (!hypePrice || hypePrice < 50) {
     try {
       const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
         method: "POST",
@@ -677,21 +683,56 @@ export async function onRequest(context) {
       if (hlRes.ok) {
         const mids = await hlRes.json();
         const p = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
-        if (p && p > 50) hypePrice = p;
+        if (p && p > 50) {
+          hypePrice = p;
+          liveCryptoMap["HYPE32196-USD"] = p;
+          liveCryptoMap["HYPE"] = p;
+        }
+      }
+    } catch (e) {}
+
+    try {
+      const cgRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd");
+      if (cgRes.ok) {
+        const cgData = await cgRes.json();
+        const p = parseFloat(cgData?.hyperliquid?.usd);
+        if (p && p > 50) {
+          hypePrice = p;
+          liveCryptoMap["HYPE32196-USD"] = p;
+          liveCryptoMap["HYPE"] = p;
+        }
       }
     } catch (e) {}
   }
 
+  // 3. TERTIARY: Binance ticker backup if missing
+  try {
+    const missingCrypto = cryptoSetups.filter(i => !liveCryptoMap[i.symbol]);
+    if (missingCrypto.length > 0) {
+      const bRes = await fetch("https://api.binance.com/api/v3/ticker/price");
+      if (bRes.ok) {
+        const list = await bRes.json();
+        if (Array.isArray(list)) {
+          const bMap = {};
+          list.forEach(item => { bMap[item.symbol] = parseFloat(item.price); });
+          missingCrypto.forEach(item => {
+            const clean = item.symbol.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
+            const pair = clean + "USDT";
+            if (bMap[pair] && bMap[pair] > 0) {
+              liveCryptoMap[item.symbol] = bMap[pair];
+            }
+          });
+        }
+      }
+    }
+  } catch (e) {}
+
   const formatted = BASE_SETUPS.map(item => {
     let curP = item.current_price;
-    if (item.symbol.includes("HYPE") && hypePrice && hypePrice > 0) {
+    if (item.type === "Crypto" && liveCryptoMap[item.symbol] && liveCryptoMap[item.symbol] > 0) {
+      curP = liveCryptoMap[item.symbol];
+    } else if (item.symbol.includes("HYPE") && hypePrice && hypePrice > 0) {
       curP = hypePrice;
-    } else if (item.type === "Crypto") {
-      const clean = item.symbol.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
-      const pair = clean + "USDT";
-      if (liveCryptoMap[pair] && liveCryptoMap[pair] > 0) {
-        curP = liveCryptoMap[pair];
-      }
     }
 
     const s = item[tf] || item.daily;

@@ -199,22 +199,57 @@ function parseBinanceKlines(klines, symbol) {
 }
 
 async function fetchYahooChart(ticker, range = "1y") {
-  // 0. If HYPE, query CoinGecko & Hyperliquid L1 info API directly for instantaneous DEX price
-  if (ticker.includes("HYPE")) {
+  // 0. PRIMARY: For any crypto asset, query Coinbase for real-time spot & candles (Zero auth, 100% reliable)
+  if (ticker.includes("-USD") || ticker.includes("HYPE")) {
+    let clean = ticker.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
+    if (clean.includes("HYPE")) clean = "HYPE";
     try {
-      const cgRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd", {
-        headers: { "Accept": "application/json" }
+      const cbRes = await fetch(`https://api.coinbase.com/v2/prices/${clean}-USD/spot`, {
+        headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0" }
       });
-      if (cgRes.ok) {
-        const cgData = await cgRes.json();
-        const p = parseFloat(cgData?.hyperliquid?.usd);
-        if (p && p > 50) {
-          return generateSyntheticPricesWithBase("HYPE32196-USD", p, "Hyperliquid USD", "CRYPTOCURRENCY");
+      if (cbRes.ok) {
+        const cbData = await cbRes.json();
+        const p = parseFloat(cbData?.data?.amount);
+        if (p && p > 0) {
+          try {
+            const candleRes = await fetch(`https://api.exchange.coinbase.com/products/${clean}-USD/candles?granularity=86400`, {
+              headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0" }
+            });
+            if (candleRes.ok) {
+              const rawCandles = await candleRes.json();
+              if (Array.isArray(rawCandles) && rawCandles.length >= 20) {
+                const sorted = rawCandles.slice().reverse();
+                const records = sorted.map(c => ({
+                  time: c[0],
+                  open: c[3],
+                  high: c[2],
+                  low: c[1],
+                  close: c[4],
+                  volume: c[5] || 0
+                }));
+                records[records.length - 1].close = p;
+                return {
+                  meta: {
+                    symbol: ticker,
+                    regularMarketPrice: p,
+                    shortName: `${clean} USD`,
+                    instrumentType: "CRYPTOCURRENCY"
+                  },
+                  records,
+                  symbol: ticker
+                };
+              }
+            }
+          } catch (cErr) {}
+
+          return generateSyntheticPricesWithBase(ticker, p, `${clean} USD`, "CRYPTOCURRENCY");
         }
       }
-    } catch (cgErr) {
-      // Fall through
-    }
+    } catch (cbErr) {}
+  }
+
+  // 0b. If HYPE, fallback to CoinGecko & Hyperliquid L1 info API directly for instantaneous DEX price
+  if (ticker.includes("HYPE")) {
     try {
       const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
         method: "POST",
@@ -228,12 +263,23 @@ async function fetchYahooChart(ticker, range = "1y") {
           return generateSyntheticPricesWithBase("HYPE32196-USD", hypePrice, "Hyperliquid USD", "CRYPTOCURRENCY");
         }
       }
-    } catch (hlErr) {
-      // Fall through
-    }
+    } catch (hlErr) {}
+
+    try {
+      const cgRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd", {
+        headers: { "Accept": "application/json" }
+      });
+      if (cgRes.ok) {
+        const cgData = await cgRes.json();
+        const p = parseFloat(cgData?.hyperliquid?.usd);
+        if (p && p > 50) {
+          return generateSyntheticPricesWithBase("HYPE32196-USD", p, "Hyperliquid USD", "CRYPTOCURRENCY");
+        }
+      }
+    } catch (cgErr) {}
   }
 
-  // 0b. If crypto, query Binance API for real-time OHLCV klines
+  // 0c. If crypto, query Binance API backup for real-time OHLCV klines
   if (ticker.includes("-USD") || ticker.endsWith("USD")) {
     const clean = ticker.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
     try {
@@ -385,9 +431,9 @@ function generateSyntheticPricesWithBase(symbol, base, name, type) {
 }
 
 const FALLBACK_PRICES = {
-  "HYPE32196-USD": { price: 92.80, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
-  "HYPE-USD": { price: 92.80, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
-  "HYPE": { price: 92.80, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
+  "HYPE32196-USD": { price: 95.20, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
+  "HYPE-USD": { price: 95.20, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
+  "HYPE": { price: 95.20, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
   "LIT6833-USD": { price: 0.74, name: "Litentry USD", type: "CRYPTOCURRENCY" },
   "LIT-USD": { price: 0.74, name: "Litentry USD", type: "CRYPTOCURRENCY" },
   "LIT": { price: 0.74, name: "Litentry USD", type: "CRYPTOCURRENCY" },
@@ -412,9 +458,9 @@ const FALLBACK_PRICES = {
   "AVAX-USD": { price: 7.39, name: "Avalanche USD", type: "CRYPTOCURRENCY" },
   "APP": { price: 323.96, name: "AppLovin Corp", type: "EQUITY" },
   "NVDA": { price: 218.29, name: "NVIDIA Corp", type: "EQUITY" },
-  "BTC-USD": { price: 77164.13, name: "Bitcoin USD", type: "CRYPTOCURRENCY" },
-  "ETH-USD": { price: 2522.21, name: "Ethereum USD", type: "CRYPTOCURRENCY" },
-  "SOL-USD": { price: 101.41, name: "Solana USD", type: "CRYPTOCURRENCY" },
+  "BTC-USD": { price: 85870.00, name: "Bitcoin USD", type: "CRYPTOCURRENCY" },
+  "ETH-USD": { price: 2741.00, name: "Ethereum USD", type: "CRYPTOCURRENCY" },
+  "SOL-USD": { price: 116.80, name: "Solana USD", type: "CRYPTOCURRENCY" },
   "AAPL": { price: 332.27, name: "Apple Inc.", type: "EQUITY" },
   "MSFT": { price: 495.63, name: "Microsoft Corp", type: "EQUITY" },
   "TSLA": { price: 365.44, sma50: 354.50, sma200: 398.93, is_bear_regime: true, name: "Tesla Inc.", type: "EQUITY" },

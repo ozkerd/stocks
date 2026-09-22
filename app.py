@@ -450,20 +450,70 @@ TRADING_LAB_STRATEGIES = {
 }
 
 INCEPTION_BUY_PRICES = {
-    "NVDA": 147.20, "PLTR": 126.50, "APP": 328.00, "BTC-USD": 87400.00, "SOL-USD": 148.20,
+    "NVDA": 147.20, "PLTR": 126.50, "APP": 328.00, "BTC-USD": 85400.00, "SOL-USD": 115.20,
     "CEG": 294.50, "ALAB": 92.40, "TSM": 191.80, "AMD": 160.10, "RDDT": 151.20,
-    "OKLO": 25.80, "SMR": 19.30, "HYPE32196-USD": 91.80, "COIN": 260.20, "CAVA": 124.50,
-    "CELH": 28.90, "MSFT": 459.80, "AAPL": 246.20, "AMZN": 222.40, "ETH-USD": 3290.00,
-    "META": 704.50, "GOOGL": 190.80, "BRK-B": 489.50, "COST": 1008.00, "JPM": 261.00
+    "OKLO": 25.80, "SMR": 19.30, "HYPE32196-USD": 93.80, "HYPE-USD": 93.80, "HYPE": 93.80,
+    "COIN": 260.20, "CAVA": 124.50, "CELH": 28.90, "MSFT": 459.80, "AAPL": 246.20,
+    "AMZN": 222.40, "ETH-USD": 2710.00, "META": 704.50, "GOOGL": 190.80, "BRK-B": 489.50,
+    "COST": 1008.00, "JPM": 261.00
 }
 
 TRADING_LAB_PRICES = {
-    "NVDA": 148.20, "PLTR": 128.50, "APP": 332.40, "BTC-USD": 88400.00, "SOL-USD": 152.80,
+    "NVDA": 148.20, "PLTR": 128.50, "APP": 332.40, "BTC-USD": 85870.00, "SOL-USD": 116.80,
     "CEG": 298.50, "ALAB": 94.20, "TSM": 194.50, "AMD": 162.30, "RDDT": 154.80,
-    "OKLO": 26.80, "SMR": 19.90, "HYPE32196-USD": 92.80, "COIN": 265.40, "CAVA": 126.80,
-    "CELH": 29.50, "MSFT": 462.50, "AAPL": 248.60, "AMZN": 224.80, "ETH-USD": 3320.00,
-    "META": 710.20, "GOOGL": 192.40, "BRK-B": 492.10, "COST": 1015.00, "JPM": 264.20
+    "OKLO": 26.80, "SMR": 19.90, "HYPE32196-USD": 95.20, "HYPE-USD": 95.20, "HYPE": 95.20,
+    "COIN": 265.40, "CAVA": 126.80, "CELH": 29.50, "MSFT": 462.50, "AAPL": 248.60,
+    "AMZN": 224.80, "ETH-USD": 2741.00, "META": 710.20, "GOOGL": 192.40, "BRK-B": 492.10,
+    "COST": 1015.00, "JPM": 264.20
 }
+
+_COINBASE_CACHE = {}
+_COINBASE_CACHE_TIME = 0
+
+def fetch_coinbase_crypto_prices(symbols):
+    """Fetches real-time crypto prices from Coinbase Spot API with caching."""
+    global _COINBASE_CACHE, _COINBASE_CACHE_TIME
+    import time
+    now = time.time()
+    if now - _COINBASE_CACHE_TIME < 30 and _COINBASE_CACHE:
+        return _COINBASE_CACHE
+
+    import urllib.request, json, ssl
+    prices = dict(_COINBASE_CACHE)
+    try:
+        try:
+            import certifi
+            ctx = ssl.create_default_context(cafile=certifi.where())
+        except Exception:
+            ctx = ssl._create_unverified_context()
+
+        for s in symbols:
+            if "-USD" in s or "HYPE" in s or s in ["BTC", "ETH", "SOL"]:
+                clean = s.replace("-USD", "").upper()
+                for d in "0123456789":
+                    clean = clean.replace(d, "")
+                if "HYPE" in clean:
+                    clean = "HYPE"
+                try:
+                    url = f"https://api.coinbase.com/v2/prices/{clean}-USD/spot"
+                    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Accept": "application/json"})
+                    with urllib.request.urlopen(req, context=ctx, timeout=3) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
+                        amt = float(data.get("data", {}).get("amount", 0))
+                        if amt > 0:
+                            prices[s] = round(amt, 2)
+                            if "HYPE" in s:
+                                prices["HYPE32196-USD"] = round(amt, 2)
+                                prices["HYPE-USD"] = round(amt, 2)
+                                prices["HYPE"] = round(amt, 2)
+                except Exception:
+                    pass
+        if prices:
+            _COINBASE_CACHE = prices
+            _COINBASE_CACHE_TIME = now
+    except Exception:
+        pass
+    return prices
 
 
 def get_market_session_info():
@@ -528,13 +578,15 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
     total_current_market_value = 0.0
 
     initial_candidates = strat["candidates"][:5]
+    all_syms = [c["symbol"] for c in initial_candidates] + [c["symbol"] for c in queued_candidates_list]
+    live_crypto = fetch_coinbase_crypto_prices(all_syms)
 
     for cand in initial_candidates:
         sym = cand["symbol"]
         is_crypto = "crypto" in cand.get("type", "").lower() or "-USD" in sym or "HYPE" in sym
         is_market_open = True if is_crypto else market_info["is_us_market_open"]
 
-        current_p = TRADING_LAB_PRICES.get(sym, 100.0)
+        current_p = live_crypto.get(sym, TRADING_LAB_PRICES.get(sym, 100.0))
         entry_p = INCEPTION_BUY_PRICES.get(sym, cand.get("entry_price", current_p))
         shares = round(slot_budget / entry_p, 4)
         market_val = round(shares * current_p, 2)
@@ -596,7 +648,7 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
                 n_is_crypto = "crypto" in next_cand.get("type", "").lower() or "-USD" in nsym or "HYPE" in nsym
                 n_market_open = True if n_is_crypto else market_info["is_us_market_open"]
 
-                nentry_p = TRADING_LAB_PRICES.get(nsym, 100.0)
+                nentry_p = live_crypto.get(nsym, TRADING_LAB_PRICES.get(nsym, 100.0))
                 ncurrent_p = nentry_p
                 nshares = round(slot_budget / nentry_p, 4)
                 nmkt_val = round(nshares * ncurrent_p, 2)
@@ -670,7 +722,7 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
                 n_is_crypto = "crypto" in next_cand.get("type", "").lower() or "-USD" in nsym or "HYPE" in nsym
                 n_market_open = True if n_is_crypto else market_info["is_us_market_open"]
 
-                nentry_p = TRADING_LAB_PRICES.get(nsym, 100.0)
+                nentry_p = live_crypto.get(nsym, TRADING_LAB_PRICES.get(nsym, 100.0))
                 ncurrent_p = nentry_p
                 nshares = round(slot_budget / nentry_p, 4)
                 nmkt_val = round(nshares * ncurrent_p, 2)
@@ -747,7 +799,7 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
 
     remaining_queued = []
     for idx, c in enumerate(queued_candidates_list[queue_idx:]):
-        cur_p = TRADING_LAB_PRICES.get(c["symbol"], 100.0)
+        cur_p = live_crypto.get(c["symbol"], TRADING_LAB_PRICES.get(c["symbol"], 100.0))
         c_is_crypto = "crypto" in c.get("type", "").lower() or "-USD" in c["symbol"] or "HYPE" in c["symbol"]
         remaining_queued.append({
             **c,
