@@ -2070,6 +2070,18 @@
       const activeBadge = document.getElementById('tl-active-count-badge');
       if (activeBadge) activeBadge.textContent = `${(details.active_positions || []).length} Active Positions`;
 
+      // Render Market Session Info in header
+      const mSession = data.market_session;
+      const statusText = document.querySelector('#tl-live-status span:last-child');
+      if (mSession && statusText) {
+        const usDot = mSession.is_us_market_open ? '🟢' : '🔴';
+        const usText = mSession.is_us_market_open 
+          ? `US Stocks: LIVE (${mSession.us_time_et})` 
+          : `US Stocks: CLOSED (${mSession.next_event})`;
+        const cryptoText = `Crypto: 24/7 LIVE`;
+        statusText.innerHTML = `${usDot} ${usText} &nbsp;|&nbsp; 🟢 ${cryptoText}`;
+      }
+
       if (activeBody) {
         activeBody.innerHTML = '';
         (details.active_positions || []).forEach(pos => {
@@ -2081,6 +2093,27 @@
           const gainSign = isGain ? '+' : '';
           const gainClass = isGain ? 'positive' : 'negative';
           const typeClass = (pos.type || '').toLowerCase().includes('crypto') ? 'crypto' : 'stock';
+          const isMarketOpen = pos.is_market_open !== false;
+
+          const livePriceHtml = isMarketOpen
+            ? `<div class="live-price-cell">
+                <span class="live-pulse-dot" style="width:6px; height:6px;"></span>
+                <span>$${Number(pos.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+              </div>`
+            : `<div class="live-price-cell" style="color:var(--text-secondary);">
+                <span style="font-size:10px; font-weight:700; background:rgba(128,134,139,0.15); color:var(--text-secondary); padding:2px 5px; border-radius:4px; margin-right:4px;">LAST CLOSE</span>
+                <span>$${Number(pos.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+              </div>`;
+
+          const pnlHtml = isMarketOpen
+            ? `<div class="pnl-pill ${gainClass}">
+                <span>${gainSign}${pos.unrealized_pnl_pct}%</span>
+                <span class="pnl-sub">${gainSign}$${Number(pos.unrealized_pnl_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+              </div>`
+            : `<div class="pnl-pill" style="background:rgba(128,134,139,0.1); color:var(--text-secondary); border:1px solid rgba(128,134,139,0.2);">
+                <span style="font-size:11px;">Market Closed</span>
+                <span class="pnl-sub" style="font-size:10px;">Execution Paused</span>
+              </div>`;
 
           tr.innerHTML = `
             <td>
@@ -2101,17 +2134,11 @@
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">${pos.entry_date}</div>
             </td>
             <td>
-              <div class="live-price-cell">
-                <span class="live-pulse-dot" style="width:6px; height:6px;"></span>
-                <span>$${Number(pos.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-              </div>
+              ${livePriceHtml}
               <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Shares: ${pos.shares}</div>
             </td>
             <td>
-              <div class="pnl-pill ${gainClass}">
-                <span>${gainSign}${pos.unrealized_pnl_pct}%</span>
-                <span class="pnl-sub">${gainSign}$${Number(pos.unrealized_pnl_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-              </div>
+              ${pnlHtml}
             </td>
             <td>
               <div style="font-family:'JetBrains Mono',monospace; font-weight:700; color:#1e8e3e;">$${Number(pos.tp_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>

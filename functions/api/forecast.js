@@ -199,8 +199,22 @@ function parseBinanceKlines(klines, symbol) {
 }
 
 async function fetchYahooChart(ticker, range = "1y") {
-  // 0. If HYPE, query Hyperliquid L1 info API directly for instantaneous DEX price
+  // 0. If HYPE, query CoinGecko & Hyperliquid L1 info API directly for instantaneous DEX price
   if (ticker.includes("HYPE")) {
+    try {
+      const cgRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd", {
+        headers: { "Accept": "application/json" }
+      });
+      if (cgRes.ok) {
+        const cgData = await cgRes.json();
+        const p = parseFloat(cgData?.hyperliquid?.usd);
+        if (p && p > 50) {
+          return generateSyntheticPricesWithBase("HYPE32196-USD", p, "Hyperliquid USD", "CRYPTOCURRENCY");
+        }
+      }
+    } catch (cgErr) {
+      // Fall through
+    }
     try {
       const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
         method: "POST",
@@ -210,7 +224,7 @@ async function fetchYahooChart(ticker, range = "1y") {
       if (hlRes.ok) {
         const mids = await hlRes.json();
         const hypePrice = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
-        if (hypePrice && hypePrice > 0) {
+        if (hypePrice && hypePrice > 50) {
           return generateSyntheticPricesWithBase("HYPE32196-USD", hypePrice, "Hyperliquid USD", "CRYPTOCURRENCY");
         }
       }
@@ -371,9 +385,9 @@ function generateSyntheticPricesWithBase(symbol, base, name, type) {
 }
 
 const FALLBACK_PRICES = {
-  "HYPE32196-USD": { price: 28.50, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
-  "HYPE-USD": { price: 28.50, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
-  "HYPE": { price: 28.50, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
+  "HYPE32196-USD": { price: 92.80, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
+  "HYPE-USD": { price: 92.80, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
+  "HYPE": { price: 92.80, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
   "LIT6833-USD": { price: 0.74, name: "Litentry USD", type: "CRYPTOCURRENCY" },
   "LIT-USD": { price: 0.74, name: "Litentry USD", type: "CRYPTOCURRENCY" },
   "LIT": { price: 0.74, name: "Litentry USD", type: "CRYPTOCURRENCY" },

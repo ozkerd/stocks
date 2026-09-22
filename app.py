@@ -452,7 +452,7 @@ TRADING_LAB_STRATEGIES = {
 INCEPTION_BUY_PRICES = {
     "NVDA": 147.20, "PLTR": 126.50, "APP": 328.00, "BTC-USD": 87400.00, "SOL-USD": 148.20,
     "CEG": 294.50, "ALAB": 92.40, "TSM": 191.80, "AMD": 160.10, "RDDT": 151.20,
-    "OKLO": 25.80, "SMR": 19.30, "HYPE32196-USD": 27.20, "COIN": 260.20, "CAVA": 124.50,
+    "OKLO": 25.80, "SMR": 19.30, "HYPE32196-USD": 91.80, "COIN": 260.20, "CAVA": 124.50,
     "CELH": 28.90, "MSFT": 459.80, "AAPL": 246.20, "AMZN": 222.40, "ETH-USD": 3290.00,
     "META": 704.50, "GOOGL": 190.80, "BRK-B": 489.50, "COST": 1008.00, "JPM": 261.00
 }
@@ -460,13 +460,58 @@ INCEPTION_BUY_PRICES = {
 TRADING_LAB_PRICES = {
     "NVDA": 148.20, "PLTR": 128.50, "APP": 332.40, "BTC-USD": 88400.00, "SOL-USD": 152.80,
     "CEG": 298.50, "ALAB": 94.20, "TSM": 194.50, "AMD": 162.30, "RDDT": 154.80,
-    "OKLO": 26.80, "SMR": 19.90, "HYPE32196-USD": 28.50, "COIN": 265.40, "CAVA": 126.80,
+    "OKLO": 26.80, "SMR": 19.90, "HYPE32196-USD": 92.80, "COIN": 265.40, "CAVA": 126.80,
     "CELH": 29.50, "MSFT": 462.50, "AAPL": 248.60, "AMZN": 224.80, "ETH-USD": 3320.00,
     "META": 710.20, "GOOGL": 192.40, "BRK-B": 492.10, "COST": 1015.00, "JPM": 264.20
 }
 
 
-def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: float = 5.0):
+def get_market_session_info():
+    """Returns US market session and 24/7 crypto status in New York time."""
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    # Eastern Time is UTC-4 in daylight saving
+    et_tz = datetime.timezone(datetime.timedelta(hours=-4))
+    now_et = now_utc.astimezone(et_tz)
+    weekday = now_et.weekday()  # 0=Mon, 6=Sun
+    cur_min = now_et.hour * 60 + now_et.minute
+
+    is_weekend = weekday >= 5
+    is_regular = not is_weekend and (570 <= cur_min < 960)  # 09:30 - 16:00 ET
+    is_pre = not is_weekend and (240 <= cur_min < 570)      # 04:00 - 09:30 ET
+    is_after = not is_weekend and (960 <= cur_min < 1200)   # 16:00 - 20:00 ET
+
+    if is_regular:
+        session = "REGULAR_OPEN"
+        session_label = "US Regular Market Open (Live Trading)"
+        next_open = "Closes 04:00 PM ET"
+    elif is_pre:
+        session = "PRE_MARKET"
+        session_label = "Pre-Market Session (04:00 - 09:30 ET)"
+        next_open = "Regular Session Opens 09:30 AM ET"
+    elif is_after:
+        session = "AFTER_HOURS"
+        session_label = "After-Hours Session (16:00 - 20:00 ET)"
+        next_open = "Next Regular Session Opens 09:30 AM ET"
+    else:
+        session = "WEEKEND_CLOSED" if is_weekend else "CLOSED"
+        session_label = "US Stock Market Closed"
+        next_open = "Regular Session Opens Monday 09:30 AM ET" if is_weekend else "Regular Session Opens 09:30 AM ET"
+
+    return {
+        "is_us_market_open": is_regular,
+        "us_session": session,
+        "us_session_label": session_label,
+        "us_time_et": now_et.strftime("%H:%M ET"),
+        "next_event": next_open,
+        "crypto_market_open": True,
+        "crypto_session_label": "24/7 Live Continuous"
+    }
+
+
+def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: float = 5.0, market_info: dict = None):
+    if not market_info:
+        market_info = get_market_session_info()
+
     strat = TRADING_LAB_STRATEGIES.get(strategy_key, TRADING_LAB_STRATEGIES["timesfm_oracle"])
     initial_budget = 10000.00
     slot_budget = 2000.00
@@ -486,12 +531,26 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
 
     for cand in initial_candidates:
         sym = cand["symbol"]
+        is_crypto = "crypto" in cand.get("type", "").lower() or "-USD" in sym or "HYPE" in sym
+        is_market_open = True if is_crypto else market_info["is_us_market_open"]
+
         current_p = TRADING_LAB_PRICES.get(sym, 100.0)
         entry_p = INCEPTION_BUY_PRICES.get(sym, cand.get("entry_price", current_p))
         shares = round(slot_budget / entry_p, 4)
         market_val = round(shares * current_p, 2)
-        unrealized_usd = round((current_p - entry_p) * shares, 2)
-        ret_pct = round(((current_p - entry_p) / entry_p) * 100.0, 2)
+
+        if is_market_open:
+            unrealized_usd = round((current_p - entry_p) * shares, 2)
+            ret_pct = round(((current_p - entry_p) / entry_p) * 100.0, 2)
+            status = "ACTIVE_MONITORING"
+            status_label = "24/7 Live Continuous" if is_crypto else "Live Intraday Trading"
+            status_class = "status-monitoring"
+        else:
+            status = "MARKET_CLOSED"
+            status_label = f"Market Closed (Last Close: ${current_p:.2f})"
+            status_class = "status-closed"
+            unrealized_usd = 0.00
+            ret_pct = 0.00
 
         tp_p = round(entry_p * (1.0 + tp_pct / 100.0), 2)
         sl_p = round(entry_p * (1.0 - sl_pct / 100.0), 2)
@@ -499,11 +558,10 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
         dist_tp_usd = round(tp_p - current_p, 2)
         dist_tp_pct = round(((tp_p - current_p) / current_p) * 100.0, 2)
         dist_sl_usd = round(current_p - sl_p, 2)
+        progress_tp = min(100, max(0, int(round((ret_pct / tp_pct) * 100.0)))) if (tp_pct > 0 and is_market_open) else 0
 
-        progress_tp = min(100, max(0, int(round((ret_pct / tp_pct) * 100.0)))) if tp_pct > 0 else 0
-
-        # Check TP hit (+10%)
-        if ret_pct >= tp_pct:
+        # Check TP hit (+10%) only when market is open
+        if is_market_open and ret_pct >= tp_pct:
             gain_usd = round(slot_budget * (tp_pct / 100.0), 2)
             returned_cap = round(slot_budget + gain_usd, 2)
             realized_pnl_usd += gain_usd
@@ -535,6 +593,9 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
 
             if next_cand:
                 nsym = next_cand["symbol"]
+                n_is_crypto = "crypto" in next_cand.get("type", "").lower() or "-USD" in nsym or "HYPE" in nsym
+                n_market_open = True if n_is_crypto else market_info["is_us_market_open"]
+
                 nentry_p = TRADING_LAB_PRICES.get(nsym, 100.0)
                 ncurrent_p = nentry_p
                 nshares = round(slot_budget / nentry_p, 4)
@@ -549,7 +610,7 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
                     "role": next_cand["role"],
                     "conviction": next_cand["conviction"],
                     "expected_return": next_cand["expected_return"],
-                    "entry_date": "Live Rotation",
+                    "entry_date": "Live Rotation" if n_market_open else "Pending Market Open",
                     "entry_price": nentry_p,
                     "current_price": ncurrent_p,
                     "shares": nshares,
@@ -565,13 +626,16 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
                     "sl_pct": -sl_pct,
                     "distance_to_sl_usd": round(ncurrent_p - (nentry_p * (1.0 - sl_pct / 100.0)), 2),
                     "progress_to_tp": 0,
-                    "status": "ACTIVE_MONITORING",
-                    "status_label": "Active Tracking",
-                    "status_class": "status-monitoring"
+                    "is_crypto": n_is_crypto,
+                    "is_market_open": n_market_open,
+                    "market_session": "OPEN_24_7" if n_is_crypto else market_info["us_session"],
+                    "status": "ACTIVE_MONITORING" if n_market_open else "PENDING_MARKET_OPEN",
+                    "status_label": ("24/7 Live Continuous" if n_is_crypto else "Live Intraday Trading") if n_market_open else "Queued for Market Open (09:30 ET)",
+                    "status_class": "status-monitoring" if n_market_open else "status-pending"
                 })
                 total_current_market_value += nmkt_val
-        elif ret_pct <= -sl_pct:
-            # Check SL hit (-5%)
+        elif is_market_open and ret_pct <= -sl_pct:
+            # Check SL hit (-5%) only when market is open
             loss_usd = round(slot_budget * (sl_pct / 100.0), 2)
             returned_cap = round(slot_budget - loss_usd, 2)
             realized_pnl_usd -= loss_usd
@@ -603,6 +667,9 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
 
             if next_cand:
                 nsym = next_cand["symbol"]
+                n_is_crypto = "crypto" in next_cand.get("type", "").lower() or "-USD" in nsym or "HYPE" in nsym
+                n_market_open = True if n_is_crypto else market_info["is_us_market_open"]
+
                 nentry_p = TRADING_LAB_PRICES.get(nsym, 100.0)
                 ncurrent_p = nentry_p
                 nshares = round(slot_budget / nentry_p, 4)
@@ -617,7 +684,7 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
                     "role": next_cand["role"],
                     "conviction": next_cand["conviction"],
                     "expected_return": next_cand["expected_return"],
-                    "entry_date": "Live Rotation",
+                    "entry_date": "Live Rotation" if n_market_open else "Pending Market Open",
                     "entry_price": nentry_p,
                     "current_price": ncurrent_p,
                     "shares": nshares,
@@ -633,16 +700,15 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
                     "sl_pct": -sl_pct,
                     "distance_to_sl_usd": round(ncurrent_p - (nentry_p * (1.0 - sl_pct / 100.0)), 2),
                     "progress_to_tp": 0,
-                    "status": "ACTIVE_MONITORING",
-                    "status_label": "Active Tracking",
-                    "status_class": "status-monitoring"
+                    "is_crypto": n_is_crypto,
+                    "is_market_open": n_market_open,
+                    "market_session": "OPEN_24_7" if n_is_crypto else market_info["us_session"],
+                    "status": "ACTIVE_MONITORING" if n_market_open else "PENDING_MARKET_OPEN",
+                    "status_label": ("24/7 Live Continuous" if n_is_crypto else "Live Intraday Trading") if n_market_open else "Queued for Market Open (09:30 ET)",
+                    "status_class": "status-monitoring" if n_market_open else "status-pending"
                 })
                 total_current_market_value += nmkt_val
         else:
-            status = "ACTIVE_MONITORING"
-            status_label = "Active Tracking"
-            status_class = "status-monitoring"
-
             total_unrealized_pnl_usd += unrealized_usd
             total_current_market_value += market_val
 
@@ -671,6 +737,9 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
                 "sl_pct": -sl_pct,
                 "distance_to_sl_usd": dist_sl_usd,
                 "progress_to_tp": progress_tp,
+                "is_crypto": is_crypto,
+                "is_market_open": is_market_open,
+                "market_session": "OPEN_24_7" if is_crypto else market_info["us_session"],
                 "status": status,
                 "status_label": status_label,
                 "status_class": status_class
@@ -679,10 +748,14 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
     remaining_queued = []
     for idx, c in enumerate(queued_candidates_list[queue_idx:]):
         cur_p = TRADING_LAB_PRICES.get(c["symbol"], 100.0)
+        c_is_crypto = "crypto" in c.get("type", "").lower() or "-USD" in c["symbol"] or "HYPE" in c["symbol"]
         remaining_queued.append({
             **c,
             "current_price": cur_p,
             "queue_order": idx + 1,
+            "is_crypto": c_is_crypto,
+            "order_status": "READY_24_7" if c_is_crypto else ("READY_INTRADAY" if market_info["is_us_market_open"] else "QUEUED_FOR_OPEN"),
+            "order_status_label": "Ready for 24/7 Execution" if c_is_crypto else ("Ready for Live Execution" if market_info["is_us_market_open"] else "Queued for Market Open (09:30 AM ET)"),
             "reason": f"Queue Candidate #{idx + 1} — Automatically purchased with freed capital ($2,000) when an active holding hits +{tp_pct:.1f}% profit target or stop-loss."
         })
 
@@ -712,6 +785,7 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
         "closed_trades_count": len(closed_trades),
         "tp_pct": tp_pct,
         "sl_pct": sl_pct,
+        "market_session": market_info,
         "active_positions": active_positions,
         "queued_candidates": remaining_queued,
         "closed_trades": closed_trades
@@ -726,9 +800,11 @@ async def api_trading_lab(
     sl_pct: float = Query(5.0, description="Stop loss target %")
 ):
     """Live Strategy Portfolios & Paper Trading Engine with multi-portfolio tracking."""
+    market_info = get_market_session_info()
+
     strategies_overview = []
     for s_key in TRADING_LAB_STRATEGIES.keys():
-        eval_res = evaluate_trading_strategy(s_key, tp_pct, sl_pct)
+        eval_res = evaluate_trading_strategy(s_key, tp_pct, sl_pct, market_info)
         strategies_overview.append({
             "id": eval_res["strategy_id"],
             "name": eval_res["strategy_name"],
@@ -746,13 +822,14 @@ async def api_trading_lab(
             "closed_trades_count": eval_res["closed_trades_count"]
         })
 
-    active_data = evaluate_trading_strategy(strategy, tp_pct, sl_pct)
+    active_data = evaluate_trading_strategy(strategy, tp_pct, sl_pct, market_info)
 
     return JSONResponse(content={
         "status": "success",
         "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "live_feed_status": "CONNECTED",
         "selected_strategy": strategy,
+        "market_session": market_info,
         "strategies_overview": strategies_overview,
         "portfolio_details": active_data
     })

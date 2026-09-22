@@ -54,13 +54,13 @@ const BASE_SETUPS = [
     name: "Hyperliquid USD",
     type: "Crypto",
     exchange: "Crypto",
-    current_price: 28.50,
+    current_price: 92.80,
     daily: {
       pattern: "DEX Volume Surge & Liquidity Expansion",
-      entry_low: 27.20, entry_high: 28.40,
-      tp1: 31.00, tp1_pct: "+8.8%",
-      tp2: 33.50, tp2_pct: "+17.5%",
-      stop_loss: 26.50, stop_pct: "-7.0%",
+      entry_low: 90.00, entry_high: 92.50,
+      tp1: 99.50, tp1_pct: "+7.2%",
+      tp2: 108.00, tp2_pct: "+16.4%",
+      stop_loss: 86.00, stop_pct: "-7.3%",
       rr_ratio: "2.3 : 1",
       conviction: 95,
       action: "BUY BREAKOUT",
@@ -68,10 +68,10 @@ const BASE_SETUPS = [
     },
     weekly: {
       pattern: "Fibonacci 61.8% Golden Pocket Launch",
-      entry_low: 26.00, entry_high: 27.80,
-      tp1: 35.00, tp1_pct: "+22.8%",
-      tp2: 42.00, tp2_pct: "+47.4%",
-      stop_loss: 24.00, stop_pct: "-15.8%",
+      entry_low: 88.00, entry_high: 92.00,
+      tp1: 115.00, tp1_pct: "+23.9%",
+      tp2: 135.00, tp2_pct: "+45.5%",
+      stop_loss: 80.00, stop_pct: "-13.8%",
       rr_ratio: "2.8 : 1",
       conviction: 96,
       action: "SWING ACCUMULATE",
@@ -79,10 +79,10 @@ const BASE_SETUPS = [
     },
     monthly: {
       pattern: "Layer-1 Ecosystem Valuation Discovery",
-      entry_low: 24.50, entry_high: 27.50,
-      tp1: 48.00, tp1_pct: "+68.4%",
-      tp2: 65.00, tp2_pct: "+128.1%",
-      stop_loss: 21.00, stop_pct: "-26.3%",
+      entry_low: 82.00, entry_high: 90.00,
+      tp1: 150.00, tp1_pct: "+61.6%",
+      tp2: 180.00, tp2_pct: "+93.9%",
+      stop_loss: 72.00, stop_pct: "-22.4%",
       rr_ratio: "3.2 : 1",
       conviction: 93,
       action: "POSITION BUY",
@@ -659,16 +659,28 @@ export async function onRequest(context) {
 
   let hypePrice = null;
   try {
-    const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({ type: "allMids" })
-    });
-    if (hlRes.ok) {
-      const mids = await hlRes.json();
-      hypePrice = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
+    const cgRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd");
+    if (cgRes.ok) {
+      const cgData = await cgRes.json();
+      const p = parseFloat(cgData?.hyperliquid?.usd);
+      if (p && p > 50) hypePrice = p;
     }
   } catch (e) {}
+
+  if (!hypePrice) {
+    try {
+      const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ type: "allMids" })
+      });
+      if (hlRes.ok) {
+        const mids = await hlRes.json();
+        const p = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
+        if (p && p > 50) hypePrice = p;
+      }
+    } catch (e) {}
+  }
 
   const formatted = BASE_SETUPS.map(item => {
     let curP = item.current_price;

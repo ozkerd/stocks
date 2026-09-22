@@ -31,9 +31,9 @@ const INCEPTION_BUY_PRICES = {
   "RDDT": 151.20,
   "OKLO": 25.80,
   "SMR": 19.30,
-  "HYPE32196-USD": 27.20,
-  "HYPE-USD": 27.20,
-  "HYPE": 27.20,
+  "HYPE32196-USD": 91.80,
+  "HYPE-USD": 91.80,
+  "HYPE": 91.80,
   "COIN": 260.20,
   "CAVA": 124.50,
   "CELH": 28.90,
@@ -62,7 +62,7 @@ const FALLBACK_PRICES = {
   "RDDT": 154.80,
   "OKLO": 26.80,
   "SMR": 19.90,
-  "HYPE32196-USD": 28.50,
+  "HYPE32196-USD": 92.80,
   "COIN": 265.40,
   "CAVA": 126.80,
   "CELH": 29.50,
@@ -318,10 +318,23 @@ async function fetchLiveQuotes(symbols, forceRefresh = false) {
     // Graceful fallback
   }
 
-  // 3. Fetch native Hyperliquid L1 mid price for HYPE
+  // 3. Fetch CoinGecko & native Hyperliquid L1 mid price for HYPE
   try {
     const hasHype = symbols.some(s => s.includes("HYPE"));
     if (hasHype) {
+      try {
+        const cgRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd");
+        if (cgRes.ok) {
+          const cgData = await cgRes.json();
+          const p = parseFloat(cgData?.hyperliquid?.usd);
+          if (p && p > 50) {
+            prices["HYPE32196-USD"] = Number(p.toFixed(2));
+            prices["HYPE-USD"] = Number(p.toFixed(2));
+            prices["HYPE"] = Number(p.toFixed(2));
+          }
+        }
+      } catch (e) {}
+
       const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -330,7 +343,7 @@ async function fetchLiveQuotes(symbols, forceRefresh = false) {
       if (hlRes.ok) {
         const mids = await hlRes.json();
         const hypePrice = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
-        if (hypePrice && hypePrice > 0) {
+        if (hypePrice && hypePrice > 50) {
           prices["HYPE32196-USD"] = Number(hypePrice.toFixed(2));
           prices["HYPE-USD"] = Number(hypePrice.toFixed(2));
           prices["HYPE"] = Number(hypePrice.toFixed(2));
@@ -347,9 +360,78 @@ async function fetchLiveQuotes(symbols, forceRefresh = false) {
 }
 
 /**
- * Process a strategy portfolio with baseline inception prices and real-time live quotes
+ * Determine live US stock market session vs 24/7 continuous crypto
  */
-function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {}) {
+function getMarketSessionInfo() {
+  const now = new Date();
+  const nyFormatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    hour12: false,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    weekday: "short"
+  });
+  const parts = nyFormatter.formatToParts(now);
+  const partMap = {};
+  parts.forEach(p => partMap[p.type] = p.value);
+
+  const weekday = partMap.weekday; // Mon, Tue, Wed, Thu, Fri, Sat, Sun
+  const hour = parseInt(partMap.hour, 10);
+  const minute = parseInt(partMap.minute, 10);
+  const currentMinutes = hour * 60 + minute;
+
+  const isWeekend = weekday === "Sat" || weekday === "Sun";
+  // Regular market: 09:30 to 16:00 ET (570 to 960 min)
+  const isRegularOpen = !isWeekend && currentMinutes >= 570 && currentMinutes < 960;
+  // Pre-market: 04:00 to 09:30 ET (240 to 570 min)
+  const isPreMarket = !isWeekend && currentMinutes >= 240 && currentMinutes < 570;
+  // After-hours: 16:00 to 20:00 ET (960 to 1200 min)
+  const isAfterHours = !isWeekend && currentMinutes >= 960 && currentMinutes < 1200;
+
+  let session = "CLOSED";
+  let sessionLabel = "US Stock Market Closed";
+  let nextOpenText = "Regular Open: 09:30 AM ET";
+
+  if (isRegularOpen) {
+    session = "REGULAR_OPEN";
+    sessionLabel = "US Regular Market Open (Live Trading)";
+    nextOpenText = "Closes 04:00 PM ET";
+  } else if (isPreMarket) {
+    session = "PRE_MARKET";
+    sessionLabel = "Pre-Market Session (04:00 - 09:30 ET)";
+    nextOpenText = "Regular Session Opens at 09:30 AM ET";
+  } else if (isAfterHours) {
+    session = "AFTER_HOURS";
+    sessionLabel = "After-Hours Session (16:00 - 20:00 ET)";
+    nextOpenText = "Next Regular Session Opens 09:30 AM ET";
+  } else if (isWeekend) {
+    session = "WEEKEND_CLOSED";
+    sessionLabel = "Weekend Closed";
+    nextOpenText = "Regular Session Opens Monday 09:30 AM ET";
+  }
+
+  const nyTimeFormatted = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')} ET`;
+
+  return {
+    is_us_market_open: isRegularOpen,
+    us_session: session,
+    us_session_label: sessionLabel,
+    us_time_et: nyTimeFormatted,
+    next_event: nextOpenText,
+    crypto_market_open: true,
+    crypto_session_label: "24/7 Live Continuous"
+  };
+}
+
+/**
+ * Process a strategy portfolio with baseline inception prices, real-time live quotes, and market hours enforcement
+ */
+function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {}, marketInfo = null) {
+  if (!marketInfo) marketInfo = getMarketSessionInfo();
+
   const def = STRATEGY_DEFINITIONS[strategyKey] || STRATEGY_DEFINITIONS.timesfm_oracle;
   const initialBudget = 10000.00;
   const slotBudget = 2000.00; // $2,000 per position (5 positions)
@@ -369,12 +451,33 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
 
   initialCandidates.forEach(cand => {
     const sym = cand.symbol;
+    const isCrypto = (cand.type || "").toLowerCase().includes("crypto") || sym.includes("-USD") || sym.includes("HYPE");
+    const isMarketOpen = isCrypto ? true : marketInfo.is_us_market_open;
+
     const currentPrice = liveQuotes[sym] || FALLBACK_PRICES[sym] || 100.0;
     const entryPrice = INCEPTION_BUY_PRICES[sym] || cand.entry_price || FALLBACK_PRICES[sym] || 100.0;
     const shares = Number((slotBudget / entryPrice).toFixed(4));
     const marketValue = Number((shares * currentPrice).toFixed(2));
-    const unrealizedUsd = Number(((currentPrice - entryPrice) * shares).toFixed(2));
-    const returnPct = Number((((currentPrice - entryPrice) / entryPrice) * 100).toFixed(2));
+
+    // When the stock market is closed:
+    // Stocks hold their official last close price. Inactive outside market hours.
+    // Intraday gain/loss and TP/SL execution only active when market is open or 24/7 for crypto.
+    let unrealizedUsd = 0.00;
+    let returnPct = 0.00;
+    let status = "ACTIVE_MONITORING";
+    let statusLabel = isCrypto ? "24/7 Live Continuous" : "Live Intraday Trading";
+    let statusClass = "status-monitoring";
+
+    if (isMarketOpen) {
+      unrealizedUsd = Number(((currentPrice - entryPrice) * shares).toFixed(2));
+      returnPct = Number((((currentPrice - entryPrice) / entryPrice) * 100).toFixed(2));
+    } else {
+      status = "MARKET_CLOSED";
+      statusLabel = `Market Closed (Last Close: $${currentPrice.toFixed(2)})`;
+      statusClass = "status-closed";
+      unrealizedUsd = 0.00;
+      returnPct = 0.00;
+    }
 
     const tpPrice = Number((entryPrice * (1 + tpPct / 100)).toFixed(2));
     const slPrice = Number((entryPrice * (1 - slPct / 100)).toFixed(2));
@@ -383,10 +486,11 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
     const distanceToTpPct = Number((((tpPrice - currentPrice) / currentPrice) * 100).toFixed(2));
     const distanceToSlUsd = Number((currentPrice - slPrice).toFixed(2));
 
-    const progressToTp = Math.min(100, Math.max(0, Number(((returnPct / tpPct) * 100).toFixed(1))));
+    const progressToTp = isMarketOpen ? Math.min(100, Math.max(0, Number(((returnPct / tpPct) * 100).toFixed(1)))) : 0;
 
-    // 1. Take-Profit Target Hit (+10.0%)
-    if (returnPct >= tpPct) {
+    // Execution check: Only execute trades if market is open (or 24/7 crypto)
+    if (isMarketOpen && returnPct >= tpPct) {
+      // 1. Take-Profit Target Hit (+10.0%)
       const realizedGain = Number((slotBudget * (tpPct / 100)).toFixed(2));
       const returnedCapital = Number((slotBudget + realizedGain).toFixed(2));
       realizedPnlUsd += realizedGain;
@@ -419,6 +523,9 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
       // Buy next queued candidate with freed capital
       if (nextCand) {
         const nextSym = nextCand.symbol;
+        const nextIsCrypto = (nextCand.type || "").toLowerCase().includes("crypto") || nextSym.includes("-USD") || nextSym.includes("HYPE");
+        const nextMarketOpen = nextIsCrypto ? true : marketInfo.is_us_market_open;
+
         const nextEntryPrice = liveQuotes[nextSym] || FALLBACK_PRICES[nextSym] || 100.0;
         const nextCurrentPrice = nextEntryPrice;
         const nextShares = Number((slotBudget / nextEntryPrice).toFixed(4));
@@ -433,7 +540,7 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
           role: nextCand.role,
           conviction: nextCand.conviction,
           expected_return: nextCand.expected_return,
-          entry_date: "Live Rotation",
+          entry_date: nextMarketOpen ? "Live Rotation" : "Pending Market Open",
           entry_price: nextEntryPrice,
           current_price: nextCurrentPrice,
           shares: nextShares,
@@ -449,13 +556,16 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
           sl_pct: -slPct,
           distance_to_sl_usd: Number((nextCurrentPrice - (nextEntryPrice * (1 - slPct / 100))).toFixed(2)),
           progress_to_tp: 0,
-          status: "ACTIVE_MONITORING",
-          status_label: "Active Tracking",
-          status_class: "status-monitoring"
+          is_crypto: nextIsCrypto,
+          is_market_open: nextMarketOpen,
+          market_session: nextIsCrypto ? "OPEN_24_7" : (marketInfo.is_us_market_open ? "REGULAR_OPEN" : marketInfo.us_session),
+          status: nextMarketOpen ? "ACTIVE_MONITORING" : "PENDING_MARKET_OPEN",
+          status_label: nextMarketOpen ? (nextIsCrypto ? "24/7 Live Continuous" : "Live Intraday Trading") : "Queued for Market Open (09:30 ET)",
+          status_class: nextMarketOpen ? "status-monitoring" : "status-pending"
         });
         totalCurrentMarketValue += nextMktVal;
       }
-    } else if (returnPct <= -slPct) {
+    } else if (isMarketOpen && returnPct <= -slPct) {
       // 2. Stop-Loss Hit (-5.0%)
       const lossUsd = Number((slotBudget * (slPct / 100)).toFixed(2));
       const returnedCapital = Number((slotBudget - lossUsd).toFixed(2));
@@ -488,6 +598,9 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
 
       if (nextCand) {
         const nextSym = nextCand.symbol;
+        const nextIsCrypto = (nextCand.type || "").toLowerCase().includes("crypto") || nextSym.includes("-USD") || nextSym.includes("HYPE");
+        const nextMarketOpen = nextIsCrypto ? true : marketInfo.is_us_market_open;
+
         const nextEntryPrice = liveQuotes[nextSym] || FALLBACK_PRICES[nextSym] || 100.0;
         const nextCurrentPrice = nextEntryPrice;
         const nextShares = Number((slotBudget / nextEntryPrice).toFixed(4));
@@ -502,7 +615,7 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
           role: nextCand.role,
           conviction: nextCand.conviction,
           expected_return: nextCand.expected_return,
-          entry_date: "Live Rotation",
+          entry_date: nextMarketOpen ? "Live Rotation" : "Pending Market Open",
           entry_price: nextEntryPrice,
           current_price: nextCurrentPrice,
           shares: nextShares,
@@ -518,18 +631,17 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
           sl_pct: -slPct,
           distance_to_sl_usd: Number((nextCurrentPrice - (nextEntryPrice * (1 - slPct / 100))).toFixed(2)),
           progress_to_tp: 0,
-          status: "ACTIVE_MONITORING",
-          status_label: "Active Tracking",
-          status_class: "status-monitoring"
+          is_crypto: nextIsCrypto,
+          is_market_open: nextMarketOpen,
+          market_session: nextIsCrypto ? "OPEN_24_7" : (marketInfo.is_us_market_open ? "REGULAR_OPEN" : marketInfo.us_session),
+          status: nextMarketOpen ? "ACTIVE_MONITORING" : "PENDING_MARKET_OPEN",
+          status_label: nextMarketOpen ? (nextIsCrypto ? "24/7 Live Continuous" : "Live Intraday Trading") : "Queued for Market Open (09:30 ET)",
+          status_class: nextMarketOpen ? "status-monitoring" : "status-pending"
         });
         totalCurrentMarketValue += nextMktVal;
       }
     } else {
-      // 3. Normal Active Position Tracking
-      const status = "ACTIVE_MONITORING";
-      const statusLabel = "Active Tracking";
-      const statusClass = "status-monitoring";
-
+      // 3. Normal Active Position Tracking (respecting market open / closed status)
       totalUnrealizedPnlUsd += unrealizedUsd;
       totalCurrentMarketValue += marketValue;
 
@@ -558,6 +670,9 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
         sl_pct: -slPct,
         distance_to_sl_usd: distanceToSlUsd,
         progress_to_tp: progressToTp,
+        is_crypto: isCrypto,
+        is_market_open: isMarketOpen,
+        market_session: isCrypto ? "OPEN_24_7" : (marketInfo.is_us_market_open ? "REGULAR_OPEN" : marketInfo.us_session),
         status: status,
         status_label: statusLabel,
         status_class: statusClass
@@ -567,10 +682,14 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
 
   const remainingQueued = queuedCandidatesList.slice(queueIndex).map((c, idx) => {
     const curP = liveQuotes[c.symbol] || FALLBACK_PRICES[c.symbol] || 100.0;
+    const isCrypto = (c.type || "").toLowerCase().includes("crypto") || c.symbol.includes("-USD") || c.symbol.includes("HYPE");
     return {
       ...c,
       current_price: curP,
       queue_order: idx + 1,
+      is_crypto: isCrypto,
+      order_status: isCrypto ? "READY_24_7" : (marketInfo.is_us_market_open ? "READY_INTRADAY" : "QUEUED_FOR_OPEN"),
+      order_status_label: isCrypto ? "Ready for 24/7 Execution" : (marketInfo.is_us_market_open ? "Ready for Live Execution" : "Queued for Market Open (09:30 AM ET)"),
       reason: `Queue Candidate #${idx + 1} — Automatically purchased with freed capital ($${slotBudget.toLocaleString()}) when an active holding hits +${tpPct.toFixed(1)}% profit target or stop-loss.`
     };
   });
@@ -601,6 +720,7 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
     closed_trades_count: closedTrades.length,
     tp_pct: tpPct,
     sl_pct: slPct,
+    market_session: marketInfo,
     active_positions: activePositions,
     queued_candidates: remainingQueued,
     closed_trades: closedTrades
@@ -615,6 +735,8 @@ export async function onRequest(context) {
   const slPct = parseFloat(url.searchParams.get("sl_pct") || "5.0");
   const forceRefresh = url.searchParams.get("force") === "true" || url.searchParams.has("_t");
 
+  const marketInfo = getMarketSessionInfo();
+
   // Collect all symbols from all strategies to fetch live quotes
   const allSymbolsSet = new Set();
   Object.values(STRATEGY_DEFINITIONS).forEach(s => {
@@ -626,7 +748,7 @@ export async function onRequest(context) {
 
   // Compute metrics for all 4 strategies for side-by-side comparison
   const strategiesOverview = Object.keys(STRATEGY_DEFINITIONS).map(key => {
-    const st = evaluateStrategy(key, tpPct, slPct, liveQuotes);
+    const st = evaluateStrategy(key, tpPct, slPct, liveQuotes, marketInfo);
     return {
       id: st.strategy_id,
       name: st.strategy_name,
@@ -645,13 +767,14 @@ export async function onRequest(context) {
     };
   });
 
-  const activeStrategyData = evaluateStrategy(selectedStrategy, tpPct, slPct, liveQuotes);
+  const activeStrategyData = evaluateStrategy(selectedStrategy, tpPct, slPct, liveQuotes, marketInfo);
 
   const payload = {
     status: "success",
     timestamp: new Date().toISOString(),
     live_feed_status: "CONNECTED",
     selected_strategy: selectedStrategy,
+    market_session: marketInfo,
     strategies_overview: strategiesOverview,
     portfolio_details: activeStrategyData
   };

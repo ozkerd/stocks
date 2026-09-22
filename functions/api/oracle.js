@@ -55,11 +55,11 @@ const FALLBACK_PRICES = {
   "SMCI": { price: 40.10, sma50: 32.51, sma200: 31.51, name: "Super Micro Computer", type: "EQUITY" },
   "ATOS": { price: 2.51, sma50: 2.45, sma200: 3.10, is_bear_regime: true, name: "Atossa Therapeutics", type: "EQUITY" },
   "ATO.PA": { price: 24.82, sma50: 23.50, sma200: 32.00, is_bear_regime: true, name: "Atos SE", type: "EQUITY" },
-  "BTC-USD": { price: 77164.13, name: "Bitcoin USD", type: "CRYPTOCURRENCY" },
-  "ETH-USD": { price: 2522.21, name: "Ethereum USD", type: "CRYPTOCURRENCY" },
-  "SOL-USD": { price: 101.41, name: "Solana USD", type: "CRYPTOCURRENCY" },
-  "HYPE32196-USD": { price: 28.50, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
-  "HYPE": { price: 28.50, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" }
+  "BTC-USD": { price: 88400.00, name: "Bitcoin USD", type: "CRYPTOCURRENCY" },
+  "ETH-USD": { price: 3320.00, name: "Ethereum USD", type: "CRYPTOCURRENCY" },
+  "SOL-USD": { price: 152.80, name: "Solana USD", type: "CRYPTOCURRENCY" },
+  "HYPE32196-USD": { price: 92.80, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
+  "HYPE": { price: 92.80, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" }
 };
 
 function normalCDF(z) {
@@ -287,8 +287,25 @@ async function fetchAssetHistory(ticker) {
     // Continue
   }
 
-  // 1c. If crypto or contains HYPE, fetch directly from Hyperliquid or Binance
+  // 1c. If crypto or contains HYPE, fetch directly from CoinGecko, Hyperliquid, or Binance
   if (ticker.includes("HYPE")) {
+    try {
+      const cgRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd", {
+        headers: { "Accept": "application/json" }
+      });
+      if (cgRes.ok) {
+        const cgData = await cgRes.json();
+        const hypeP = parseFloat(cgData?.hyperliquid?.usd);
+        if (hypeP && hypeP > 50) {
+          const synth = generateSyntheticPrices(ticker);
+          synth.prices[synth.prices.length - 1] = hypeP;
+          synth.info.price = hypeP;
+          return synth;
+        }
+      }
+    } catch (e) {
+      // Continue
+    }
     try {
       const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
         method: "POST",
@@ -298,7 +315,7 @@ async function fetchAssetHistory(ticker) {
       if (hlRes.ok) {
         const mids = await hlRes.json();
         const hypeP = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
-        if (hypeP && hypeP > 0) {
+        if (hypeP && hypeP > 50) {
           const synth = generateSyntheticPrices(ticker);
           synth.prices[synth.prices.length - 1] = hypeP;
           synth.info.price = hypeP;
