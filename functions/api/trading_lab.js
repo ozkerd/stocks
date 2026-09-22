@@ -15,7 +15,38 @@
 // In-memory price cache for Cloudflare edge worker instances
 let CACHED_PRICES = {};
 let LAST_PRICE_FETCH = 0;
-const CACHE_TTL_MS = 60 * 1000; // 60 seconds
+const CACHE_TTL_MS = 5 * 1000; // 5 seconds for real-time responsiveness
+
+// Baseline entry prices established at systematic inception (fair starting buy prices)
+const INCEPTION_BUY_PRICES = {
+  "NVDA": 147.20,
+  "PLTR": 126.50,
+  "APP": 328.00,
+  "BTC-USD": 87400.00,
+  "SOL-USD": 148.20,
+  "CEG": 294.50,
+  "ALAB": 92.40,
+  "TSM": 191.80,
+  "AMD": 160.10,
+  "RDDT": 151.20,
+  "OKLO": 25.80,
+  "SMR": 19.30,
+  "HYPE32196-USD": 27.20,
+  "HYPE-USD": 27.20,
+  "HYPE": 27.20,
+  "COIN": 260.20,
+  "CAVA": 124.50,
+  "CELH": 28.90,
+  "MSFT": 459.80,
+  "AAPL": 246.20,
+  "AMZN": 222.40,
+  "ETH-USD": 3290.00,
+  "META": 704.50,
+  "GOOGL": 190.80,
+  "BRK-B": 489.50,
+  "COST": 1008.00,
+  "JPM": 261.00
+};
 
 // Base fallback market prices (used if external network quote is temporarily unavailable)
 const FALLBACK_PRICES = {
@@ -220,9 +251,12 @@ const STRATEGY_DEFINITIONS = {
 /**
  * Fetch live quotes from Yahoo Finance Spark API, with direct Binance & Hyperliquid fallback for crypto
  */
-async function fetchLiveQuotes(symbols) {
+/**
+ * Fetch live quotes from Yahoo Finance Spark API, with direct Binance & Hyperliquid fallback for crypto
+ */
+async function fetchLiveQuotes(symbols, forceRefresh = false) {
   const now = Date.now();
-  if (now - LAST_PRICE_FETCH < CACHE_TTL_MS && Object.keys(CACHED_PRICES).length > 0) {
+  if (!forceRefresh && (now - LAST_PRICE_FETCH < CACHE_TTL_MS) && Object.keys(CACHED_PRICES).length > 0) {
     return CACHED_PRICES;
   }
 
@@ -313,21 +347,225 @@ async function fetchLiveQuotes(symbols) {
 }
 
 /**
- * Process a strategy portfolio with fresh inception at live market prices
+ * Process a strategy portfolio with baseline inception prices and real-time live quotes
  */
 function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {}) {
   const def = STRATEGY_DEFINITIONS[strategyKey] || STRATEGY_DEFINITIONS.timesfm_oracle;
   const initialBudget = 10000.00;
   const slotBudget = 2000.00; // $2,000 per position (5 positions)
-  const inceptionDate = "Live Inception";
+  const inceptionDate = "Sep 22, 2026";
 
   const activePositions = [];
-  const closedTrades = []; // Fresh inception starts with 0 closed trades
-  const realizedPnlUsd = 0.00;
+  const closedTrades = [];
+  let realizedPnlUsd = 0.00;
 
-  // Take top 5 candidates as active holdings
-  const activeCandidates = def.candidates.slice(0, 5);
-  const queuedCandidates = def.candidates.slice(5).map((c, idx) => {
+  const queuedCandidatesList = def.candidates.slice(5);
+  let queueIndex = 0;
+
+  let totalUnrealizedPnlUsd = 0;
+  let totalCurrentMarketValue = 0;
+
+  const initialCandidates = def.candidates.slice(0, 5);
+
+  initialCandidates.forEach(cand => {
+    const sym = cand.symbol;
+    const currentPrice = liveQuotes[sym] || FALLBACK_PRICES[sym] || 100.0;
+    const entryPrice = INCEPTION_BUY_PRICES[sym] || cand.entry_price || FALLBACK_PRICES[sym] || 100.0;
+    const shares = Number((slotBudget / entryPrice).toFixed(4));
+    const marketValue = Number((shares * currentPrice).toFixed(2));
+    const unrealizedUsd = Number(((currentPrice - entryPrice) * shares).toFixed(2));
+    const returnPct = Number((((currentPrice - entryPrice) / entryPrice) * 100).toFixed(2));
+
+    const tpPrice = Number((entryPrice * (1 + tpPct / 100)).toFixed(2));
+    const slPrice = Number((entryPrice * (1 - slPct / 100)).toFixed(2));
+
+    const distanceToTpUsd = Number((tpPrice - currentPrice).toFixed(2));
+    const distanceToTpPct = Number((((tpPrice - currentPrice) / currentPrice) * 100).toFixed(2));
+    const distanceToSlUsd = Number((currentPrice - slPrice).toFixed(2));
+
+    const progressToTp = Math.min(100, Math.max(0, Number(((returnPct / tpPct) * 100).toFixed(1))));
+
+    // 1. Take-Profit Target Hit (+10.0%)
+    if (returnPct >= tpPct) {
+      const realizedGain = Number((slotBudget * (tpPct / 100)).toFixed(2));
+      const returnedCapital = Number((slotBudget + realizedGain).toFixed(2));
+      realizedPnlUsd += realizedGain;
+
+      const nextCand = queuedCandidatesList[queueIndex];
+      queueIndex++;
+
+      closedTrades.push({
+        trade_id: `TR-${sym}-01`,
+        symbol: sym,
+        display_symbol: cand.display_symbol || sym,
+        name: cand.name,
+        type: cand.type,
+        exchange: cand.exchange,
+        entry_date: inceptionDate,
+        exit_date: "Live Target Hit",
+        entry_price: entryPrice,
+        exit_price: tpPrice,
+        holding_days: 1,
+        allocated_capital: slotBudget,
+        returned_capital: returnedCapital,
+        realized_pnl_usd: realizedGain,
+        realized_pnl_pct: Number(tpPct.toFixed(2)),
+        reinvested_into: nextCand ? nextCand.symbol : "Cash Reserve",
+        status: "PROFIT_TAKEN",
+        status_label: `🎯 +${tpPct.toFixed(1)}% TP Hit`,
+        status_class: "status-profit"
+      });
+
+      // Buy next queued candidate with freed capital
+      if (nextCand) {
+        const nextSym = nextCand.symbol;
+        const nextEntryPrice = liveQuotes[nextSym] || FALLBACK_PRICES[nextSym] || 100.0;
+        const nextCurrentPrice = nextEntryPrice;
+        const nextShares = Number((slotBudget / nextEntryPrice).toFixed(4));
+        const nextMktVal = Number((nextShares * nextCurrentPrice).toFixed(2));
+
+        activePositions.push({
+          symbol: nextSym,
+          display_symbol: nextCand.display_symbol || nextSym,
+          name: nextCand.name,
+          type: nextCand.type,
+          exchange: nextCand.exchange,
+          role: nextCand.role,
+          conviction: nextCand.conviction,
+          expected_return: nextCand.expected_return,
+          entry_date: "Live Rotation",
+          entry_price: nextEntryPrice,
+          current_price: nextCurrentPrice,
+          shares: nextShares,
+          allocated_capital: slotBudget,
+          current_market_value: nextMktVal,
+          unrealized_pnl_usd: 0.00,
+          unrealized_pnl_pct: 0.00,
+          tp_price: Number((nextEntryPrice * (1 + tpPct / 100)).toFixed(2)),
+          tp_pct: tpPct,
+          distance_to_tp_usd: Number(((nextEntryPrice * (1 + tpPct / 100)) - nextCurrentPrice).toFixed(2)),
+          distance_to_tp_pct: Number(tpPct.toFixed(2)),
+          sl_price: Number((nextEntryPrice * (1 - slPct / 100)).toFixed(2)),
+          sl_pct: -slPct,
+          distance_to_sl_usd: Number((nextCurrentPrice - (nextEntryPrice * (1 - slPct / 100))).toFixed(2)),
+          progress_to_tp: 0,
+          status: "ACTIVE_MONITORING",
+          status_label: "Active Tracking",
+          status_class: "status-monitoring"
+        });
+        totalCurrentMarketValue += nextMktVal;
+      }
+    } else if (returnPct <= -slPct) {
+      // 2. Stop-Loss Hit (-5.0%)
+      const lossUsd = Number((slotBudget * (slPct / 100)).toFixed(2));
+      const returnedCapital = Number((slotBudget - lossUsd).toFixed(2));
+      realizedPnlUsd -= lossUsd;
+
+      const nextCand = queuedCandidatesList[queueIndex];
+      queueIndex++;
+
+      closedTrades.push({
+        trade_id: `TR-${sym}-01`,
+        symbol: sym,
+        display_symbol: cand.display_symbol || sym,
+        name: cand.name,
+        type: cand.type,
+        exchange: cand.exchange,
+        entry_date: inceptionDate,
+        exit_date: "Live Stop-Loss",
+        entry_price: entryPrice,
+        exit_price: slPrice,
+        holding_days: 1,
+        allocated_capital: slotBudget,
+        returned_capital: returnedCapital,
+        realized_pnl_usd: -lossUsd,
+        realized_pnl_pct: -Number(slPct.toFixed(2)),
+        reinvested_into: nextCand ? nextCand.symbol : "Cash Reserve",
+        status: "STOP_LOSS_HIT",
+        status_label: `🛑 -${slPct.toFixed(1)}% Stop-Loss Hit`,
+        status_class: "status-loss"
+      });
+
+      if (nextCand) {
+        const nextSym = nextCand.symbol;
+        const nextEntryPrice = liveQuotes[nextSym] || FALLBACK_PRICES[nextSym] || 100.0;
+        const nextCurrentPrice = nextEntryPrice;
+        const nextShares = Number((slotBudget / nextEntryPrice).toFixed(4));
+        const nextMktVal = Number((nextShares * nextCurrentPrice).toFixed(2));
+
+        activePositions.push({
+          symbol: nextSym,
+          display_symbol: nextCand.display_symbol || nextSym,
+          name: nextCand.name,
+          type: nextCand.type,
+          exchange: nextCand.exchange,
+          role: nextCand.role,
+          conviction: nextCand.conviction,
+          expected_return: nextCand.expected_return,
+          entry_date: "Live Rotation",
+          entry_price: nextEntryPrice,
+          current_price: nextCurrentPrice,
+          shares: nextShares,
+          allocated_capital: slotBudget,
+          current_market_value: nextMktVal,
+          unrealized_pnl_usd: 0.00,
+          unrealized_pnl_pct: 0.00,
+          tp_price: Number((nextEntryPrice * (1 + tpPct / 100)).toFixed(2)),
+          tp_pct: tpPct,
+          distance_to_tp_usd: Number(((nextEntryPrice * (1 + tpPct / 100)) - nextCurrentPrice).toFixed(2)),
+          distance_to_tp_pct: Number(tpPct.toFixed(2)),
+          sl_price: Number((nextEntryPrice * (1 - slPct / 100)).toFixed(2)),
+          sl_pct: -slPct,
+          distance_to_sl_usd: Number((nextCurrentPrice - (nextEntryPrice * (1 - slPct / 100))).toFixed(2)),
+          progress_to_tp: 0,
+          status: "ACTIVE_MONITORING",
+          status_label: "Active Tracking",
+          status_class: "status-monitoring"
+        });
+        totalCurrentMarketValue += nextMktVal;
+      }
+    } else {
+      // 3. Normal Active Position Tracking
+      const status = "ACTIVE_MONITORING";
+      const statusLabel = "Active Tracking";
+      const statusClass = "status-monitoring";
+
+      totalUnrealizedPnlUsd += unrealizedUsd;
+      totalCurrentMarketValue += marketValue;
+
+      activePositions.push({
+        symbol: sym,
+        display_symbol: cand.display_symbol || sym,
+        name: cand.name,
+        type: cand.type,
+        exchange: cand.exchange,
+        role: cand.role,
+        conviction: cand.conviction,
+        expected_return: cand.expected_return,
+        entry_date: inceptionDate,
+        entry_price: entryPrice,
+        current_price: currentPrice,
+        shares: shares,
+        allocated_capital: slotBudget,
+        current_market_value: marketValue,
+        unrealized_pnl_usd: unrealizedUsd,
+        unrealized_pnl_pct: returnPct,
+        tp_price: tpPrice,
+        tp_pct: tpPct,
+        distance_to_tp_usd: distanceToTpUsd,
+        distance_to_tp_pct: distanceToTpPct,
+        sl_price: slPrice,
+        sl_pct: -slPct,
+        distance_to_sl_usd: distanceToSlUsd,
+        progress_to_tp: progressToTp,
+        status: status,
+        status_label: statusLabel,
+        status_class: statusClass
+      });
+    }
+  });
+
+  const remainingQueued = queuedCandidatesList.slice(queueIndex).map((c, idx) => {
     const curP = liveQuotes[c.symbol] || FALLBACK_PRICES[c.symbol] || 100.0;
     return {
       ...c,
@@ -337,70 +575,12 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
     };
   });
 
-  let totalUnrealizedPnlUsd = 0;
-  let totalCurrentMarketValue = 0;
-
-  activeCandidates.forEach(cand => {
-    const sym = cand.symbol;
-    const currentPrice = liveQuotes[sym] || FALLBACK_PRICES[sym] || 100.0;
-    
-    // Fresh live inception: entry price equals exact current live quote
-    const entryPrice = currentPrice;
-    const shares = Number((slotBudget / entryPrice).toFixed(4));
-    const marketValue = Number((shares * currentPrice).toFixed(2));
-    const unrealizedUsd = 0.00;
-    const returnPct = 0.00;
-
-    const tpPrice = Number((entryPrice * (1 + tpPct / 100)).toFixed(2));
-    const slPrice = Number((entryPrice * (1 - slPct / 100)).toFixed(2));
-
-    const distanceToTpUsd = Number((tpPrice - currentPrice).toFixed(2));
-    const distanceToTpPct = Number(tpPct.toFixed(2));
-    const distanceToSlUsd = Number((currentPrice - slPrice).toFixed(2));
-
-    const progressToTp = 0;
-
-    const status = "ACTIVE_MONITORING";
-    const statusLabel = "Active Tracking";
-    const statusClass = "status-monitoring";
-
-    totalUnrealizedPnlUsd += unrealizedUsd;
-    totalCurrentMarketValue += marketValue;
-
-    activePositions.push({
-      symbol: sym,
-      display_symbol: cand.display_symbol || sym,
-      name: cand.name,
-      type: cand.type,
-      exchange: cand.exchange,
-      role: cand.role,
-      conviction: cand.conviction,
-      expected_return: cand.expected_return,
-      entry_date: inceptionDate,
-      entry_price: entryPrice,
-      current_price: currentPrice,
-      shares: shares,
-      allocated_capital: slotBudget,
-      current_market_value: marketValue,
-      unrealized_pnl_usd: unrealizedUsd,
-      unrealized_pnl_pct: returnPct,
-      tp_price: tpPrice,
-      tp_pct: tpPct,
-      distance_to_tp_usd: distanceToTpUsd,
-      distance_to_tp_pct: distanceToTpPct,
-      sl_price: slPrice,
-      sl_pct: -slPct,
-      distance_to_sl_usd: distanceToSlUsd,
-      progress_to_tp: progressToTp,
-      status: status,
-      status_label: statusLabel,
-      status_class: statusClass
-    });
-  });
-
   const totalCurrentValue = Number((initialBudget + realizedPnlUsd + totalUnrealizedPnlUsd).toFixed(2));
   const totalNetProfitUsd = Number((totalCurrentValue - initialBudget).toFixed(2));
   const totalNetProfitPct = Number(((totalNetProfitUsd / initialBudget) * 100).toFixed(2));
+
+  const winTrades = closedTrades.filter(t => t.realized_pnl_usd >= 0).length;
+  const winRatePct = closedTrades.length > 0 ? Number(((winTrades / closedTrades.length) * 100).toFixed(1)) : 100.0;
 
   return {
     strategy_id: def.id,
@@ -416,13 +596,13 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
     total_net_profit_pct: totalNetProfitPct,
     realized_pnl_usd: Number(realizedPnlUsd.toFixed(2)),
     unrealized_pnl_usd: Number(totalUnrealizedPnlUsd.toFixed(2)),
-    win_rate_pct: 100.0,
+    win_rate_pct: winRatePct,
     active_positions_count: activePositions.length,
-    closed_trades_count: 0,
+    closed_trades_count: closedTrades.length,
     tp_pct: tpPct,
     sl_pct: slPct,
     active_positions: activePositions,
-    queued_candidates: queuedCandidates,
+    queued_candidates: remainingQueued,
     closed_trades: closedTrades
   };
 }
@@ -433,6 +613,7 @@ export async function onRequest(context) {
   const selectedStrategy = url.searchParams.get("strategy") || "timesfm_oracle";
   const tpPct = parseFloat(url.searchParams.get("tp_pct") || "10.0");
   const slPct = parseFloat(url.searchParams.get("sl_pct") || "5.0");
+  const forceRefresh = url.searchParams.get("force") === "true" || url.searchParams.has("_t");
 
   // Collect all symbols from all strategies to fetch live quotes
   const allSymbolsSet = new Set();
@@ -441,7 +622,7 @@ export async function onRequest(context) {
   });
   const allSymbols = Array.from(allSymbolsSet);
 
-  const liveQuotes = await fetchLiveQuotes(allSymbols);
+  const liveQuotes = await fetchLiveQuotes(allSymbols, forceRefresh);
 
   // Compute metrics for all 4 strategies for side-by-side comparison
   const strategiesOverview = Object.keys(STRATEGY_DEFINITIONS).map(key => {
@@ -480,7 +661,7 @@ export async function onRequest(context) {
     headers: {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
-      "Cache-Control": "public, max-age=10"
+      "Cache-Control": "no-cache, no-store, must-revalidate"
     }
   });
 }
