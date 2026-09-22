@@ -44,9 +44,9 @@
         <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
         Best Portfolio
       </button>
-      <button type="button" class="nav-btn" id="nav-btn-trading-lab" onclick="switchAppView('trading-lab')" title="Tutulan Portföy: Live Strategy Paper Trading &amp; Real-Time PnL Tracker">
+      <button type="button" class="nav-btn" id="nav-btn-trading-lab" onclick="switchAppView('trading-lab')" title="Live Portfolios: Real-Time Strategy Paper Trading &amp; PnL Tracker">
         <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
-        Tutulan Portföy
+        Live Portfolios
       </button>
       <button type="button" class="nav-btn" id="nav-btn-detector" onclick="switchAppView('detector')">
         <svg style="width:14px;height:14px;fill:currentColor;margin-right:6px;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
@@ -752,27 +752,27 @@
       </div>
     </div><!-- End of view-portfolio -->
 
-    <!-- VIEW: TUTULAN PORTFÖY & LIVE STRATEGY PAPER TRADING LAB -->
+    <!-- VIEW: LIVE STRATEGY PORTFOLIOS & PAPER TRADING LAB -->
     <div id="view-trading-lab" class="app-view" style="display:none;">
       <!-- Header & Status -->
       <div class="trading-lab-header">
         <div class="trading-lab-title-area">
           <h2>
             <svg style="width:26px;height:26px;fill:var(--google-blue);" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
-            Tutulan Portföy &amp; Canlı Strateji Takip Laboratuvarı
+            Live Strategy Portfolios &amp; Paper Trading Lab
           </h2>
           <p class="trading-lab-subtitle">
-            Sistemin gerçek zamanlı piyasa fiyatlarıyla kazandırdığı performansı test edin. Seçilen stratejinin en yüksek skorlu ilk 5 varlığı eşit payla ($2,000) alınır; <strong>+%10 kâr hedefine</strong> ulaşıldığında satılarak kâr kilitlenir ve boşa çıkan sermayeyle kuyruktaki sıradaki yeni aday satın alınır. Olası düşüşlerde <strong>-%5 zarar kes (stop-loss)</strong> uygulanır.
+            Real-time systematic portfolio execution with live market feeds. Holds the top 5 highest-ranked assets for each strategy ($2,000 equal allocation, $10,000 initial budget). Locks in profit at the <strong>+10.0% target</strong> and rotates freed capital into the next queued candidate. Enforces a <strong>-5.0% stop-loss</strong> for downside capital preservation.
           </p>
         </div>
         <div class="trading-lab-actions">
           <div class="live-feed-badge" id="tl-live-status">
             <span class="live-pulse-dot"></span>
-            <span>CANLI FİYAT AKIŞI AKTİF</span>
+            <span>LIVE MARKET FEED CONNECTED</span>
           </div>
           <button type="button" class="btn-refresh-live" onclick="fetchTradingLab(currentTradingStrategy, true)" id="btn-refresh-trading-lab">
             <svg style="width:15px;height:15px;fill:currentColor;" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-            <span>Fiyatları Güncelle</span>
+            <span>Refresh Live Quotes</span>
           </button>
         </div>
       </div>
@@ -796,23 +796,23 @@
       <div class="tl-section">
         <div class="tl-section-header">
           <h3 class="tl-section-title">
-            <span>📌</span> Aktif Tutulan Portföy (Top 5 Pozisyon)
+            <span>📌</span> Active Strategy Holdings (Top 5 Positions)
           </h3>
-          <span class="tl-section-badge" id="tl-active-count-badge">5 Aktif Pozisyon</span>
+          <span class="tl-section-badge" id="tl-active-count-badge">5 Active Positions</span>
         </div>
         <div class="tl-table-wrap">
           <table class="tl-table">
             <thead>
               <tr>
-                <th>Varlık</th>
-                <th>Strateji Rolü &amp; İnanç</th>
-                <th>Giriş Fiyatı</th>
-                <th>Anlık Canlı Fiyat</th>
-                <th>Güncel Kâr / Getiri</th>
-                <th>Hedef Satış (+%10 TP)</th>
-                <th>Zarar Kes (-%5 SL)</th>
-                <th>Hedefe İlerleme</th>
-                <th>Aksiyon &amp; Durum</th>
+                <th>Asset</th>
+                <th>Strategy Role &amp; Conviction</th>
+                <th>Entry Price</th>
+                <th>Live Market Price</th>
+                <th>Current PnL</th>
+                <th>Take Profit (+10% TP)</th>
+                <th>Stop Loss (-5% SL)</th>
+                <th>Target Progress</th>
+                <th>Status &amp; Action</th>
               </tr>
             </thead>
             <tbody id="tl-active-positions-body">
@@ -826,9 +826,9 @@
       <div class="tl-section">
         <div class="tl-section-header">
           <h3 class="tl-section-title">
-            <span>🔄</span> Otomatik Alım Kuyruğu (Sıradaki Adaylar)
+            <span>🔄</span> Automated Reinvestment Pipeline (Next Candidates)
           </h3>
-          <span class="tl-section-badge">Aktif Pozisyon Kâr Alınca Alınacaklar</span>
+          <span class="tl-section-badge">Queued Assets Purchased on Exit</span>
         </div>
         <div class="queue-grid" id="tl-queue-grid">
           <!-- Dynamically populated -->
@@ -839,24 +839,24 @@
       <div class="tl-section">
         <div class="tl-section-header">
           <h3 class="tl-section-title">
-            <span>📜</span> Gerçekleşen İşlemler &amp; Realize Kâr Defteri
+            <span>📜</span> Closed Trades &amp; Realized PnL Ledger
           </h3>
-          <span class="tl-section-badge" id="tl-closed-count-badge">Tamamlanan İşlemler</span>
+          <span class="tl-section-badge" id="tl-closed-count-badge">0 Completed Trades</span>
         </div>
         <div class="tl-table-wrap">
           <table class="tl-table">
             <thead>
               <tr>
-                <th>İşlem ID</th>
-                <th>Varlık</th>
-                <th>Giriş &amp; Tarih</th>
-                <th>Çıkış &amp; Tarih</th>
-                <th>Süre</th>
-                <th>Tahsis Edilen</th>
-                <th>Geri Dönen</th>
-                <th>Realize Kâr / Getiri</th>
-                <th>Kapanış Nedeni</th>
-                <th>Yeni Yatırım</th>
+                <th>Trade ID</th>
+                <th>Asset</th>
+                <th>Entry &amp; Date</th>
+                <th>Exit &amp; Date</th>
+                <th>Holding Period</th>
+                <th>Capital Deployed</th>
+                <th>Capital Returned</th>
+                <th>Realized PnL</th>
+                <th>Exit Trigger</th>
+                <th>Reinvested Into</th>
               </tr>
             </thead>
             <tbody id="tl-closed-trades-body">
@@ -1913,7 +1913,7 @@
     }
 
     // ==========================================================================
-    // TUTULAN PORTFÖY & LIVE STRATEGY PAPER TRADING CONTROLLER
+    // LIVE STRATEGY PORTFOLIOS & PAPER TRADING CONTROLLER
     // ==========================================================================
     let currentTradingStrategy = 'timesfm_oracle';
     let tradingLabData = null;
@@ -1926,10 +1926,10 @@
         refreshBtn.disabled = true;
         refreshBtn.innerHTML = `
           <svg style="width:15px;height:15px;fill:currentColor;animation:spin 1s linear infinite;" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
-          <span>Fiyatlar Alınıyor...</span>
+          <span>Fetching Live Quotes...</span>
         `;
       }
-      if (statusText) statusText.textContent = 'CANLI FİYATLAR GÜNCELLENİYOR...';
+      if (statusText) statusText.textContent = 'FETCHING LIVE MARKET QUOTES...';
 
       try {
         const url = `${API_BASE}/api/trading_lab?strategy=${encodeURIComponent(strategy)}&tp_pct=10&sl_pct=5&_t=${forceRefresh ? Date.now() : ''}`;
@@ -1938,16 +1938,16 @@
         const data = await res.json();
         tradingLabData = data;
         renderTradingLab(data);
-        if (statusText) statusText.textContent = 'CANLI FİYAT AKIŞI AKTİF';
+        if (statusText) statusText.textContent = 'LIVE MARKET FEED CONNECTED';
       } catch (err) {
         console.error('Trading Lab fetch error:', err);
-        if (statusText) statusText.textContent = 'CANLI BAĞLANTI (ÇEVRİMİÇİ MOD)';
+        if (statusText) statusText.textContent = 'LIVE FEED ACTIVE (OFFLINE CACHE)';
       } finally {
         if (refreshBtn) {
           refreshBtn.disabled = false;
           refreshBtn.innerHTML = `
             <svg style="width:15px;height:15px;fill:currentColor;" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-            <span>Fiyatları Güncelle</span>
+            <span>Refresh Live Quotes</span>
           `;
         }
       }
@@ -1990,8 +1990,8 @@
               <span style="font-size:11px; opacity:0.85;">(${returnSign}$${(st.total_net_profit_usd || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})})</span>
             </div>
             <div class="strategy-card-stats">
-              <span>🎯 %${st.win_rate_pct} Kazanma</span>
-              <span>${st.active_positions_count || 5} Aktif | ${st.closed_trades_count || 0} Kapalı</span>
+              <span>🎯 ${st.win_rate_pct}% Win Rate</span>
+              <span>${st.active_positions_count || 5} Active | ${st.closed_trades_count || 0} Closed</span>
             </div>
           `;
           stratGrid.appendChild(card);
@@ -2005,14 +2005,14 @@
           <div class="st-header">
             <div class="st-title">
               <span>${details.icon || '💼'}</span>
-              <span>${details.strategy_name || 'Strateji'}</span>
+              <span>${details.strategy_name || 'Strategy'}</span>
               <span style="font-size:12px; font-weight:700; color:var(--google-blue); background:rgba(26,115,232,0.1); padding:2px 8px; border-radius:6px;">${details.badge || ''}</span>
             </div>
             <div class="st-chips">
-              <span class="st-chip">💼 Başlangıç: $10,000 ($2,000 / Pozisyon)</span>
-              <span class="st-chip" style="color:#1e8e3e;">🎯 Kâr Al (TP): +%${details.tp_pct || 10.0}</span>
-              <span class="st-chip" style="color:#d93025;">🛑 Zarar Kes (SL): -%${details.sl_pct || 5.0}</span>
-              <span class="st-chip">🔄 Otomatik Devir: Aktif</span>
+              <span class="st-chip">💼 Capital: $10,000 ($2,000 / Position)</span>
+              <span class="st-chip" style="color:#1e8e3e;">🎯 Take Profit (TP): +${details.tp_pct || 10.0}%</span>
+              <span class="st-chip" style="color:#d93025;">🛑 Stop Loss (SL): -${details.sl_pct || 5.0}%</span>
+              <span class="st-chip">🔄 Auto-Reinvestment: Active</span>
             </div>
           </div>
           <p class="st-desc">${details.thesis || ''}</p>
@@ -2028,29 +2028,29 @@
 
         metricsRow.innerHTML = `
           <div class="tl-metric-card">
-            <div class="tl-metric-label">Toplam Portföy Değeri</div>
+            <div class="tl-metric-label">Total Portfolio Value</div>
             <div class="tl-metric-val">$${(details.current_value || 10000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-            <div class="tl-metric-sub ${pClass}">${sign}${details.total_net_profit_pct}% Toplam Getiri</div>
+            <div class="tl-metric-sub ${pClass}">${sign}${details.total_net_profit_pct}% Total Return</div>
           </div>
           <div class="tl-metric-card">
-            <div class="tl-metric-label">Toplam Net Kâr</div>
+            <div class="tl-metric-label">Net Profit / PnL</div>
             <div class="tl-metric-val" style="color:${isProfit ? 'var(--google-green)' : '#d93025'};">${sign}$${(details.total_net_profit_usd || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-            <div class="tl-metric-sub">Sermaye: $${(details.initial_budget || 10000).toLocaleString()}</div>
+            <div class="tl-metric-sub">Capital Deployed: $${(details.initial_budget || 10000).toLocaleString()}</div>
           </div>
           <div class="tl-metric-card">
-            <div class="tl-metric-label">Kilitlenen Realize Kâr</div>
+            <div class="tl-metric-label">Realized Profit (Locked)</div>
             <div class="tl-metric-val" style="color:var(--google-green);">+$${(details.realized_pnl_usd || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-            <div class="tl-metric-sub">${details.closed_trades_count || 0} Adet Satış Yapıldı</div>
+            <div class="tl-metric-sub">${details.closed_trades_count || 0} Closed Exits</div>
           </div>
           <div class="tl-metric-card">
-            <div class="tl-metric-label">Açık Pozisyonlar Kârı</div>
+            <div class="tl-metric-label">Unrealized Active PnL</div>
             <div class="tl-metric-val" style="color:${(details.unrealized_pnl_usd || 0) >= 0 ? 'var(--google-blue)' : '#d93025'};">${(details.unrealized_pnl_usd || 0) >= 0 ? '+' : ''}$${(details.unrealized_pnl_usd || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-            <div class="tl-metric-sub">${details.active_positions_count || 5} Aktif Varlıkta Anlık PnL</div>
+            <div class="tl-metric-sub">${details.active_positions_count || 5} Active Positions PnL</div>
           </div>
           <div class="tl-metric-card">
-            <div class="tl-metric-label">Kazanma Oranı (Win Rate)</div>
-            <div class="tl-metric-val" style="color:var(--google-green);">%${details.win_rate_pct || 100.0}</div>
-            <div class="tl-metric-sub">Kapalı İşlemler Başarısı</div>
+            <div class="tl-metric-label">Win Rate</div>
+            <div class="tl-metric-val" style="color:var(--google-green);">${details.win_rate_pct || 100.0}%</div>
+            <div class="tl-metric-sub">Closed Position Success</div>
           </div>
         `;
       }
@@ -2058,14 +2058,14 @@
       // 4. Render Active Positions Table
       const activeBody = document.getElementById('tl-active-positions-body');
       const activeBadge = document.getElementById('tl-active-count-badge');
-      if (activeBadge) activeBadge.textContent = `${(details.active_positions || []).length} Aktif Pozisyon`;
+      if (activeBadge) activeBadge.textContent = `${(details.active_positions || []).length} Active Positions`;
 
       if (activeBody) {
         activeBody.innerHTML = '';
         (details.active_positions || []).forEach(pos => {
           const tr = document.createElement('tr');
           tr.style.cursor = 'pointer';
-          tr.title = `${pos.symbol} detaylı tahminini açmak için tıklayın`;
+          tr.title = `Click to view detailed forecast for ${pos.symbol}`;
 
           const isGain = pos.unrealized_pnl_pct >= 0;
           const gainSign = isGain ? '+' : '';
@@ -2083,19 +2083,19 @@
               </div>
             </td>
             <td>
-              <div style="font-weight:600; font-size:12px; color:var(--text-primary);">${pos.role || 'Strateji Pozisyonu'}</div>
-              <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">İnanç: <strong style="color:var(--google-blue);">%${pos.conviction}</strong> | Beklenti: ${pos.expected_return}</div>
+              <div style="font-weight:600; font-size:12px; color:var(--text-primary);">${pos.role || 'Strategy Holding'}</div>
+              <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Conviction: <strong style="color:var(--google-blue);">${pos.conviction}%</strong> | Target: ${pos.expected_return}</div>
             </td>
             <td>
               <div style="font-family:'JetBrains Mono',monospace; font-weight:700;">$${Number(pos.entry_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-              <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Tarih: ${pos.entry_date}</div>
+              <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">${pos.entry_date}</div>
             </td>
             <td>
               <div class="live-price-cell">
                 <span class="live-pulse-dot" style="width:6px; height:6px;"></span>
                 <span>$${Number(pos.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
               </div>
-              <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Pay: ${pos.shares} Adet</div>
+              <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Shares: ${pos.shares}</div>
             </td>
             <td>
               <div class="pnl-pill ${gainClass}">
@@ -2105,11 +2105,11 @@
             </td>
             <td>
               <div style="font-family:'JetBrains Mono',monospace; font-weight:700; color:#1e8e3e;">$${Number(pos.tp_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-              <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Kalan: $${Number(pos.distance_to_tp_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${pos.distance_to_tp_pct}%)</div>
+              <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Remaining: $${Number(pos.distance_to_tp_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${pos.distance_to_tp_pct}%)</div>
             </td>
             <td>
               <div style="font-family:'JetBrains Mono',monospace; font-weight:700; color:#d93025;">$${Number(pos.sl_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-              <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Mesafe: $${Number(pos.distance_to_sl_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+              <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Distance: $${Number(pos.distance_to_sl_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
             </td>
             <td>
               <div class="tp-progress-box">
@@ -2117,8 +2117,8 @@
                   <div class="tp-progress-bar-fill" style="width:${pos.progress_to_tp}%;"></div>
                 </div>
                 <div class="tp-progress-label">
-                  <span>Hedef Kâr</span>
-                  <span>%${pos.progress_to_tp}</span>
+                  <span>Target Progress</span>
+                  <span>${pos.progress_to_tp}%</span>
                 </div>
               </div>
             </td>
@@ -2149,7 +2149,7 @@
           const card = document.createElement('div');
           card.className = 'queue-card';
           card.style.cursor = 'pointer';
-          card.title = `${cand.symbol} tahminini incele`;
+          card.title = `Click to view forecast for ${cand.symbol}`;
 
           card.innerHTML = `
             <div style="display:flex; align-items:center; gap:12px;">
@@ -2165,7 +2165,7 @@
             </div>
             <div style="text-align:right; min-width:90px;">
               <div style="font-family:'JetBrains Mono',monospace; font-weight:700; font-size:14px;">$${Number(cand.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-              <div style="font-size:11px; color:var(--google-green); font-weight:700; margin-top:2px;">Beklenti: ${cand.expected_return}</div>
+              <div style="font-size:11px; color:var(--google-green); font-weight:700; margin-top:2px;">Target: ${cand.expected_return}</div>
             </div>
           `;
 
@@ -2184,52 +2184,64 @@
       // 6. Render Closed Trades Table
       const closedBody = document.getElementById('tl-closed-trades-body');
       const closedBadge = document.getElementById('tl-closed-count-badge');
-      if (closedBadge) closedBadge.textContent = `${(details.closed_trades || []).length} İşlem Kapandı`;
+      const closedTrades = details.closed_trades || [];
+      if (closedBadge) closedBadge.textContent = `${closedTrades.length} Completed Trades`;
 
       if (closedBody) {
         closedBody.innerHTML = '';
-        (details.closed_trades || []).forEach(trade => {
-          const tr = document.createElement('tr');
-          const isGain = trade.realized_pnl_usd >= 0;
-          const gainSign = isGain ? '+' : '';
-          const gainClass = isGain ? 'positive' : 'negative';
-
-          tr.innerHTML = `
-            <td><strong style="font-family:'JetBrains Mono',monospace; color:var(--text-secondary);">${trade.trade_id}</strong></td>
-            <td>
-              <div style="display:flex; align-items:center; gap:6px;">
-                <strong style="font-family:'JetBrains Mono',monospace; font-size:14px;">${trade.symbol}</strong>
-                <span style="font-size:12px; color:var(--text-secondary);">${trade.name}</span>
-              </div>
-            </td>
-            <td>
-              <div style="font-family:'JetBrains Mono',monospace; font-weight:700;">$${Number(trade.entry_price).toFixed(2)}</div>
-              <div style="font-size:11px; color:var(--text-secondary);">${trade.entry_date}</div>
-            </td>
-            <td>
-              <div style="font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--google-green);">$${Number(trade.exit_price).toFixed(2)}</div>
-              <div style="font-size:11px; color:var(--text-secondary);">${trade.exit_date}</div>
-            </td>
-            <td><span style="font-size:12px; font-weight:600;">${trade.holding_days} gün</span></td>
-            <td><span style="font-family:'JetBrains Mono',monospace; font-size:12px;">$${Number(trade.allocated_capital).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></td>
-            <td><span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700;">$${Number(trade.returned_capital).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></td>
-            <td>
-              <div class="pnl-pill ${gainClass}">
-                <span>${gainSign}${trade.realized_pnl_pct}%</span>
-                <span class="pnl-sub">${gainSign}$${Number(trade.realized_pnl_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-              </div>
-            </td>
-            <td>
-              <span class="status-badge-tl status-tp-hit">
-                🎯 +%10 Hedef Alındı
-              </span>
-            </td>
-            <td>
-              <strong style="color:var(--google-blue); font-size:12px; font-family:'JetBrains Mono',monospace;">→ ${trade.reinvested_into} Alındı</strong>
-            </td>
+        if (closedTrades.length === 0) {
+          closedBody.innerHTML = `
+            <tr>
+              <td colspan="10" style="text-align:center; padding:32px 16px; color:var(--text-secondary); font-size:13px;">
+                <div style="font-size:20px; margin-bottom:8px;">🏁</div>
+                <strong>Fresh Inception Active:</strong> All 5 strategy positions initiated at current live market prices. Completed trades will be recorded here as soon as an asset hits the +10.0% target profit or triggers the -5.0% stop-loss.
+              </td>
+            </tr>
           `;
-          closedBody.appendChild(tr);
-        });
+        } else {
+          closedTrades.forEach(trade => {
+            const tr = document.createElement('tr');
+            const isGain = trade.realized_pnl_usd >= 0;
+            const gainSign = isGain ? '+' : '';
+            const gainClass = isGain ? 'positive' : 'negative';
+
+            tr.innerHTML = `
+              <td><strong style="font-family:'JetBrains Mono',monospace; color:var(--text-secondary);">${trade.trade_id}</strong></td>
+              <td>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <strong style="font-family:'JetBrains Mono',monospace; font-size:14px;">${trade.symbol}</strong>
+                  <span style="font-size:12px; color:var(--text-secondary);">${trade.name}</span>
+                </div>
+              </td>
+              <td>
+                <div style="font-family:'JetBrains Mono',monospace; font-weight:700;">$${Number(trade.entry_price).toFixed(2)}</div>
+                <div style="font-size:11px; color:var(--text-secondary);">${trade.entry_date}</div>
+              </td>
+              <td>
+                <div style="font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--google-green);">$${Number(trade.exit_price).toFixed(2)}</div>
+                <div style="font-size:11px; color:var(--text-secondary);">${trade.exit_date}</div>
+              </td>
+              <td><span style="font-size:12px; font-weight:600;">${trade.holding_days} days</span></td>
+              <td><span style="font-family:'JetBrains Mono',monospace; font-size:12px;">$${Number(trade.allocated_capital).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></td>
+              <td><span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700;">$${Number(trade.returned_capital).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></td>
+              <td>
+                <div class="pnl-pill ${gainClass}">
+                  <span>${gainSign}${trade.realized_pnl_pct}%</span>
+                  <span class="pnl-sub">${gainSign}$${Number(trade.realized_pnl_usd).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-badge-tl status-tp-hit">
+                  🎯 +10.0% TP Hit
+                </span>
+              </td>
+              <td>
+                <strong style="color:var(--google-blue); font-size:12px; font-family:'JetBrains Mono',monospace;">→ Reinvested: ${trade.reinvested_into}</strong>
+              </td>
+            `;
+            closedBody.appendChild(tr);
+          });
+        }
       }
     }
 

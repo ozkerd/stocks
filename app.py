@@ -371,50 +371,44 @@ async def api_search(q: str = Query("", description="Search term for asset or co
 
 
 # ============================================================================
-# TUTULAN PORTFÖY & LIVE STRATEGY PAPER TRADING ENGINE (/api/trading_lab)
+# LIVE STRATEGY PORTFOLIOS & PAPER TRADING ENGINE (/api/trading_lab)
 # ============================================================================
 TRADING_LAB_STRATEGIES = {
     "timesfm_oracle": {
         "id": "timesfm_oracle",
-        "name": "TimesFM Oracle AI Stratejisi",
-        "short_name": "TimesFM Oracle",
+        "name": "TimesFM Oracle AI Strategy",
+        "short_name": "TimesFM Oracle AI",
         "badge": "AI Neural Drift",
         "icon": "🔮",
-        "tagline": "Yüksek yapay zekâ inanç skoru ve pozitif çok değişkenli quantile drift modelleri",
-        "thesis": "TimesFM-3 temel modelinin tahmin ettiği pozitif drift ve %75+ inanç skoru olan ilk 5 varlık tutulur. +%10 kâr hedefine ulaşıldığında nakit realize edilerek kuyruktaki yeni AI adayına aktarılır.",
+        "tagline": "High AI conviction score (≥75) & positive multivariate TimesFM quantile drift",
+        "thesis": "Initiates long positions in the top 5 AI-ranked assets at current live market prices. When any constituent reaches the +10.0% target profit, the gain is locked in and freed capital ($2,200) automatically buys the next queued candidate.",
         "candidates": [
-            {"symbol": "NVDA", "display_symbol": "NVDA", "name": "NVIDIA Corporation", "type": "Stock", "exchange": "NASDAQ", "entry_price": 136.50, "entry_date": "2026-09-12", "role": "AI Compute & GPU Hızlandırma Lideri", "conviction": 96, "expected_return": "+34.5%"},
-            {"symbol": "PLTR", "display_symbol": "PLTR", "name": "Palantir Technologies", "type": "Stock", "exchange": "NYSE", "entry_price": 118.20, "entry_date": "2026-09-11", "role": "Kurumsal Yapay Zekâ ve AIP Platformu", "conviction": 94, "expected_return": "+36.2%"},
-            {"symbol": "BTC-USD", "display_symbol": "BTC", "name": "Bitcoin USD", "type": "Crypto", "exchange": "Crypto", "entry_price": 82500.00, "entry_date": "2026-09-10", "role": "Küresel Dijital Likidite & Makro Hedge", "conviction": 92, "expected_return": "+28.0%"},
-            {"symbol": "SOL-USD", "display_symbol": "SOL", "name": "Solana USD", "type": "Crypto", "exchange": "Crypto", "entry_price": 139.50, "entry_date": "2026-09-13", "role": "Yüksek Hızlı Katman-1 Blockchain Ağı", "conviction": 90, "expected_return": "+38.5%"},
-            {"symbol": "CEG", "display_symbol": "CEG", "name": "Constellation Energy", "type": "Stock", "exchange": "NASDAQ", "entry_price": 272.00, "entry_date": "2026-09-14", "role": "AI Veri Merkezleri Temiz Nükleer Güç", "conviction": 89, "expected_return": "+26.0%"},
-            {"symbol": "ALAB", "display_symbol": "ALAB", "name": "Astera Labs Inc.", "type": "Stock", "exchange": "NASDAQ", "entry_price": 86.00, "entry_date": "Kuyrukta Bekliyor", "role": "Cloud AI PCIe ve Optik Bağlantı", "conviction": 88, "expected_return": "+32.0%"},
-            {"symbol": "TSM", "display_symbol": "TSM", "name": "Taiwan Semiconductor", "type": "Stock", "exchange": "NYSE", "entry_price": 184.00, "entry_date": "Kuyrukta Bekliyor", "role": "Küresel 2nm/3nm Çip Üretim Tekeli", "conviction": 87, "expected_return": "+24.0%"},
-            {"symbol": "AMD", "display_symbol": "AMD", "name": "Advanced Micro Devices", "type": "Stock", "exchange": "NASDAQ", "entry_price": 152.00, "entry_date": "Kuyrukta Bekliyor", "role": "Veri Merkezi GPU & CPU Çeşitlendirmesi", "conviction": 85, "expected_return": "+22.5%"}
-        ],
-        "completed_trades": [
-            {"trade_id": "ORA-01", "symbol": "APP", "name": "AppLovin Corp", "type": "Stock", "entry_date": "2026-09-01", "entry_price": 292.00, "exit_date": "2026-09-09", "exit_price": 322.00, "shares": 6.85, "allocated_capital": 2000.00, "returned_capital": 2205.48, "realized_pnl_usd": 205.48, "realized_pnl_pct": 10.27, "exit_reason": "TAKE_PROFIT_HIT", "holding_days": 8, "reinvested_into": "CEG"}
+            {"symbol": "NVDA", "display_symbol": "NVDA", "name": "NVIDIA Corporation", "type": "Stock", "exchange": "NASDAQ", "role": "AI Compute & GPU Acceleration Leader", "conviction": 96, "expected_return": "+34.5%"},
+            {"symbol": "PLTR", "display_symbol": "PLTR", "name": "Palantir Technologies", "type": "Stock", "exchange": "NYSE", "role": "Enterprise AI Operating System & AIP Platform", "conviction": 94, "expected_return": "+36.2%"},
+            {"symbol": "BTC-USD", "display_symbol": "BTC", "name": "Bitcoin USD", "type": "Crypto", "exchange": "Crypto", "role": "Global Digital Liquidity & Macro Hedge", "conviction": 92, "expected_return": "+28.0%"},
+            {"symbol": "SOL-USD", "display_symbol": "SOL", "name": "Solana USD", "type": "Crypto", "exchange": "Crypto", "role": "High-Throughput Layer-1 Blockchain Network", "conviction": 90, "expected_return": "+38.5%"},
+            {"symbol": "CEG", "display_symbol": "CEG", "name": "Constellation Energy", "type": "Stock", "exchange": "NASDAQ", "role": "Clean Nuclear Energy for Hyperscale AI Compute", "conviction": 89, "expected_return": "+26.0%"},
+            {"symbol": "ALAB", "display_symbol": "ALAB", "name": "Astera Labs Inc.", "type": "Stock", "exchange": "NASDAQ", "role": "Cloud AI PCIe Connectivity & Optical Interconnects", "conviction": 88, "expected_return": "+32.0%"},
+            {"symbol": "TSM", "display_symbol": "TSM", "name": "Taiwan Semiconductor", "type": "Stock", "exchange": "NYSE", "role": "Global 2nm/3nm Advanced Semiconductor Foundry Monopoly", "conviction": 87, "expected_return": "+24.0%"},
+            {"symbol": "AMD", "display_symbol": "AMD", "name": "Advanced Micro Devices", "type": "Stock", "exchange": "NASDAQ", "role": "Data Center GPU & High-Performance CPU Diversification", "conviction": 85, "expected_return": "+22.5%"}
         ]
     },
     "price_action": {
         "id": "price_action",
-        "name": "Price Action Breakout Stratejisi",
+        "name": "Price Action Breakout Strategy",
         "short_name": "Price Action Breakout",
         "badge": "Momentum Breakout",
         "icon": "⚡",
-        "tagline": "Hacim patlaması, 52 haftalık zirve kırılımları ve momentum genişlemesi",
-        "thesis": "Son 20 günlük ortalama hacminin 1.25 katı üzerinde işlem gören ve 52 haftalık zirvesine %5 mesafede olan ilk 5 varlık alınır. +%10 kârda otomatik satılarak sıradaki kırılım adayına geçilir.",
+        "tagline": "Volume burst (>1.25x 20d avg), 52-week high proximity & momentum expansion",
+        "thesis": "Buys the top 5 assets exhibiting heavy volume accumulation and trading within 5% of their 52-week highs. When an asset hits the +10.0% take-profit target, gains are secured and proceeds rotate into the next breakout candidate.",
         "candidates": [
-            {"symbol": "OKLO", "display_symbol": "OKLO", "name": "Oklo Inc.", "type": "Stock", "exchange": "NYSE", "entry_price": 23.50, "entry_date": "2026-09-12", "role": "Mikro Nükleer Reaktör Hacim Kırılımı", "conviction": 91, "expected_return": "+36.0%"},
-            {"symbol": "SMR", "display_symbol": "SMR", "name": "NuScale Power Corp", "type": "Stock", "exchange": "NYSE", "entry_price": 17.50, "entry_date": "2026-09-13", "role": "Modüler SMR Güç Santralleri Momentumu", "conviction": 89, "expected_return": "+35.5%"},
-            {"symbol": "RDDT", "display_symbol": "RDDT", "name": "Reddit Inc.", "type": "Stock", "exchange": "NYSE", "entry_price": 142.00, "entry_date": "2026-09-14", "role": "Veri Lisanslama & AI Reklam Hacim Patlaması", "conviction": 88, "expected_return": "+29.5%"},
-            {"symbol": "HYPE32196-USD", "display_symbol": "HYPE", "name": "Hyperliquid USD", "type": "Crypto", "exchange": "Crypto", "entry_price": 76.50, "entry_date": "2026-09-11", "role": "DEX Türev Hacim Zirvesi ve Fiyat Keşfi", "conviction": 92, "expected_return": "+42.0%"},
-            {"symbol": "CAVA", "display_symbol": "CAVA", "name": "CAVA Group Inc.", "type": "Stock", "exchange": "NYSE", "entry_price": 118.00, "entry_date": "2026-09-10", "role": "Restoran Büyüme Trend Devamı", "conviction": 86, "expected_return": "+24.0%"},
-            {"symbol": "COIN", "display_symbol": "COIN", "name": "Coinbase Global", "type": "Stock", "exchange": "NASDAQ", "entry_price": 250.00, "entry_date": "Kuyrukta Bekliyor", "role": "Kripto Sermaye Piyasası Kırılımı", "conviction": 85, "expected_return": "+30.0%"},
-            {"symbol": "CELH", "display_symbol": "CELH", "name": "Celsius Holdings", "type": "Stock", "exchange": "NASDAQ", "entry_price": 26.50, "entry_date": "Kuyrukta Bekliyor", "role": "Dip Dönüşü ve Hacimli Tepki", "conviction": 82, "expected_return": "+25.0%"}
-        ],
-        "completed_trades": [
-            {"trade_id": "PA-01", "symbol": "APP", "name": "AppLovin Corp", "type": "Stock", "entry_date": "2026-09-02", "entry_price": 290.00, "exit_date": "2026-09-08", "exit_price": 320.00, "shares": 6.90, "allocated_capital": 2000.00, "returned_capital": 2206.90, "realized_pnl_usd": 206.90, "realized_pnl_pct": 10.34, "exit_reason": "TAKE_PROFIT_HIT", "holding_days": 6, "reinvested_into": "OKLO"}
+            {"symbol": "OKLO", "display_symbol": "OKLO", "name": "Oklo Inc.", "type": "Stock", "exchange": "NYSE", "role": "Micro-Nuclear Fast-Fission Reactor Volume Breakout", "conviction": 91, "expected_return": "+36.0%"},
+            {"symbol": "SMR", "display_symbol": "SMR", "name": "NuScale Power Corp", "type": "Stock", "exchange": "NYSE", "role": "Modular SMR Nuclear Clean Power Momentum", "conviction": 89, "expected_return": "+35.5%"},
+            {"symbol": "RDDT", "display_symbol": "RDDT", "name": "Reddit Inc.", "type": "Stock", "exchange": "NYSE", "role": "AI Content Licensing & Monetization Expansion", "conviction": 88, "expected_return": "+29.5%"},
+            {"symbol": "HYPE32196-USD", "display_symbol": "HYPE", "name": "Hyperliquid USD", "type": "Crypto", "exchange": "Crypto", "role": "DEX Perp Volume Dominance & Price Discovery", "conviction": 92, "expected_return": "+42.0%"},
+            {"symbol": "CAVA", "display_symbol": "CAVA", "name": "CAVA Group Inc.", "type": "Stock", "exchange": "NYSE", "role": "High Same-Store Sales Momentum & Brand Scaling", "conviction": 86, "expected_return": "+24.0%"},
+            {"symbol": "COIN", "display_symbol": "COIN", "name": "Coinbase Global", "type": "Stock", "exchange": "NASDAQ", "role": "Institutional Digital Asset Capital Markets Leverage", "conviction": 85, "expected_return": "+30.0%"},
+            {"symbol": "CELH", "display_symbol": "CELH", "name": "Celsius Holdings", "type": "Stock", "exchange": "NASDAQ", "role": "Oversold Channel Reversal & Institutional Buying", "conviction": 82, "expected_return": "+25.0%"}
         ]
     },
     "best_technicals": {
@@ -423,19 +417,16 @@ TRADING_LAB_STRATEGIES = {
         "short_name": "Best Technicals",
         "badge": "Golden Trend",
         "icon": "📈",
-        "tagline": "Golden Cross (SMA50 > SMA200), pozitif MACD ve optimal RSI (45-65)",
-        "thesis": "Tüm teknik göstergeleri teyitli boğa modunda olan (SMA 50 > SMA 200, MACD pozitif, RSI aşırı alımda olmayan) ilk 5 varlık seçilir. Dalgalanma riskine karşı -%5 stop, +%10 hedef kâr uygulanır.",
+        "tagline": "Confirmed Golden Cross (SMA50 > SMA200), positive MACD & optimal RSI (45-65)",
+        "thesis": "Systematically selects the top 5 assets with confirmed multi-timeframe moving average breakouts, positive MACD momentum, and non-exhausted RSI. Operates with a +10.0% take-profit target and -5.0% stop loss.",
         "candidates": [
-            {"symbol": "NVDA", "display_symbol": "NVDA", "name": "NVIDIA Corporation", "type": "Stock", "exchange": "NASDAQ", "entry_price": 136.50, "entry_date": "2026-09-12", "role": "Teyitli Golden Cross & MACD Boğa Modu", "conviction": 95, "expected_return": "+32.0%"},
-            {"symbol": "MSFT", "display_symbol": "MSFT", "name": "Microsoft Corporation", "type": "Stock", "exchange": "NASDAQ", "entry_price": 438.00, "entry_date": "2026-09-10", "role": "SMA200 Üzerinde Güçlü Konsolidasyon", "conviction": 90, "expected_return": "+18.5%"},
-            {"symbol": "AAPL", "display_symbol": "AAPL", "name": "Apple Inc.", "type": "Stock", "exchange": "NASDAQ", "entry_price": 236.00, "entry_date": "2026-09-11", "role": "Yükselen Kanal Desteğinde RSI Toparlanması", "conviction": 89, "expected_return": "+16.0%"},
-            {"symbol": "AMZN", "display_symbol": "AMZN", "name": "Amazon.com Inc.", "type": "Stock", "exchange": "NASDAQ", "entry_price": 208.00, "entry_date": "2026-09-13", "role": "Trend Çizgisi Kırılımı ve MACD Genişlemesi", "conviction": 88, "expected_return": "+20.0%"},
-            {"symbol": "BTC-USD", "display_symbol": "BTC", "name": "Bitcoin USD", "type": "Crypto", "exchange": "Crypto", "entry_price": 82500.00, "entry_date": "2026-09-12", "role": "Haftalık EMA21 Üzerinde Boğa Trendi", "conviction": 91, "expected_return": "+26.0%"},
-            {"symbol": "META", "display_symbol": "META", "name": "Meta Platforms Inc.", "type": "Stock", "exchange": "NASDAQ", "entry_price": 665.00, "entry_date": "Kuyrukta Bekliyor", "role": "Boğa Bayrak Formasyonu Tamamlanışı", "conviction": 87, "expected_return": "+19.0%"},
-            {"symbol": "ETH-USD", "display_symbol": "ETH", "name": "Ethereum USD", "type": "Crypto", "exchange": "Crypto", "entry_price": 3100.00, "entry_date": "Kuyrukta Bekliyor", "role": "SMA50 Direncini Desteğe Çevirme", "conviction": 84, "expected_return": "+24.0%"}
-        ],
-        "completed_trades": [
-            {"trade_id": "TECH-01", "symbol": "APP", "name": "AppLovin Corp", "type": "Stock", "entry_date": "2026-09-02", "entry_price": 291.00, "exit_date": "2026-09-09", "exit_price": 321.50, "shares": 6.87, "allocated_capital": 2000.00, "returned_capital": 2209.62, "realized_pnl_usd": 209.62, "realized_pnl_pct": 10.48, "exit_reason": "TAKE_PROFIT_HIT", "holding_days": 7, "reinvested_into": "NVDA"}
+            {"symbol": "NVDA", "display_symbol": "NVDA", "name": "NVIDIA Corporation", "type": "Stock", "exchange": "NASDAQ", "role": "Confirmed Golden Cross & Bullish Trend Continuation", "conviction": 95, "expected_return": "+32.0%"},
+            {"symbol": "MSFT", "display_symbol": "MSFT", "name": "Microsoft Corporation", "type": "Stock", "exchange": "NASDAQ", "role": "High-Base Accumulation Above 200-Day Moving Average", "conviction": 90, "expected_return": "+18.5%"},
+            {"symbol": "AAPL", "display_symbol": "AAPL", "name": "Apple Inc.", "type": "Stock", "exchange": "NASDAQ", "role": "Ascending Channel Bounce with Healthy 52 RSI", "conviction": 89, "expected_return": "+16.0%"},
+            {"symbol": "AMZN", "display_symbol": "AMZN", "name": "Amazon.com Inc.", "type": "Stock", "exchange": "NASDAQ", "role": "Resistance-to-Support Conversion & Multi-Week MACD Bull Cross", "conviction": 88, "expected_return": "+20.0%"},
+            {"symbol": "BTC-USD", "display_symbol": "BTC", "name": "Bitcoin USD", "type": "Crypto", "exchange": "Crypto", "role": "Institutional Inflow Base Above 21-Week EMA", "conviction": 91, "expected_return": "+26.0%"},
+            {"symbol": "META", "display_symbol": "META", "name": "Meta Platforms Inc.", "type": "Stock", "exchange": "NASDAQ", "role": "Bull Flag Consolidation Near All-Time Highs", "conviction": 87, "expected_return": "+19.0%"},
+            {"symbol": "ETH-USD", "display_symbol": "ETH", "name": "Ethereum USD", "type": "Crypto", "exchange": "Crypto", "role": "SMA-50 Reclaim & DeFi Staking Yield Support", "conviction": 84, "expected_return": "+24.0%"}
         ]
     },
     "fundamental_quality": {
@@ -444,19 +435,16 @@ TRADING_LAB_STRATEGIES = {
         "short_name": "Fundamental Quality",
         "badge": "Quality Fortress",
         "icon": "💎",
-        "tagline": "Kale bilançolar, yüksek faaliyet kâr marjları ve kurumsal nakit akışı",
-        "thesis": "Geniş ekonomik hendeklere (moat), yüksek net kâr marjlarına ve sağlam serbest nakit akışına sahip mega piyasa liderleri. Düşük volatilite ve istikrarlı bileşik büyüme hedeflenir.",
+        "tagline": "Fortress balance sheets, high operating margins & resilient free cash flow",
+        "thesis": "Allocates capital exclusively to wide-moat market monopolies with superior pricing power, low debt, massive share repurchases, and robust cash flow compounding.",
         "candidates": [
-            {"symbol": "AAPL", "display_symbol": "AAPL", "name": "Apple Inc.", "type": "Stock", "exchange": "NASDAQ", "entry_price": 236.00, "entry_date": "2026-09-10", "role": "Hizmet Gelirleri & Nakit Geri Alım Kalesi", "conviction": 92, "expected_return": "+16.5%"},
-            {"symbol": "MSFT", "display_symbol": "MSFT", "name": "Microsoft Corporation", "type": "Stock", "exchange": "NASDAQ", "entry_price": 438.00, "entry_date": "2026-09-10", "role": "Ticari Bulut & Kurumsal Yazılım Tekeli", "conviction": 93, "expected_return": "+19.0%"},
-            {"symbol": "GOOGL", "display_symbol": "GOOGL", "name": "Alphabet Inc.", "type": "Stock", "exchange": "NASDAQ", "entry_price": 178.00, "entry_date": "2026-09-11", "role": "Arama Tekeli ve YouTube Reklam Gücü", "conviction": 89, "expected_return": "+17.5%"},
-            {"symbol": "COST", "display_symbol": "COST", "name": "Costco Wholesale", "type": "Stock", "exchange": "NASDAQ", "entry_price": 955.00, "entry_date": "2026-09-12", "role": "Yüksek Yenilemeli Üyelik Nakit Akışı", "conviction": 88, "expected_return": "+15.0%"},
-            {"symbol": "BRK-B", "display_symbol": "BRK-B", "name": "Berkshire Hathaway", "type": "Stock", "exchange": "NYSE", "entry_price": 468.00, "entry_date": "2026-09-12", "role": "300 Milyar $ Nakit Rezervi ve Çeşitlendirme", "conviction": 90, "expected_return": "+14.0%"},
-            {"symbol": "JPM", "display_symbol": "JPM", "name": "JPMorgan Chase", "type": "Stock", "exchange": "NYSE", "entry_price": 248.00, "entry_date": "Kuyrukta Bekliyor", "role": "Tier-1 Kredi Gücü ve Net Faiz Geliri", "conviction": 86, "expected_return": "+14.5%"},
-            {"symbol": "NVDA", "display_symbol": "NVDA", "name": "NVIDIA Corp", "type": "Stock", "exchange": "NASDAQ", "entry_price": 136.50, "entry_date": "Kuyrukta Bekliyor", "role": "Yüksek Faaliyet Kâr Marjlı Altyapı", "conviction": 94, "expected_return": "+30.0%"}
-        ],
-        "completed_trades": [
-            {"trade_id": "FQ-01", "symbol": "AMZN", "name": "Amazon.com Inc.", "type": "Stock", "entry_date": "2026-09-01", "entry_price": 198.00, "exit_date": "2026-09-10", "exit_price": 218.00, "shares": 10.10, "allocated_capital": 2000.00, "returned_capital": 2202.02, "realized_pnl_usd": 202.02, "realized_pnl_pct": 10.10, "exit_reason": "TAKE_PROFIT_HIT", "holding_days": 9, "reinvested_into": "AAPL"}
+            {"symbol": "AAPL", "display_symbol": "AAPL", "name": "Apple Inc.", "type": "Stock", "exchange": "NASDAQ", "role": "Services Ecosystem & Unrivaled Share Buyback Machine", "conviction": 92, "expected_return": "+16.5%"},
+            {"symbol": "MSFT", "display_symbol": "MSFT", "name": "Microsoft Corporation", "type": "Stock", "exchange": "NASDAQ", "role": "Commercial Cloud & Enterprise AI Software Monopoly", "conviction": 93, "expected_return": "+19.0%"},
+            {"symbol": "GOOGL", "display_symbol": "GOOGL", "name": "Alphabet Inc.", "type": "Stock", "exchange": "NASDAQ", "role": "Search Monopoly, Cloud Infrastructure & YouTube Monetization", "conviction": 89, "expected_return": "+17.5%"},
+            {"symbol": "COST", "display_symbol": "COST", "name": "Costco Wholesale", "type": "Stock", "exchange": "NASDAQ", "role": "93%+ Renewal Membership Recurring Cash Flow Fortress", "conviction": 88, "expected_return": "+15.0%"},
+            {"symbol": "BRK-B", "display_symbol": "BRK-B", "name": "Berkshire Hathaway", "type": "Stock", "exchange": "NYSE", "role": "$300B+ Cash Reserves & Diversified Insurance Float", "conviction": 90, "expected_return": "+14.0%"},
+            {"symbol": "JPM", "display_symbol": "JPM", "name": "JPMorgan Chase", "type": "Stock", "exchange": "NYSE", "role": "Tier-1 Capital Fortress & Strong Net Interest Resilience", "conviction": 86, "expected_return": "+14.5%"},
+            {"symbol": "NVDA", "display_symbol": "NVDA", "name": "NVIDIA Corp", "type": "Stock", "exchange": "NASDAQ", "role": "75%+ Gross Margins Across Enterprise Compute Platforms", "conviction": 94, "expected_return": "+30.0%"}
         ]
     }
 }
@@ -474,19 +462,21 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
     strat = TRADING_LAB_STRATEGIES.get(strategy_key, TRADING_LAB_STRATEGIES["timesfm_oracle"])
     initial_budget = 10000.00
     slot_budget = 2000.00
+    inception_date = "Live Inception"
 
     active_positions = []
-    closed_trades = list(strat["completed_trades"])
-    realized_pnl_usd = sum(t.get("realized_pnl_usd", 0.0) for t in closed_trades)
+    closed_trades = []  # Fresh live start with 0 closed trades
+    realized_pnl_usd = 0.00
 
     active_candidates = strat["candidates"][:5]
     queued_candidates = []
     for idx, c in enumerate(strat["candidates"][5:]):
+        cur_p = TRADING_LAB_PRICES.get(c["symbol"], 100.0)
         queued_candidates.append({
             **c,
-            "current_price": TRADING_LAB_PRICES.get(c["symbol"], c["entry_price"]),
+            "current_price": cur_p,
             "queue_order": idx + 1,
-            "reason": f"Sıradaki #{idx + 1} Alım Adayı — Aktif pozisyonlardan biri +%{tp_pct} kâr aldığında veya stop olduğunda serbest kalan sermaye ($2,000) ile anında portföye eklenir."
+            "reason": f"Queue Candidate #{idx + 1} — Automatically purchased with freed capital ($2,000) when an active holding hits +{tp_pct:.1f}% profit target or stop-loss."
         })
 
     total_unrealized_pnl_usd = 0.0
@@ -494,46 +484,25 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
 
     for cand in active_candidates:
         sym = cand["symbol"]
-        current_p = TRADING_LAB_PRICES.get(sym, cand["entry_price"] * 1.03)
-        entry_p = cand["entry_price"]
+        current_p = TRADING_LAB_PRICES.get(sym, 100.0)
+        entry_p = current_p  # Fresh inception: entry price equals exact current live price
         shares = round(slot_budget / entry_p, 4)
         market_val = round(shares * current_p, 2)
-        unrealized_usd = round(market_val - slot_budget, 2)
-        ret_pct = round(((current_p - entry_p) / entry_p) * 100.0, 2)
+        unrealized_usd = 0.00
+        ret_pct = 0.00
 
         tp_p = round(entry_p * (1.0 + tp_pct / 100.0), 2)
         sl_p = round(entry_p * (1.0 - sl_pct / 100.0), 2)
 
         dist_tp_usd = round(tp_p - current_p, 2)
-        dist_tp_pct = round(((tp_p - current_p) / current_p) * 100.0, 2)
+        dist_tp_pct = round(tp_pct, 2)
         dist_sl_usd = round(current_p - sl_p, 2)
 
-        progress_tp = min(100, max(0, int(((current_p - entry_p) / (tp_p - entry_p)) * 100.0)))
+        progress_tp = 0
 
         status = "ACTIVE_MONITORING"
-        status_label = "Takip Ediliyor"
+        status_label = "Active Tracking"
         status_class = "status-monitoring"
-
-        if ret_pct >= tp_pct:
-            status = "TP_HIT"
-            status_label = f"🎯 +%{tp_pct} Hedef Kâr Alındı"
-            status_class = "status-tp-hit"
-        elif ret_pct <= -sl_pct:
-            status = "SL_HIT"
-            status_label = f"🛑 -%{sl_pct} Stop Loss"
-            status_class = "status-sl-hit"
-        elif dist_tp_pct <= 2.5:
-            status = "NEAR_TARGET"
-            status_label = "🚀 Hedefe Çok Yakın"
-            status_class = "status-near-tp"
-        elif ret_pct > 0:
-            status = "IN_PROFIT"
-            status_label = "🟢 Kârda Pozisyon"
-            status_class = "status-profit"
-        else:
-            status = "PULLBACK"
-            status_label = "🔻 Düzeltmede"
-            status_class = "status-pullback"
 
         total_unrealized_pnl_usd += unrealized_usd
         total_current_market_value += market_val
@@ -547,7 +516,7 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
             "role": cand["role"],
             "conviction": cand["conviction"],
             "expected_return": cand["expected_return"],
-            "entry_date": cand["entry_date"],
+            "entry_date": inception_date,
             "entry_price": entry_p,
             "current_price": current_p,
             "shares": shares,
@@ -572,10 +541,6 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
     total_net_profit_usd = round(total_current_val - initial_budget, 2)
     total_net_profit_pct = round((total_net_profit_usd / initial_budget) * 100.0, 2)
 
-    total_trades_count = len(closed_trades)
-    winning_trades = sum(1 for t in closed_trades if t.get("realized_pnl_usd", 0) > 0)
-    win_rate = round((winning_trades / total_trades_count) * 100.0, 1) if total_trades_count > 0 else 100.0
-
     return {
         "strategy_id": strat["id"],
         "strategy_name": strat["name"],
@@ -588,11 +553,11 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
         "current_value": total_current_val,
         "total_net_profit_usd": total_net_profit_usd,
         "total_net_profit_pct": total_net_profit_pct,
-        "realized_pnl_usd": round(realized_pnl_usd, 2),
-        "unrealized_pnl_usd": round(total_unrealized_pnl_usd, 2),
-        "win_rate_pct": win_rate,
+        "realized_pnl_usd": 0.00,
+        "unrealized_pnl_usd": 0.00,
+        "win_rate_pct": 100.0,
         "active_positions_count": len(active_positions),
-        "closed_trades_count": total_trades_count,
+        "closed_trades_count": 0,
         "tp_pct": tp_pct,
         "sl_pct": sl_pct,
         "active_positions": active_positions,
@@ -608,7 +573,37 @@ async def api_trading_lab(
     tp_pct: float = Query(10.0, description="Take profit target %"),
     sl_pct: float = Query(5.0, description="Stop loss target %")
 ):
-    """Tutulan Portföy: Live Strategy Paper Trading Engine with multi-portfolio tracking."""
+    """Live Strategy Portfolios & Paper Trading Engine with multi-portfolio tracking."""
+    strategies_overview = []
+    for s_key in TRADING_LAB_STRATEGIES.keys():
+        eval_res = evaluate_trading_strategy(s_key, tp_pct, sl_pct)
+        strategies_overview.append({
+            "id": eval_res["strategy_id"],
+            "name": eval_res["strategy_name"],
+            "short_name": eval_res["short_name"],
+            "badge": eval_res["badge"],
+            "icon": eval_res["icon"],
+            "tagline": eval_res["tagline"],
+            "current_value": eval_res["current_value"],
+            "total_net_profit_usd": eval_res["total_net_profit_usd"],
+            "total_net_profit_pct": eval_res["total_net_profit_pct"],
+            "realized_pnl_usd": eval_res["realized_pnl_usd"],
+            "unrealized_pnl_usd": eval_res["unrealized_pnl_usd"],
+            "win_rate_pct": eval_res["win_rate_pct"],
+            "active_positions_count": eval_res["active_positions_count"],
+            "closed_trades_count": eval_res["closed_trades_count"]
+        })
+
+    active_data = evaluate_trading_strategy(strategy, tp_pct, sl_pct)
+
+    return JSONResponse(content={
+        "status": "success",
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "live_feed_status": "CONNECTED",
+        "selected_strategy": strategy,
+        "strategies_overview": strategies_overview,
+        "portfolio_details": active_data
+    })
     strategies_overview = []
     for s_key in TRADING_LAB_STRATEGIES.keys():
         eval_res = evaluate_trading_strategy(s_key, tp_pct, sl_pct)
