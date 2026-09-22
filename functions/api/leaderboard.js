@@ -14,7 +14,7 @@ const ASSET_UNIVERSE = [
   { symbol: "MSFT", display_symbol: "MSFT", name: "Microsoft Corp", type: "Stock", exchange: "NASDAQ", base_price: 495.63, base_return: 18.5, conviction: 92, rating: "STRONG BUY", cap: "high_cap", tech_score: 93, pa_score: 95 },
   { symbol: "AAPL", display_symbol: "AAPL", name: "Apple Inc.", type: "Stock", exchange: "NASDAQ", base_price: 332.27, base_return: 16.8, conviction: 91, rating: "STRONG BUY", cap: "high_cap", tech_score: 89, pa_score: 92 },
   { symbol: "AMZN", display_symbol: "AMZN", name: "Amazon.com Inc.", type: "Stock", exchange: "NASDAQ", base_price: 256.78, base_return: 19.2, conviction: 91, rating: "STRONG BUY", cap: "high_cap", tech_score: 93, pa_score: 93 },
-  { symbol: "HYPE32196-USD", display_symbol: "HYPE", name: "Hyperliquid USD", type: "Crypto", exchange: "Crypto", base_price: 80.4, base_return: 34.5, conviction: 91, rating: "STRONG BUY", cap: "low_cap", tech_score: 94, pa_score: 95 },
+  { symbol: "HYPE32196-USD", display_symbol: "HYPE", name: "Hyperliquid USD", type: "Crypto", exchange: "Crypto", base_price: 28.5, base_return: 34.5, conviction: 91, rating: "STRONG BUY", cap: "low_cap", tech_score: 94, pa_score: 95 },
   { symbol: "TAO-USD", display_symbol: "TAO", name: "Bittensor USD", type: "Crypto", exchange: "Crypto", base_price: 232.2, base_return: 32.0, conviction: 90, rating: "STRONG BUY", cap: "mid_cap", tech_score: 92, pa_score: 91 },
   { symbol: "GOOGL", display_symbol: "GOOGL", name: "Alphabet Inc. (Google)", type: "Stock", exchange: "NASDAQ", base_price: 338.5, base_return: 17.6, conviction: 90, rating: "STRONG BUY", cap: "high_cap", tech_score: 91, pa_score: 89 },
   { symbol: "SUI20947-USD", display_symbol: "SUI", name: "Sui Network USD", type: "Crypto", exchange: "Crypto", base_price: 0.72, base_return: 33.0, conviction: 89, rating: "BUY", cap: "mid_cap", tech_score: 92, pa_score: 93 },
@@ -212,6 +212,33 @@ async function fetchLivePrices(assets) {
             };
           }
         });
+      }
+    } catch (e) {
+      // Ignore
+    }
+
+    // Direct Hyperliquid mid price fetch for HYPE
+    try {
+      const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ type: "allMids" })
+      });
+      if (hlRes.ok) {
+        const mids = await hlRes.json();
+        const hypeP = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
+        if (hypeP && hypeP > 0) {
+          prices["HYPE32196-USD"] = {
+            price: hypeP,
+            changePct: 4.5,
+            ma50: hypeP * 0.95,
+            ma200: hypeP * 0.88,
+            high52: hypeP * 1.35,
+            low52: hypeP * 0.45,
+            marketCap: 9e9,
+            volume: 85e6
+          };
+        }
       }
     } catch (e) {
       // Ignore

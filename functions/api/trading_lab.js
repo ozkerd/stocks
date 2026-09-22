@@ -31,7 +31,7 @@ const FALLBACK_PRICES = {
   "RDDT": 154.80,
   "OKLO": 26.80,
   "SMR": 19.90,
-  "HYPE32196-USD": 84.50,
+  "HYPE32196-USD": 28.50,
   "COIN": 265.40,
   "CAVA": 126.80,
   "CELH": 29.50,
@@ -218,7 +218,7 @@ const STRATEGY_DEFINITIONS = {
 };
 
 /**
- * Fetch live quotes from Yahoo Finance Spark API
+ * Fetch live quotes from Yahoo Finance Spark API, with direct Binance & Hyperliquid fallback for crypto
  */
 async function fetchLiveQuotes(symbols) {
   const now = Date.now();
@@ -228,6 +228,7 @@ async function fetchLiveQuotes(symbols) {
 
   const prices = { ...FALLBACK_PRICES };
 
+  // 1. Fetch Stocks & cryptos via Yahoo Finance Spark
   try {
     const stockSymbols = symbols.filter(s => !s.includes("BINANCE"));
     if (stockSymbols.length > 0) {
@@ -254,7 +255,56 @@ async function fetchLiveQuotes(symbols) {
       }
     }
   } catch (e) {
-    // Graceful fallback to cached / base prices
+    // Graceful fallback
+  }
+
+  // 2. Fetch real-time crypto prices via Binance public ticker
+  try {
+    const cryptoSymbols = symbols.filter(s => s.includes("-USD"));
+    if (cryptoSymbols.length > 0) {
+      const res = await fetch("https://api.binance.com/api/v3/ticker/price", {
+        headers: { "Accept": "application/json" }
+      });
+      if (res.ok) {
+        const list = await res.json();
+        const bMap = {};
+        if (Array.isArray(list)) {
+          list.forEach(item => { bMap[item.symbol] = parseFloat(item.price); });
+        }
+        cryptoSymbols.forEach(s => {
+          const clean = s.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
+          const pair = clean + "USDT";
+          if (bMap[pair] && bMap[pair] > 0) {
+            prices[s] = Number(bMap[pair].toFixed(2));
+          }
+        });
+      }
+    }
+  } catch (e) {
+    // Graceful fallback
+  }
+
+  // 3. Fetch native Hyperliquid L1 mid price for HYPE
+  try {
+    const hasHype = symbols.some(s => s.includes("HYPE"));
+    if (hasHype) {
+      const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ type: "allMids" })
+      });
+      if (hlRes.ok) {
+        const mids = await hlRes.json();
+        const hypePrice = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
+        if (hypePrice && hypePrice > 0) {
+          prices["HYPE32196-USD"] = Number(hypePrice.toFixed(2));
+          prices["HYPE-USD"] = Number(hypePrice.toFixed(2));
+          prices["HYPE"] = Number(hypePrice.toFixed(2));
+        }
+      }
+    }
+  } catch (e) {
+    // Graceful fallback
   }
 
   CACHED_PRICES = prices;

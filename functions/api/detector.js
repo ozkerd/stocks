@@ -18,7 +18,7 @@ const ASSET_UNIVERSE = [
   { symbol: "MSFT", display_symbol: "MSFT", name: "Microsoft Corp", type: "Stock", exchange: "NASDAQ", base_price: 495.63, past_1w_price: 488.20, pred_1w_target: 494.00 },
   { symbol: "AAPL", display_symbol: "AAPL", name: "Apple Inc.", type: "Stock", exchange: "NASDAQ", base_price: 332.27, past_1w_price: 327.40, pred_1w_target: 331.00 },
   { symbol: "AMZN", display_symbol: "AMZN", name: "Amazon.com Inc.", type: "Stock", exchange: "NASDAQ", base_price: 256.78, past_1w_price: 251.00, pred_1w_target: 255.50 },
-  { symbol: "HYPE32196-USD", display_symbol: "HYPE", name: "Hyperliquid USD", type: "Crypto", exchange: "Crypto", base_price: 80.4, past_1w_price: 74.5, pred_1w_target: 79.2 },
+  { symbol: "HYPE32196-USD", display_symbol: "HYPE", name: "Hyperliquid USD", type: "Crypto", exchange: "Crypto", base_price: 28.5, past_1w_price: 26.2, pred_1w_target: 28.1 },
   { symbol: "TAO-USD", display_symbol: "TAO", name: "Bittensor USD", type: "Crypto", exchange: "Crypto", base_price: 232.2, past_1w_price: 218.0, pred_1w_target: 229.0 },
   { symbol: "GOOGL", display_symbol: "GOOGL", name: "Alphabet Inc. (Google)", type: "Stock", exchange: "NASDAQ", base_price: 338.5, past_1w_price: 332.0, pred_1w_target: 336.8 },
   { symbol: "SUI20947-USD", display_symbol: "SUI", name: "Sui Network USD", type: "Crypto", exchange: "Crypto", base_price: 0.72, past_1w_price: 0.67, pred_1w_target: 0.71 },
@@ -78,6 +78,25 @@ async function fetchLivePrices(universe) {
           const pair = clean + "USDT";
           if (map[pair] !== undefined) prices[a.symbol] = map[pair];
         });
+      }
+    } catch (e) {
+      // Fallback
+    }
+
+    // Direct Hyperliquid mid price fetch for HYPE
+    try {
+      const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ type: "allMids" })
+      });
+      if (hlRes.ok) {
+        const mids = await hlRes.json();
+        const hypeP = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
+        if (hypeP && hypeP > 0) {
+          prices["HYPE32196-USD"] = hypeP;
+          prices["HYPE"] = hypeP;
+        }
       }
     } catch (e) {
       // Fallback

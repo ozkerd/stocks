@@ -58,7 +58,8 @@ const FALLBACK_PRICES = {
   "BTC-USD": { price: 77164.13, name: "Bitcoin USD", type: "CRYPTOCURRENCY" },
   "ETH-USD": { price: 2522.21, name: "Ethereum USD", type: "CRYPTOCURRENCY" },
   "SOL-USD": { price: 101.41, name: "Solana USD", type: "CRYPTOCURRENCY" },
-  "HYPE32196-USD": { price: 80.40, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" }
+  "HYPE32196-USD": { price: 28.50, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" },
+  "HYPE": { price: 28.50, name: "Hyperliquid USD", type: "CRYPTOCURRENCY" }
 };
 
 function normalCDF(z) {
@@ -284,6 +285,50 @@ async function fetchAssetHistory(ticker) {
     }
   } catch (sErr) {
     // Continue
+  }
+
+  // 1c. If crypto or contains HYPE, fetch directly from Hyperliquid or Binance
+  if (ticker.includes("HYPE")) {
+    try {
+      const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ type: "allMids" })
+      });
+      if (hlRes.ok) {
+        const mids = await hlRes.json();
+        const hypeP = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
+        if (hypeP && hypeP > 0) {
+          const synth = generateSyntheticPrices(ticker);
+          synth.prices[synth.prices.length - 1] = hypeP;
+          synth.info.price = hypeP;
+          return synth;
+        }
+      }
+    } catch (e) {
+      // Continue
+    }
+  }
+
+  if (ticker.includes("-USD")) {
+    try {
+      const clean = ticker.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
+      const bRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${clean}USDT`, {
+        headers: { "Accept": "application/json" }
+      });
+      if (bRes.ok) {
+        const bData = await bRes.json();
+        const p = parseFloat(bData.price);
+        if (p && p > 0) {
+          const synth = generateSyntheticPrices(ticker);
+          synth.prices[synth.prices.length - 1] = p;
+          synth.info.price = p;
+          return synth;
+        }
+      }
+    } catch (e) {
+      // Continue
+    }
   }
 
   return generateSyntheticPrices(ticker);

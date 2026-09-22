@@ -54,39 +54,39 @@ const BASE_SETUPS = [
     name: "Hyperliquid USD",
     type: "Crypto",
     exchange: "Crypto",
-    current_price: 80.40,
+    current_price: 28.50,
     daily: {
       pattern: "DEX Volume Surge & Liquidity Expansion",
-      entry_low: 78.50, entry_high: 80.20,
-      tp1: 85.50, tp1_pct: "+6.3%",
-      tp2: 90.00, tp2_pct: "+11.9%",
-      stop_loss: 76.00, stop_pct: "-5.5%",
-      rr_ratio: "2.2 : 1",
+      entry_low: 27.20, entry_high: 28.40,
+      tp1: 31.00, tp1_pct: "+8.8%",
+      tp2: 33.50, tp2_pct: "+17.5%",
+      stop_loss: 26.50, stop_pct: "-7.0%",
+      rr_ratio: "2.3 : 1",
       conviction: 95,
       action: "BUY BREAKOUT",
       thesis: "Record perp volume and open interest driving platform fee distribution to token holders."
     },
     weekly: {
       pattern: "Fibonacci 61.8% Golden Pocket Launch",
-      entry_low: 76.00, entry_high: 79.50,
-      tp1: 94.00, tp1_pct: "+16.9%",
-      tp2: 108.00, tp2_pct: "+34.3%",
-      stop_loss: 70.00, stop_pct: "-12.9%",
-      rr_ratio: "2.7 : 1",
+      entry_low: 26.00, entry_high: 27.80,
+      tp1: 35.00, tp1_pct: "+22.8%",
+      tp2: 42.00, tp2_pct: "+47.4%",
+      stop_loss: 24.00, stop_pct: "-15.8%",
+      rr_ratio: "2.8 : 1",
       conviction: 96,
       action: "SWING ACCUMULATE",
       thesis: "Breakout past key horizontal resistance; dominant DeFi perpetual DEX market share."
     },
     monthly: {
       pattern: "Layer-1 Ecosystem Valuation Discovery",
-      entry_low: 72.00, entry_high: 78.00,
-      tp1: 120.00, tp1_pct: "+49.3%",
-      tp2: 145.00, tp2_pct: "+80.3%",
-      stop_loss: 62.00, stop_pct: "-22.9%",
-      rr_ratio: "3.5 : 1",
-      conviction: 97,
-      action: "STRONG BUY",
-      thesis: "TimesFM P90 optimistic trajectory projects rapid market cap convergence with top 15 chains."
+      entry_low: 24.50, entry_high: 27.50,
+      tp1: 48.00, tp1_pct: "+68.4%",
+      tp2: 65.00, tp2_pct: "+128.1%",
+      stop_loss: 21.00, stop_pct: "-26.3%",
+      rr_ratio: "3.2 : 1",
+      conviction: 93,
+      action: "POSITION BUY",
+      thesis: "Hyperliquid L1 mainnet expansion and spot auction revenue compounding."
     }
   },
 
@@ -645,7 +645,43 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const tf = url.searchParams.get("timeframe") || "daily"; // 'daily', 'weekly', 'monthly'
 
+  // Fetch real-time crypto prices to keep setups dynamically hydrated
+  let liveCryptoMap = {};
+  try {
+    const bRes = await fetch("https://api.binance.com/api/v3/ticker/price");
+    if (bRes.ok) {
+      const list = await bRes.json();
+      if (Array.isArray(list)) {
+        list.forEach(item => { liveCryptoMap[item.symbol] = parseFloat(item.price); });
+      }
+    }
+  } catch (e) {}
+
+  let hypePrice = null;
+  try {
+    const hlRes = await fetch("https://api.hyperliquid.xyz/info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ type: "allMids" })
+    });
+    if (hlRes.ok) {
+      const mids = await hlRes.json();
+      hypePrice = parseFloat(mids["HYPE"] || mids["@107"] || mids["HYPE/USDC"]);
+    }
+  } catch (e) {}
+
   const formatted = BASE_SETUPS.map(item => {
+    let curP = item.current_price;
+    if (item.symbol.includes("HYPE") && hypePrice && hypePrice > 0) {
+      curP = hypePrice;
+    } else if (item.type === "Crypto") {
+      const clean = item.symbol.replace("-USD", "").replace(/\d+/g, "").toUpperCase();
+      const pair = clean + "USDT";
+      if (liveCryptoMap[pair] && liveCryptoMap[pair] > 0) {
+        curP = liveCryptoMap[pair];
+      }
+    }
+
     const s = item[tf] || item.daily;
     return {
       symbol: item.symbol,
@@ -653,7 +689,7 @@ export async function onRequest(context) {
       name: item.name,
       type: item.type,
       exchange: item.exchange,
-      current_price: item.current_price,
+      current_price: curP,
       timeframe: tf,
       pattern: s.pattern,
       entry_zone: `$${s.entry_low.toLocaleString()} – $${s.entry_high.toLocaleString()}`,
