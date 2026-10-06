@@ -516,6 +516,49 @@ def fetch_coinbase_crypto_prices(symbols):
     return prices
 
 
+_STOCK_CACHE = {}
+_STOCK_CACHE_TIME = 0
+
+def fetch_stock_prices(symbols):
+    """Fetches real-time stock last close prices from Yahoo Finance with caching."""
+    global _STOCK_CACHE, _STOCK_CACHE_TIME
+    import time
+    now = time.time()
+    if now - _STOCK_CACHE_TIME < 30 and _STOCK_CACHE:
+        return _STOCK_CACHE
+
+    clean_syms = [s for s in symbols if "-USD" not in s and "HYPE" not in s and "BINANCE" not in s]
+    if not clean_syms:
+        return {}
+
+    import urllib.request, json, ssl
+    prices = dict(_STOCK_CACHE)
+    try:
+        try:
+            import certifi
+            ctx = ssl.create_default_context(cafile=certifi.where())
+        except Exception:
+            ctx = ssl._create_unverified_context()
+
+        url = f"https://query1.finance.yahoo.com/v7/finance/spark?symbols={','.join(clean_syms)}&range=5d&interval=1d"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36", "Accept": "application/json"})
+        with urllib.request.urlopen(req, context=ctx, timeout=4) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            for item in data.get("spark", {}).get("result", []):
+                sym = item.get("symbol")
+                meta = item.get("response", [{}])[0].get("meta", {})
+                closes = [c for c in item.get("response", [{}])[0].get("indicators", {}).get("quote", [{}])[0].get("close", []) if c is not None]
+                p = meta.get("regularMarketPrice") or (closes[-1] if closes else None)
+                if sym and p and p > 0:
+                    prices[sym] = round(float(p), 2)
+        if prices:
+            _STOCK_CACHE = prices
+            _STOCK_CACHE_TIME = now
+    except Exception:
+        pass
+    return prices
+
+
 def get_market_session_info():
     """Returns US market session and 24/7 crypto status in New York time."""
     now_utc = datetime.datetime.now(datetime.timezone.utc)
@@ -580,29 +623,23 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
     initial_candidates = strat["candidates"][:5]
     all_syms = [c["symbol"] for c in initial_candidates] + [c["symbol"] for c in queued_candidates_list]
     live_crypto = fetch_coinbase_crypto_prices(all_syms)
+    live_stocks = fetch_stock_prices(all_syms)
 
     for cand in initial_candidates:
         sym = cand["symbol"]
         is_crypto = "crypto" in cand.get("type", "").lower() or "-USD" in sym or "HYPE" in sym
         is_market_open = True if is_crypto else market_info["is_us_market_open"]
 
-        current_p = live_crypto.get(sym, TRADING_LAB_PRICES.get(sym, 100.0))
+        current_p = live_crypto.get(sym) or live_stocks.get(sym) or TRADING_LAB_PRICES.get(sym, 100.0)
         entry_p = INCEPTION_BUY_PRICES.get(sym, cand.get("entry_price", current_p))
         shares = round(slot_budget / entry_p, 4)
         market_val = round(shares * current_p, 2)
 
-        if is_market_open:
-            unrealized_usd = round((current_p - entry_p) * shares, 2)
-            ret_pct = round(((current_p - entry_p) / entry_p) * 100.0, 2)
-            status = "ACTIVE_MONITORING"
-            status_label = "24/7 Live Continuous" if is_crypto else "Live Intraday Trading"
-            status_class = "status-monitoring"
-        else:
-            status = "MARKET_CLOSED"
-            status_label = f"Market Closed (Last Close: ${current_p:.2f})"
-            status_class = "status-closed"
-            unrealized_usd = 0.00
-            ret_pct = 0.00
+        unrealized_usd = round((current_p - entry_p) * shares, 2)
+        ret_pct = round(((current_p - entry_p) / entry_p) * 100.0, 2)
+        status = "ACTIVE_MONITORING" if is_market_open else "MARKET_CLOSED"
+        status_label = "24/7 Live Continuous" if is_crypto else ("Live Intraday Trading" if is_market_open else f"Market Closed (Last Close: ${current_p:.2f})")
+        status_class = "status-monitoring" if is_market_open else "status-closed"
 
         tp_p = round(entry_p * (1.0 + tp_pct / 100.0), 2)
         sl_p = round(entry_p * (1.0 - sl_pct / 100.0), 2)
@@ -610,10 +647,10 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
         dist_tp_usd = round(tp_p - current_p, 2)
         dist_tp_pct = round(((tp_p - current_p) / current_p) * 100.0, 2)
         dist_sl_usd = round(current_p - sl_p, 2)
-        progress_tp = min(100, max(0, int(round((ret_pct / tp_pct) * 100.0)))) if (tp_pct > 0 and is_market_open) else 0
+        progress_tp = min(100, max(0, int(round((ret_pct / tp_pct) * 100.0)))) if tp_pct > 0 else 0
 
-        # Check TP hit (+10%) only when market is open
-        if is_market_open and ret_pct >= tp_pct:
+        # Check TP hit (+10%)
+        if ret_pct >= tp_pct:
             gain_usd = round(slot_budget * (tp_pct / 100.0), 2)
             returned_cap = round(slot_budget + gain_usd, 2)
             realized_pnl_usd += gain_usd
@@ -648,7 +685,7 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
                 n_is_crypto = "crypto" in next_cand.get("type", "").lower() or "-USD" in nsym or "HYPE" in nsym
                 n_market_open = True if n_is_crypto else market_info["is_us_market_open"]
 
-                nentry_p = live_crypto.get(nsym, TRADING_LAB_PRICES.get(nsym, 100.0))
+                nentry_p = live_crypto.get(nsym) or live_stocks.get(nsym) or TRADING_LAB_PRICES.get(nsym, 100.0)
                 ncurrent_p = nentry_p
                 nshares = round(slot_budget / nentry_p, 4)
                 nmkt_val = round(nshares * ncurrent_p, 2)
@@ -686,8 +723,8 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
                     "status_class": "status-monitoring" if n_market_open else "status-pending"
                 })
                 total_current_market_value += nmkt_val
-        elif is_market_open and ret_pct <= -sl_pct:
-            # Check SL hit (-5%) only when market is open
+        elif ret_pct <= -sl_pct:
+            # Check SL hit (-5%)
             loss_usd = round(slot_budget * (sl_pct / 100.0), 2)
             returned_cap = round(slot_budget - loss_usd, 2)
             realized_pnl_usd -= loss_usd
@@ -722,7 +759,7 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
                 n_is_crypto = "crypto" in next_cand.get("type", "").lower() or "-USD" in nsym or "HYPE" in nsym
                 n_market_open = True if n_is_crypto else market_info["is_us_market_open"]
 
-                nentry_p = live_crypto.get(nsym, TRADING_LAB_PRICES.get(nsym, 100.0))
+                nentry_p = live_crypto.get(nsym) or live_stocks.get(nsym) or TRADING_LAB_PRICES.get(nsym, 100.0)
                 ncurrent_p = nentry_p
                 nshares = round(slot_budget / nentry_p, 4)
                 nmkt_val = round(nshares * ncurrent_p, 2)
@@ -799,7 +836,7 @@ def evaluate_trading_strategy(strategy_key: str, tp_pct: float = 10.0, sl_pct: f
 
     remaining_queued = []
     for idx, c in enumerate(queued_candidates_list[queue_idx:]):
-        cur_p = live_crypto.get(c["symbol"], TRADING_LAB_PRICES.get(c["symbol"], 100.0))
+        cur_p = live_crypto.get(c["symbol"]) or live_stocks.get(c["symbol"]) or TRADING_LAB_PRICES.get(c["symbol"], 100.0)
         c_is_crypto = "crypto" in c.get("type", "").lower() or "-USD" in c["symbol"] or "HYPE" in c["symbol"]
         remaining_queued.append({
             **c,

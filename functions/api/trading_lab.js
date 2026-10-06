@@ -264,9 +264,9 @@ async function fetchLiveQuotes(symbols, forceRefresh = false) {
 
   const prices = { ...FALLBACK_PRICES };
 
-  // 1. Fetch Stocks & cryptos via Yahoo Finance Spark
+  // 1. Fetch Stocks via Yahoo Finance Spark (strictly stocks only)
   try {
-    const stockSymbols = symbols.filter(s => !s.includes("BINANCE"));
+    const stockSymbols = symbols.filter(s => !s.includes("-USD") && !s.includes("HYPE") && !s.includes("BINANCE"));
     if (stockSymbols.length > 0) {
       const url = `https://query1.finance.yahoo.com/v7/finance/spark?symbols=${encodeURIComponent(stockSymbols.join(","))}&range=5d&interval=1d`;
       const res = await fetch(url, {
@@ -495,25 +495,13 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
     const shares = Number((slotBudget / entryPrice).toFixed(4));
     const marketValue = Number((shares * currentPrice).toFixed(2));
 
-    // When the stock market is closed:
-    // Stocks hold their official last close price. Inactive outside market hours.
-    // Intraday gain/loss and TP/SL execution only active when market is open or 24/7 for crypto.
-    let unrealizedUsd = 0.00;
-    let returnPct = 0.00;
-    let status = "ACTIVE_MONITORING";
-    let statusLabel = isCrypto ? "24/7 Live Continuous" : "Live Intraday Trading";
-    let statusClass = "status-monitoring";
-
-    if (isMarketOpen) {
-      unrealizedUsd = Number(((currentPrice - entryPrice) * shares).toFixed(2));
-      returnPct = Number((((currentPrice - entryPrice) / entryPrice) * 100).toFixed(2));
-    } else {
-      status = "MARKET_CLOSED";
-      statusLabel = `Market Closed (Last Close: $${currentPrice.toFixed(2)})`;
-      statusClass = "status-closed";
-      unrealizedUsd = 0.00;
-      returnPct = 0.00;
-    }
+    const unrealizedUsd = Number(((currentPrice - entryPrice) * shares).toFixed(2));
+    const returnPct = Number((((currentPrice - entryPrice) / entryPrice) * 100).toFixed(2));
+    let status = isMarketOpen ? "ACTIVE_MONITORING" : "MARKET_CLOSED";
+    let statusLabel = isCrypto 
+      ? "24/7 Live Continuous" 
+      : (isMarketOpen ? "Live Intraday Trading" : `Market Closed (Last Close: $${currentPrice.toFixed(2)})`);
+    let statusClass = isMarketOpen ? "status-monitoring" : "status-closed";
 
     const tpPrice = Number((entryPrice * (1 + tpPct / 100)).toFixed(2));
     const slPrice = Number((entryPrice * (1 - slPct / 100)).toFixed(2));
@@ -522,11 +510,10 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
     const distanceToTpPct = Number((((tpPrice - currentPrice) / currentPrice) * 100).toFixed(2));
     const distanceToSlUsd = Number((currentPrice - slPrice).toFixed(2));
 
-    const progressToTp = isMarketOpen ? Math.min(100, Math.max(0, Number(((returnPct / tpPct) * 100).toFixed(1)))) : 0;
+    const progressToTp = Math.min(100, Math.max(0, Number(((returnPct / tpPct) * 100).toFixed(1))));
 
-    // Execution check: Only execute trades if market is open (or 24/7 crypto)
-    if (isMarketOpen && returnPct >= tpPct) {
-      // 1. Take-Profit Target Hit (+10.0%)
+    // Execution check: Take-Profit Hit (+10.0%)
+    if (returnPct >= tpPct) {
       const realizedGain = Number((slotBudget * (tpPct / 100)).toFixed(2));
       const returnedCapital = Number((slotBudget + realizedGain).toFixed(2));
       realizedPnlUsd += realizedGain;
@@ -601,7 +588,7 @@ function evaluateStrategy(strategyKey, tpPct = 10.0, slPct = 5.0, liveQuotes = {
         });
         totalCurrentMarketValue += nextMktVal;
       }
-    } else if (isMarketOpen && returnPct <= -slPct) {
+    } else if (returnPct <= -slPct) {
       // 2. Stop-Loss Hit (-5.0%)
       const lossUsd = Number((slotBudget * (slPct / 100)).toFixed(2));
       const returnedCapital = Number((slotBudget - lossUsd).toFixed(2));
